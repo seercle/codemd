@@ -94,6 +94,34 @@ func TestRunDiscoveredConfigError(t *testing.T) {
 	}
 }
 
+func TestRunLanguages(t *testing.T) {
+	var out, errb bytes.Buffer
+	if code := Run([]string{"--languages"}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if !strings.Contains(out.String(), `go -> go (line "//")`) {
+		t.Fatalf("out:\n%s", out.String())
+	}
+	if !strings.Contains(out.String(), `html -> html (block "<!--" "-->")`) {
+		t.Fatalf("out:\n%s", out.String())
+	}
+}
+
+func TestRunLanguagesWithConfig(t *testing.T) {
+	dir := t.TempDir()
+	cfg := filepath.Join(dir, "c.yaml")
+	if err := os.WriteFile(cfg, []byte("languages:\n  foo:\n    line: \";;\"\n    fence: foofence\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	if code := Run([]string{"--languages", "--config", cfg}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if !strings.Contains(out.String(), `foo -> foofence (line ";;")`) {
+		t.Fatalf("out:\n%s", out.String())
+	}
+}
+
 func TestUnifiedDiffShape(t *testing.T) {
 	d := unifiedDiff("doc.md", "a\nb\n", "a\nc\n")
 	if !strings.HasPrefix(d, "--- ") {

@@ -29,8 +29,28 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opt.Diff, "d", false, "print a unified diff")
 	fs.BoolVar(&opt.Check, "check", false, "exit non-zero if any file would change")
 	fs.StringVar(&opt.Config, "config", "", "path to config file")
+	languages := fs.Bool("languages", false, "list supported languages and exit")
 	if err := fs.Parse(args); err != nil {
 		return 2
+	}
+	if *languages {
+		table := lang.Builtins()
+		if opt.Config != "" {
+			cfg, err := lang.LoadConfig(opt.Config)
+			if err != nil {
+				fmt.Fprintf(stderr, "codemd: %v\n", err)
+				return 1
+			}
+			table, err = lang.Merge(lang.Builtins(), cfg)
+			if err != nil {
+				fmt.Fprintf(stderr, "codemd: %v\n", err)
+				return 1
+			}
+		}
+		for _, line := range lang.Describe(table) {
+			fmt.Fprintln(stdout, line)
+		}
+		return 0
 	}
 	exclusive := 0
 	for _, b := range []bool{opt.Write, opt.Output != "", opt.Diff, opt.Check} {

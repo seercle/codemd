@@ -3,6 +3,7 @@ package lang
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -51,5 +52,22 @@ func TestMergeRejectsBadEntry(t *testing.T) {
 	}})
 	if err == nil {
 		t.Fatal("expected error for entry with neither line nor block")
+	}
+}
+
+func TestDescribe(t *testing.T) {
+	table := map[string]Language{
+		"go":   {Fence: "go", Form: CommentForm{Line: "//"}},
+		"c":    {Fence: "c", Form: CommentForm{Line: "//", Block: [2]string{"/*", "*/"}}},
+		"html": {Fence: "html", Form: CommentForm{Block: [2]string{"<!--", "-->"}}},
+	}
+	got := Describe(table)
+	want := []string{
+		`c -> c (line "//" or block "/*" "*/")`,
+		`go -> go (line "//")`,
+		`html -> html (block "<!--" "-->")`,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
 	}
 }
