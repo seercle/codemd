@@ -53,3 +53,28 @@ func TestParseErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestParseTrailingBackslashDoesNotPanic(t *testing.T) {
+	for _, s := range []string{`(import /a\)`, `(import a../x\)`} {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("ParseRef(%q) panicked: %v", s, r)
+				}
+			}()
+			if _, err := ParseRef(s); err == nil {
+				t.Errorf("expected error for %q", s)
+			}
+		}()
+	}
+}
+
+func TestParseEscapedSlashBound(t *testing.T) {
+	r, err := ParseRef(`(import /a\//../b/ x.go go)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Range.Start.Regex != "a/" || r.Range.End.Regex != "b" || r.Lang != "go" {
+		t.Fatalf("got %+v", r)
+	}
+}

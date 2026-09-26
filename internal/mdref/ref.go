@@ -120,7 +120,11 @@ func scanBound(s string, i int, left bool) int {
 		i++
 		for i < len(s) {
 			if s[i] == '\\' {
-				i += 2
+				if i+1 < len(s) {
+					i += 2
+				} else {
+					i++
+				}
 				continue
 			}
 			if s[i] == '/' {
