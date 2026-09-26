@@ -51,10 +51,10 @@ func (l lv) double() lv { return l * 2 }
 
 A Markdown link-reference definition that is never referenced, so renderers
 (including GitHub) hide it. It sits on its own line and manages the content
-immediately below it.
+directly below it, skipping blank lines.
 
-Import mode — replaces the fenced code block immediately below, creating one if
-absent:
+Import mode — replaces the fenced code block directly below when one is
+present, otherwise inserts the generated fence directly below the comment:
 
 ````
 [codemd]:# (import lv-def..lv-end src/server.go go)
@@ -63,7 +63,8 @@ absent:
 ```
 ````
 
-Link mode — replaces the single line immediately below with the generated link:
+Link mode — inserts the generated link directly below the comment, replacing an
+existing generated link in place:
 
 ```
 [codemd]:# (link lv-def src/server.go go)

@@ -248,3 +248,27 @@ func TestIntegrationMatrixIdempotent(t *testing.T) {
 		t.Fatalf("not idempotent:\n--- first ---\n%s\n--- second ---\n%s", first, second)
 	}
 }
+
+func TestIntegrationMatrixConfig(t *testing.T) {
+	files := map[string]string{
+		".codemd.yaml": "languages:\n  foo:\n    line: \";;\"\n    fence: foofence\n",
+		"s.foo":        "aaa\n;;codemd:a\nbbb\n;;codemd:b\nccc\n",
+	}
+	cases := []matrixCase{
+		{
+			name:  "discovered custom line form and fence",
+			files: files,
+			doc:   "[codemd]:# (import a..b s.foo)\n",
+			want:  "[codemd]:# (import a..b s.foo)\n```foofence\nbbb\n```\n",
+		},
+		{
+			name:  "explicit lang token overrides configured fence",
+			files: files,
+			doc:   "[codemd]:# (import a..b s.foo custom)\n",
+			want:  "[codemd]:# (import a..b s.foo custom)\n```custom\nbbb\n```\n",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) { runMatrixCase(t, tc) })
+	}
+}
