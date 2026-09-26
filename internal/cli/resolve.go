@@ -74,7 +74,11 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 		if err != nil {
 			return nil, err
 		}
-		return []string{fmt.Sprintf("[%s](%s)", render.LinkLabel(ref.Ref.Path, line), render.LinkTarget(ref.Ref.Path, line, isRemote))}, nil
+		label := ref.Ref.Label
+		if label == "" {
+			label = render.LinkLabel(ref.Ref.Path, line)
+		}
+		return []string{fmt.Sprintf("[%s](%s)", label, render.LinkTarget(ref.Ref.Path, line, isRemote))}, nil
 	}
 	res, err := extract.Resolve(content, markers, ref.Ref.Range, ref.Ref.Strip)
 	if err != nil {

@@ -20,6 +20,7 @@ type Ref struct {
 	Path  string
 	Lang  string
 	Strip bool
+	Label string
 }
 
 func ParseRef(comment string) (Ref, error) {
@@ -41,7 +42,10 @@ func ParseRef(comment string) (Ref, error) {
 	if rangeTok == "" {
 		return Ref{}, fmt.Errorf("reference too short: %q", comment)
 	}
-	rest := strings.Fields(s[i:])
+	rest, err := splitTokens(s[i:])
+	if err != nil {
+		return Ref{}, fmt.Errorf("%v in %q", err, comment)
+	}
 	var r Ref
 	switch mode {
 	case "import":
@@ -70,14 +74,33 @@ func ParseRef(comment string) (Ref, error) {
 	if len(rest) == 0 {
 		return Ref{}, fmt.Errorf("missing path in %q", comment)
 	}
+	if strings.HasPrefix(rest[0], `"`) {
+		return Ref{}, fmt.Errorf("path must not be quoted in %q", comment)
+	}
 	r.Path = rest[0]
 	rest = rest[1:]
 	for _, tok := range rest {
-		if tok == "strip" {
+		switch {
+		case tok == "strip":
 			r.Strip = true
-		} else if r.Lang == "" {
+		case strings.HasPrefix(tok, `"`):
+			if r.Mode != Link {
+				return Ref{}, fmt.Errorf("link text is only valid for link mode in %q", comment)
+			}
+			label := tok[1 : len(tok)-1]
+			if label == "" {
+				return Ref{}, fmt.Errorf("empty link text in %q", comment)
+			}
+			if strings.Contains(label, "]") {
+				return Ref{}, fmt.Errorf("link text must not contain ']' in %q", comment)
+			}
+			if r.Label != "" {
+				return Ref{}, fmt.Errorf("multiple link labels in %q", comment)
+			}
+			r.Label = label
+		case r.Lang == "":
 			r.Lang = tok
-		} else {
+		default:
 			return Ref{}, fmt.Errorf("unexpected token %q in %q", tok, comment)
 		}
 	}
@@ -85,6 +108,39 @@ func ParseRef(comment string) (Ref, error) {
 		return Ref{}, fmt.Errorf("strip requires a regex token in %q", comment)
 	}
 	return r, nil
+}
+
+// splitTokens splits s on whitespace, treating a double-quoted run as a single
+// token (quotes included). It returns an error for an unterminated quote.
+func splitTokens(s string) ([]string, error) {
+	var toks []string
+	i := 0
+	for i < len(s) {
+		for i < len(s) && isSpace(s[i]) {
+			i++
+		}
+		if i >= len(s) {
+			break
+		}
+		if s[i] == '"' {
+			j := i + 1
+			for j < len(s) && s[j] != '"' {
+				j++
+			}
+			if j >= len(s) {
+				return nil, fmt.Errorf("unterminated quoted string")
+			}
+			toks = append(toks, s[i:j+1])
+			i = j + 1
+			continue
+		}
+		start := i
+		for i < len(s) && !isSpace(s[i]) {
+			i++
+		}
+		toks = append(toks, s[start:i])
+	}
+	return toks, nil
 }
 
 func isSpace(c byte) bool {

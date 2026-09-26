@@ -39,6 +39,26 @@ func TestParseLink(t *testing.T) {
 	}
 }
 
+func TestParseLinkCustomLabel(t *testing.T) {
+	r, err := ParseRef(`(link a src/x.go "My Label")`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Mode != Link || r.Range.Start.Name != "a" || r.Path != "src/x.go" || r.Label != "My Label" {
+		t.Fatalf("got %+v", r)
+	}
+}
+
+func TestParseLinkNoLabel(t *testing.T) {
+	r, err := ParseRef("(link a src/x.go go)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Label != "" || r.Lang != "go" {
+		t.Fatalf("got %+v", r)
+	}
+}
+
 func TestParseErrors(t *testing.T) {
 	bad := []string{
 		"(import a src/x.go)",             // import needs range
@@ -46,6 +66,12 @@ func TestParseErrors(t *testing.T) {
 		"(import a..b src/x.go go strip)", // strip without regex
 		"(nope a..b src/x.go)",            // bad mode
 		"(import a..b)",                   // missing path
+		`(import a..b src/x.go "nope")`,   // link text on import
+		`(link a src/x.go "")`,            // empty link text
+		`(link a src/x.go "a]b")`,         // link text with bracket
+		`(link a src/x.go "A" "B")`,       // multiple link texts
+		`(link a src/x.go "oops)`,         // unterminated quote
+		`(link a "src/x.go")`,             // quoted path
 	}
 	for _, s := range bad {
 		if _, err := ParseRef(s); err == nil {
