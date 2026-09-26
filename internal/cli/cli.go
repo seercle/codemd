@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/seercle/codemd/internal/lang"
 	"github.com/seercle/codemd/internal/srcfile"
@@ -226,31 +225,4 @@ func reportErrors(name string, errs []RefError, stderr io.Writer) int {
 		return len(errs)
 	}
 	return 0
-}
-
-func unifiedDiff(name, old, new string) string {
-	oldLines := splitDiffLines(old)
-	newLines := splitDiffLines(new)
-	var b strings.Builder
-	clean := strings.TrimPrefix(name, string(filepath.Separator))
-	fmt.Fprintf(&b, "--- a/%s\n+++ b/%s\n", clean, clean)
-	fmt.Fprintf(&b, "@@ -1,%d +1,%d @@\n", len(oldLines), len(newLines))
-	for _, l := range oldLines {
-		fmt.Fprintf(&b, "-%s\n", l)
-	}
-	for _, l := range newLines {
-		fmt.Fprintf(&b, "+%s\n", l)
-	}
-	return b.String()
-}
-
-func splitDiffLines(s string) []string {
-	if s == "" {
-		return nil
-	}
-	lines := strings.Split(s, "\n")
-	if len(lines) > 0 && lines[len(lines)-1] == "" {
-		lines = lines[:len(lines)-1]
-	}
-	return lines
 }

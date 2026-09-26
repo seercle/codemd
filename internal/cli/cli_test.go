@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -171,27 +172,9 @@ func TestRunUnknownFlagExitsTwo(t *testing.T) {
 
 func TestUnifiedDiffShape(t *testing.T) {
 	d := unifiedDiff("doc.md", "a\nb\n", "a\nc\n")
-	if !strings.HasPrefix(d, "--- ") {
-		t.Fatalf("missing old header:\n%s", d)
-	}
-	if !strings.Contains(d, "+++ ") {
-		t.Fatalf("missing new header:\n%s", d)
-	}
-	if !strings.Contains(d, "@@ -1,2 +1,2 @@") {
-		t.Fatalf("wrong hunk header:\n%s", d)
-	}
-	minus, plus := 0, 0
-	for _, l := range strings.Split(d, "\n") {
-		switch {
-		case strings.HasPrefix(l, "--- "), strings.HasPrefix(l, "+++ "):
-		case strings.HasPrefix(l, "-"):
-			minus++
-		case strings.HasPrefix(l, "+"):
-			plus++
-		}
-	}
-	if minus != 2 || plus != 2 {
-		t.Fatalf("expected 2 '-' and 2 '+' lines, got %d and %d:\n%s", minus, plus, d)
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,2 +1,2 @@\n a\n-b\n+c\n"
+	if d != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
 	}
 
 	if _, err := exec.LookPath("patch"); err != nil {
@@ -206,5 +189,50 @@ func TestUnifiedDiffShape(t *testing.T) {
 	cmd.Stdin = strings.NewReader(d)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("patch --dry-run failed: %v\n%s", err, out)
+	}
+}
+
+func TestUnifiedDiffContext(t *testing.T) {
+	old := "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n"
+	new := "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\nCHANGED\n"
+	d := unifiedDiff("doc.md", old, new)
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -9,4 +9,4 @@\n 9\n 10\n 11\n-12\n+CHANGED\n"
+	if d != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
+	}
+}
+
+func TestUnifiedDiffMultipleHunks(t *testing.T) {
+	var oldB, newB strings.Builder
+	for i := 1; i <= 30; i++ {
+		fmt.Fprintf(&oldB, "%d\n", i)
+		if i == 5 {
+			newB.WriteString("5X\n")
+		} else if i == 25 {
+			newB.WriteString("25Y\n")
+		} else {
+			fmt.Fprintf(&newB, "%d\n", i)
+		}
+	}
+	d := unifiedDiff("doc.md", oldB.String(), newB.String())
+	if strings.Count(d, "@@") != 4 {
+		t.Fatalf("expected two hunks (4 @@ markers):\n%s", d)
+	}
+	if !strings.Contains(d, "-5\n+5X\n") {
+		t.Fatalf("first change missing:\n%s", d)
+	}
+	if !strings.Contains(d, "-25\n+25Y\n") {
+		t.Fatalf("second change missing:\n%s", d)
+	}
+	if strings.Contains(d, " 15\n") {
+		t.Fatalf("unchanged middle line should not appear:\n%s", d)
+	}
+}
+
+func TestUnifiedDiffNoChange(t *testing.T) {
+	d := unifiedDiff("doc.md", "a\nb\n", "a\nb\n")
+	want := "--- a/doc.md\n+++ b/doc.md\n"
+	if d != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
 	}
 }
