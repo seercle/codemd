@@ -31,8 +31,10 @@ go install github.com/seercle/codemd/cmd/codemd@latest
 - **LANG**: optional fence language; otherwise resolved from the extension.
 - **strip**: optional; removes the regex match from the boundary line.
 
-The managed region is the first non-blank line after the comment: an existing
-fence is replaced for `import`, or the single line is replaced for `link`.
+The reference manages the content directly below it. Blank lines are skipped to
+find the first non-blank line: an existing fence (for `import`) or generated
+link (for `link`) is replaced in place; otherwise the generated block is
+inserted directly below the comment, leaving existing lines untouched.
 
 ## Source markers
 

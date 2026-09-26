@@ -76,13 +76,19 @@ backtick fence with the language info string.
 
 ### Managed regions
 
-- "Immediately below" means the first non-blank line after the reference
-  comment.
+The reference manages the content directly below it. Blank lines after the
+comment are skipped to find the first non-blank line:
+
 - Import: if that line opens a fenced block, the whole block (opening fence,
-  body, closing fence) is the managed region and is replaced. Otherwise a new
-  fence is inserted directly after the comment, before that line.
-- Link: the first non-blank line after the comment is replaced by the generated
-  link line.
+  body, closing fence) is the managed region and is replaced. Otherwise the
+  generated fence is inserted directly below the comment, leaving any existing
+  line untouched.
+- Link: if that line is a generated link (`[label](target#L<n>)`), it is
+  replaced. Otherwise the generated link line is inserted directly below the
+  comment, leaving any existing line untouched.
+- A following reference comment is never consumed: when the first non-blank
+  line is another reference, the generated content is inserted below the
+  current comment.
 - On re-run the region is re-derived from the comment, so repeated runs are
   idempotent.
 
