@@ -24,6 +24,7 @@ tool refreshes imported snippets and link line numbers.
 - Range links (`link a..b`); link mode supports a single point only.
 - GitHub commit-SHA permalinks.
 - Markers spanning multiple lines in block-comment languages.
+- Inline references: a reference that appears mid-line and renders inline.
 
 ## Vocabulary
 
@@ -96,7 +97,7 @@ comment are skipped to find the first non-blank line:
 ## Reference grammar
 
 ```
-[codemd]:# (MODE RANGE PATH [LANG] [strip])
+[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
 ```
 
 - **MODE**: `import` or `link`.
@@ -122,12 +123,17 @@ comment are skipped to find the first non-blank line:
   matched substring from the boundary lines (Go leftmost match). If a boundary
   line becomes empty (whitespace only) after stripping, it is dropped. `strip`
   with no regex token is an error.
+- **LINK-TEXT**: link mode only. A double-quoted token after PATH sets the
+  rendered link label; it may contain spaces. It must not contain `]`. A quoted
+  token in import mode, an empty link text, more than one link text, an
+  unterminated quote, or a quoted PATH is an error.
 
 ### Link rendering
 
 - Local source: label `PATH:LINE`, target `PATH#LLINE` (relative to the
   Markdown file's directory).
 - HTTP source: label `PATH:LINE`, target the source URL with `#LLINE` appended.
+- The label is LINK-TEXT when present, otherwise `PATH:LINE`.
 - Single line only; the anchor is `#L<line>`.
 
 ### Range semantics
@@ -167,6 +173,8 @@ mixed line endings are normalized to the dominant ending.
 - Unknown extensions fall back to trying generic comment prefixes per line
   (`//`, `#`, `/* */`, `<!-- -->`). A marker is recognized when the trimmed
   line, after removing the comment form, equals `codemd:NAME`.
+- `--languages` prints the effective table (built-ins plus `--config`), sorted by
+  extension.
 
 Example config:
 
@@ -194,6 +202,7 @@ Single command: `codemd [flags] file.md...`
 - `-d`: print a unified diff
 - `--check`: exit non-zero if any file would change (CI)
 - `--config path`: explicit config file
+- `--languages`: print the supported extension → fence table and exit.
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive. With no input files,
 input is read from stdin and written to stdout (in-place flags are then

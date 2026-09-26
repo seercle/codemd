@@ -18,7 +18,7 @@ go install github.com/seercle/codemd/cmd/codemd@latest
 ## Grammar
 
 ```
-[codemd]:# (MODE RANGE PATH [LANG] [strip])
+[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
 ```
 
 - **MODE**: `import` or `link`.
@@ -30,6 +30,8 @@ go install github.com/seercle/codemd/cmd/codemd@latest
 - **PATH**: a local path (relative to the Markdown file) or `http(s)://` URL.
 - **LANG**: optional fence language; otherwise resolved from the extension.
 - **strip**: optional; removes the regex match from the boundary line.
+- **LINK-TEXT**: `link` only; a quoted token after PATH sets the link label. It
+  may contain spaces and must not contain `]`.
 
 The reference manages the content directly below it. Blank lines are skipped to
 find the first non-blank line: an existing fence (for `import`) or generated
@@ -58,8 +60,43 @@ func handler() string {
 | `-d` | Print a unified diff. |
 | `--check` | Exit non-zero if any file would change (CI). |
 | `--config path` | Use an explicit config file. |
+| `--languages` | List supported languages and exit. |
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive.
+
+## Supported languages
+
+The built-in table maps an extension to a comment form and a fence name.
+`--languages` prints the effective table (including any `--config` additions).
+
+| Extension | Fence | Comment form |
+| --- | --- | --- |
+| `go` | `go` | line `//` |
+| `js`, `mjs` | `javascript` | line `//` |
+| `ts` | `typescript` | line `//` |
+| `tsx` | `tsx` | line `//` |
+| `jsx` | `jsx` | line `//` |
+| `c`, `h` | `c` | line `//` or block `/* */` |
+| `cpp`, `hpp` | `cpp` | line `//` or block `/* */` |
+| `java` | `java` | line `//` or block `/* */` |
+| `rs` | `rust` | line `//` or block `/* */` |
+| `php` | `php` | line `//` or block `/* */` |
+| `py` | `python` | line `#` |
+| `rb` | `ruby` | line `#` |
+| `sh`, `bash` | `bash` | line `#` |
+| `yaml`, `yml` | `yaml` | line `#` |
+| `toml` | `toml` | line `#` |
+| `lua` | `lua` | line `--` |
+| `sql` | `sql` | line `--` |
+| `html` | `html` | block `<!-- -->` |
+| `xml` | `xml` | block `<!-- -->` |
+| `md` | `markdown` | block `<!-- -->` |
+| `css` | `css` | block `/* */` |
+
+Any other extension still works: markers are recognized by trying the generic
+comment forms (`//`, `#`, `/* */`, `<!-- -->`), and the fence falls back to
+`text`. Use the explicit LANG token or a `.codemd.yaml` entry to override the
+fence or comment form.
 
 ## Config
 
