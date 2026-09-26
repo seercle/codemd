@@ -20,11 +20,9 @@ type Marker struct {
 
 func CommentText(line string, form lang.CommentForm) (string, bool) {
 	if form.Line != "" {
-		idx := strings.Index(line, form.Line)
-		if idx < 0 {
-			return "", false
+		if idx := strings.Index(line, form.Line); idx >= 0 {
+			return line[idx+len(form.Line):], true
 		}
-		return line[idx+len(form.Line):], true
 	}
 	if form.Block != [2]string{} {
 		start := strings.Index(line, form.Block[0])

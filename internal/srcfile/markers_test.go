@@ -28,6 +28,17 @@ func TestExtractMarkersBlockForm(t *testing.T) {
 	}
 }
 
+func TestExtractMarkersBlockFormDualFormLanguage(t *testing.T) {
+	src := "int x;\n/*codemd:a*/\n"
+	ms, err := ExtractMarkers(src, lang.Builtins()["c"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ms) != 1 || ms[0].Name != "a" || ms[0].Line != 2 {
+		t.Fatalf("got %+v", ms)
+	}
+}
+
 func TestExtractMarkersDuplicateIsError(t *testing.T) {
 	src := "//codemd:a\n//codemd:a\n"
 	if _, err := ExtractMarkers(src, lang.Builtins()["go"]); err == nil {
