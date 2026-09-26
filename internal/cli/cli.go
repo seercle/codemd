@@ -118,7 +118,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		if opt.Check {
 			// --check is not an in-place flag: it is valid with stdin for CI piping.
 			if out != string(data) {
-				fmt.Fprintln(stderr, "codemd: stdin is out of date")
+				fmt.Fprintln(stderr, "codemd: <stdin> is out of date")
 				errCount++
 			}
 		} else {
