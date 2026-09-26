@@ -319,3 +319,56 @@ func TestUnifiedDiffNoChange(t *testing.T) {
 		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
 	}
 }
+
+func TestUnifiedDiffNoTrailingNewline(t *testing.T) {
+	old := "[codemd]:# (import a..b s.go go)"
+	new := "[codemd]:# (import a..b s.go go)\n\n```go\nfunc A() {}\n```"
+	d := unifiedDiff("doc.md", old, new)
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,1 +1,5 @@\n-[codemd]:# (import a..b s.go go)\n\\ No newline at end of file\n+[codemd]:# (import a..b s.go go)\n+\n+```go\n+func A() {}\n+```\n\\ No newline at end of file\n"
+	if d != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
+	}
+}
+
+func TestUnifiedDiffNewlineOnlyChange(t *testing.T) {
+	got := unifiedDiff("doc.md", "x", "x\n")
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,1 +1,1 @@\n-x\n\\ No newline at end of file\n+x\n"
+	if got != want {
+		t.Fatalf("old no NL, new NL:\ngot:\n%q\nwant:\n%q", got, want)
+	}
+	got = unifiedDiff("doc.md", "x\n", "x")
+	want = "--- a/doc.md\n+++ b/doc.md\n@@ -1,1 +1,1 @@\n-x\n+x\n\\ No newline at end of file\n"
+	if got != want {
+		t.Fatalf("old NL, new no NL:\ngot:\n%q\nwant:\n%q", got, want)
+	}
+}
+
+func TestUnifiedDiffNoTrailingNewlineContext(t *testing.T) {
+	d := unifiedDiff("doc.md", "a\nb\nc", "a\nX\nc")
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,3 +1,3 @@\n a\n-b\n+X\n c\n\\ No newline at end of file\n"
+	if d != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
+	}
+}
+
+func TestRunDiffNoTrailingNewline(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (import a..b s.go go)",
+	})
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-d", filepath.Join(dir, "doc.md")}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("exit %d: %s", code, errb.String())
+	}
+	got := out.String()
+	if strings.Count(got, "\\ No newline at end of file\n") != 2 {
+		t.Fatalf("expected two newline markers:\n%s", got)
+	}
+	if !strings.Contains(got, "-[codemd]:# (import a..b s.go go)\n\\ No newline at end of file\n") {
+		t.Fatalf("old last line should be marked:\n%s", got)
+	}
+	if !strings.HasSuffix(got, "+```\n\\ No newline at end of file\n") {
+		t.Fatalf("new last line should be marked:\n%s", got)
+	}
+}

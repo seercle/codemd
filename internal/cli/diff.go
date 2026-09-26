@@ -11,14 +11,29 @@ import (
 func unifiedDiff(name, old, new string) string {
 	oldLines := splitDiffLines(old)
 	newLines := splitDiffLines(new)
+	oldNL := old == "" || strings.HasSuffix(old, "\n")
+	newNL := new == "" || strings.HasSuffix(new, "\n")
 	clean := strings.TrimPrefix(name, string(filepath.Separator))
 	var b strings.Builder
 	fmt.Fprintf(&b, "--- a/%s\n+++ b/%s\n", clean, clean)
-	for _, h := range diffHunks(oldLines, newLines, 3) {
+	for _, h := range diffHunks(oldLines, newLines, oldNL, newNL, 3) {
 		fmt.Fprintf(&b, "@@ -%d,%d +%d,%d @@\n", h.oldStart, h.oldCount, h.newStart, h.newCount)
+		ol, nl := h.oldStart, h.newStart
 		for _, l := range h.lines {
 			b.WriteString(l)
 			b.WriteByte('\n')
+			kind := l[0]
+			oldLast := (kind == ' ' || kind == '-') && ol == len(oldLines) && !oldNL
+			newLast := (kind == ' ' || kind == '+') && nl == len(newLines) && !newNL
+			if oldLast || newLast {
+				b.WriteString("\\ No newline at end of file\n")
+			}
+			if kind == ' ' || kind == '-' {
+				ol++
+			}
+			if kind == ' ' || kind == '+' {
+				nl++
+			}
 		}
 	}
 	return b.String()
@@ -46,9 +61,19 @@ type diffHunk struct {
 	lines              []string
 }
 
-// diffOps computes an LCS-based edit script from a to b.
-func diffOps(a, b []string) []diffOp {
+// diffOps computes an LCS-based edit script from a to b. aNL/bNL report
+// whether each side ends with a newline; a final line's newline status is
+// part of its identity, matching GNU diff.
+func diffOps(a, b []string, aNL, bNL bool) []diffOp {
 	n, m := len(a), len(b)
+	eq := func(i, j int) bool {
+		if a[i] != b[j] {
+			return false
+		}
+		aLast := !aNL && i == n-1
+		bLast := !bNL && j == m-1
+		return aLast == bLast
+	}
 	dp := make([][]int, n+1)
 	for i := range dp {
 		dp[i] = make([]int, m+1)
@@ -56,7 +81,7 @@ func diffOps(a, b []string) []diffOp {
 	for i := n - 1; i >= 0; i-- {
 		for j := m - 1; j >= 0; j-- {
 			switch {
-			case a[i] == b[j]:
+			case eq(i, j):
 				dp[i][j] = dp[i+1][j+1] + 1
 			case dp[i+1][j] >= dp[i][j+1]:
 				dp[i][j] = dp[i+1][j]
@@ -69,7 +94,7 @@ func diffOps(a, b []string) []diffOp {
 	i, j := 0, 0
 	for i < n && j < m {
 		switch {
-		case a[i] == b[j]:
+		case eq(i, j):
 			ops = append(ops, diffOp{' ', a[i]})
 			i++
 			j++
@@ -92,8 +117,8 @@ func diffOps(a, b []string) []diffOp {
 
 // diffHunks groups the edit script into hunks with up to context equal lines
 // on either side of each change, merging hunks whose context windows touch.
-func diffHunks(a, b []string, context int) []diffHunk {
-	ops := diffOps(a, b)
+func diffHunks(a, b []string, aNL, bNL bool, context int) []diffHunk {
+	ops := diffOps(a, b, aNL, bNL)
 	oldAt := make([]int, len(ops)+1)
 	newAt := make([]int, len(ops)+1)
 	ol, nl := 1, 1
