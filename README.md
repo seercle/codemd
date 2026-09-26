@@ -31,7 +31,8 @@ go install github.com/seercle/codemd/cmd/codemd@latest
 - **LANG**: optional fence language; otherwise resolved from the extension.
 - **strip**: optional; removes the regex match from the boundary line.
 - **LINK-TEXT**: `link` only; a quoted token after PATH sets the link label. It
-  may contain spaces and must not contain `]`.
+  may contain spaces and must not contain `]`; an empty or whitespace-only
+  label is an error.
 
 The reference manages the content directly below it. Blank lines are skipped to
 find the first non-blank line: an existing fence (for `import`) or generated
@@ -60,6 +61,7 @@ func handler() string {
 | `-d` | Print a unified diff. |
 | `--check` | Exit non-zero if any file would change (CI). |
 | `--config path` | Use an explicit config file. |
+| `-f`, `--force` | Write even if some references failed. |
 | `--languages` | List supported languages and exit. |
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive.

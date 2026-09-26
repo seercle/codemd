@@ -125,8 +125,8 @@ comment are skipped to find the first non-blank line:
   with no regex token is an error.
 - **LINK-TEXT**: link mode only. A double-quoted token after PATH sets the
   rendered link label; it may contain spaces. It must not contain `]`. A quoted
-  token in import mode, an empty link text, more than one link text, an
-  unterminated quote, or a quoted PATH is an error.
+  token in import mode, an empty or whitespace-only link text, more than one
+  link text, an unterminated quote, or a quoted PATH is an error.
 
 ### Link rendering
 
@@ -203,16 +203,22 @@ Single command: `codemd [flags] file.md...`
 - `--check`: exit non-zero if any file would change (CI)
 - `--config path`: explicit config file
 - `--languages`: print the supported extension → fence/comment-form table and exit.
+- `-f`, `--force`: with `-w` or `-o`, write even if some references failed.
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive. With no input files,
 input is read from stdin and written to stdout (in-place flags are then
 invalid); config discovery and relative-path resolution then start from the
 current working directory.
 
+`-w` and `-o` are all-or-nothing per file: if any reference in a file fails,
+that file is not written (other files still process). `--force` overrides this.
+`-d` and stdout output are unaffected and still print the partial result.
+
 ## Errors
 
-Collect-and-continue: every reference error is recorded with file, line, and
-reason; remaining references and files still process. A summary is printed to
+Collect-and-continue: every reference error is recorded with the file name,
+line, and reason (stdin is reported as `<stdin>`); remaining references and
+files still process. A summary is printed to
 stderr, and the process exits non-zero if any error occurred. On error, the
 managed region is left untouched. Sources are fetched once per run (cache).
 
