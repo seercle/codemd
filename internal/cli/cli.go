@@ -79,25 +79,56 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			resolver.Table = configTable
 		}
 		out, errs := resolver.ResolveDocument(string(data), ".")
-		io.WriteString(stdout, out)
-		return reportErrors(errs, stderr)
+		errCount := reportErrors(errs, stderr)
+		if opt.Check {
+			// --check is not an in-place flag: it is valid with stdin for CI piping.
+			if out != string(data) {
+				fmt.Fprintln(stderr, "codemd: stdin is out of date")
+				errCount++
+			}
+		} else {
+			io.WriteString(stdout, out)
+		}
+		if errCount > 0 {
+			fmt.Fprintf(stderr, "codemd: %d error(s)\n", errCount)
+			return 1
+		}
+		return 0
 	}
 
 	exit := 0
+	errCount := 0
 	for _, file := range files {
+		baseDir := filepath.Dir(file)
 		// Derive a fresh table per file so config cannot leak across files.
 		table := lang.Builtins()
 		switch {
 		case configTable != nil:
 			table = configTable
 		default:
-			baseDir := filepath.Dir(file)
-			if cfgPath, err := lang.DiscoverConfig(baseDir); err == nil && cfgPath != "" {
-				if cfg, err := lang.LoadConfig(cfgPath); err == nil {
-					if merged, err := lang.Merge(lang.Builtins(), cfg); err == nil {
-						table = merged
-					}
+			cfgPath, err := lang.DiscoverConfig(baseDir)
+			if err != nil {
+				fmt.Fprintf(stderr, "codemd: %v\n", err)
+				errCount++
+				exit = 1
+				continue
+			}
+			if cfgPath != "" {
+				cfg, err := lang.LoadConfig(cfgPath)
+				if err != nil {
+					fmt.Fprintf(stderr, "codemd: %v\n", err)
+					errCount++
+					exit = 1
+					continue
 				}
+				merged, err := lang.Merge(lang.Builtins(), cfg)
+				if err != nil {
+					fmt.Fprintf(stderr, "codemd: %v\n", err)
+					errCount++
+					exit = 1
+					continue
+				}
+				table = merged
 			}
 		}
 		resolver.Table = table
@@ -105,12 +136,13 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			errCount++
 			exit = 1
 			continue
 		}
-		baseDir := filepath.Dir(file)
 		out, errs := resolver.ResolveDocument(string(data), baseDir)
-		if reportErrors(errs, stderr) != 0 {
+		if n := reportErrors(errs, stderr); n > 0 {
+			errCount += n
 			exit = 1
 		}
 		changed := out != string(data)
@@ -118,6 +150,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		case opt.Check:
 			if changed {
 				fmt.Fprintf(stderr, "codemd: %s is out of date\n", file)
+				errCount++
 				exit = 1
 			}
 		case opt.Diff:
@@ -128,17 +161,22 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			if changed {
 				if err := os.WriteFile(file, []byte(out), 0o644); err != nil {
 					fmt.Fprintf(stderr, "codemd: %v\n", err)
+					errCount++
 					exit = 1
 				}
 			}
 		case opt.Output != "":
 			if err := os.WriteFile(opt.Output, []byte(out), 0o644); err != nil {
 				fmt.Fprintf(stderr, "codemd: %v\n", err)
+				errCount++
 				exit = 1
 			}
 		default:
 			io.WriteString(stdout, out)
 		}
+	}
+	if errCount > 0 {
+		fmt.Fprintf(stderr, "codemd: %d error(s)\n", errCount)
 	}
 	return exit
 }
@@ -152,16 +190,18 @@ func reportErrors(errs []RefError, stderr io.Writer) int {
 		}
 	}
 	if len(errs) > 0 {
-		return 1
+		return len(errs)
 	}
 	return 0
 }
 
 func unifiedDiff(name, old, new string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "--- %s\n+++ %s\n", name, name)
+	clean := strings.TrimPrefix(name, string(filepath.Separator))
+	fmt.Fprintf(&b, "--- a/%s\n+++ b/%s\n", clean, clean)
 	oldLines := strings.Split(old, "\n")
 	newLines := strings.Split(new, "\n")
+	fmt.Fprintf(&b, "@@ -1,%d +1,%d @@\n", len(oldLines), len(newLines))
 	for _, l := range oldLines {
 		fmt.Fprintf(&b, "-%s\n", l)
 	}
