@@ -18,6 +18,7 @@ type Options struct {
 	Diff   bool
 	Check  bool
 	Config string
+	Force  bool
 }
 
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
@@ -38,6 +39,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opt.Diff, "d", false, "print a unified diff")
 	fs.BoolVar(&opt.Check, "check", false, "exit non-zero if any file would change")
 	fs.StringVar(&opt.Config, "config", "", "path to config file")
+	fs.BoolVar(&opt.Force, "f", false, "write even if some references failed")
+	fs.BoolVar(&opt.Force, "force", false, "write even if some references failed")
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -173,6 +176,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			continue
 		}
 		out, errs := resolver.ResolveDocument(string(data), baseDir)
+		fileErrs := len(errs)
 		if n := reportErrors(file, errs, stderr); n > 0 {
 			errCount += n
 			exit = 1
@@ -190,7 +194,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 				io.WriteString(stdout, unifiedDiff(file, string(data), out))
 			}
 		case opt.Write:
-			if changed {
+			if fileErrs > 0 && !opt.Force {
+				fmt.Fprintf(stderr, "codemd: %s: not written due to errors (use --force to write anyway)\n", file)
+			} else if changed {
 				if err := os.WriteFile(file, []byte(out), 0o644); err != nil {
 					fmt.Fprintf(stderr, "codemd: %v\n", err)
 					errCount++
@@ -198,7 +204,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 				}
 			}
 		case opt.Output != "":
-			if err := os.WriteFile(opt.Output, []byte(out), 0o644); err != nil {
+			if fileErrs > 0 && !opt.Force {
+				fmt.Fprintf(stderr, "codemd: %s: not written due to errors (use --force to write anyway)\n", file)
+			} else if err := os.WriteFile(opt.Output, []byte(out), 0o644); err != nil {
 				fmt.Fprintf(stderr, "codemd: %v\n", err)
 				errCount++
 				exit = 1

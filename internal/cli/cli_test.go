@@ -170,6 +170,89 @@ func TestRunUnknownFlagExitsTwo(t *testing.T) {
 	}
 }
 
+func TestRunWriteAllOrNothing(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+	})
+	docPath := filepath.Join(dir, "doc.md")
+	before, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", docPath}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit")
+	}
+	after, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != string(before) {
+		t.Fatalf("file should be untouched on error:\n%s", after)
+	}
+	if !strings.Contains(errb.String(), "not written") {
+		t.Fatalf("stderr should explain the skip:\n%s", errb.String())
+	}
+}
+
+func TestRunWriteForce(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+	})
+	docPath := filepath.Join(dir, "doc.md")
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", "--force", docPath}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit even with --force")
+	}
+	after, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(after), "```go\nfunc A() {}\n```") {
+		t.Fatalf("--force should write the good region:\n%s", after)
+	}
+}
+
+func TestRunWriteForceShorthand(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+	})
+	docPath := filepath.Join(dir, "doc.md")
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", "-f", docPath}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit even with -f")
+	}
+	after, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(after), "```go\nfunc A() {}\n```") {
+		t.Fatalf("-f should write the good region:\n%s", after)
+	}
+}
+
+func TestRunOutputAllOrNothing(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+	})
+	outPath := filepath.Join(dir, "out.md")
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-o", outPath, filepath.Join(dir, "doc.md")}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit")
+	}
+	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
+		t.Fatalf("output file should not be created on error")
+	}
+}
+
 func TestUnifiedDiffShape(t *testing.T) {
 	d := unifiedDiff("doc.md", "a\nb\n", "a\nc\n")
 	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,2 +1,2 @@\n a\n-b\n+c\n"
