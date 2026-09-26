@@ -88,7 +88,7 @@ func ParseRef(comment string) (Ref, error) {
 				return Ref{}, fmt.Errorf("link text is only valid for link mode in %q", comment)
 			}
 			label := tok[1 : len(tok)-1]
-			if label == "" {
+			if strings.TrimSpace(label) == "" {
 				return Ref{}, fmt.Errorf("empty link text in %q", comment)
 			}
 			if strings.Contains(label, "]") {

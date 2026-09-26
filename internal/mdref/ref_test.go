@@ -68,6 +68,7 @@ func TestParseErrors(t *testing.T) {
 		"(import a..b)",                   // missing path
 		`(import a..b src/x.go "nope")`,   // link text on import
 		`(link a src/x.go "")`,            // empty link text
+		`(link a src/x.go "   ")`,         // whitespace-only link text
 		`(link a src/x.go "a]b")`,         // link text with bracket
 		`(link a src/x.go "A" "B")`,       // multiple link texts
 		`(link a src/x.go "oops)`,         // unterminated quote
