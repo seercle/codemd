@@ -3,10 +3,12 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/seercle/codemd/internal/lang"
+	"github.com/seercle/codemd/internal/mdref"
 	"github.com/seercle/codemd/internal/srcfile"
 )
 
@@ -14,10 +16,37 @@ func resolver() Resolver {
 	return Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 }
 
+func TestSpliceInsertsBelowComment(t *testing.T) {
+	lines := []string{"[codemd]:# (link a s.go)", "", "keep me"}
+	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
+	want := []string{"[codemd]:# (link a s.go)", "[s.go:2](s.go#L2)", "", "keep me"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+}
+
+func TestSpliceReplacesGeneratedLink(t *testing.T) {
+	lines := []string{"[codemd]:# (link a s.go)", "", "[s.go:9](s.go#L9)"}
+	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
+	want := []string{"[codemd]:# (link a s.go)", "", "[s.go:2](s.go#L2)"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+}
+
+func TestSpliceBackToBackComments(t *testing.T) {
+	lines := []string{"[codemd]:# (import a..b s.go go)", "[codemd]:# (link a s.go)"}
+	got := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{"[codemd]:# (import a..b s.go go)", "```go", "x", "```", "[codemd]:# (link a s.go)"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+}
+
 func TestResolveDocumentImportAndLink(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n//codemd:b\n"), 0o644)
-	md := "[codemd]:# (import a..b server.go go)\n\n```go\nstale\n```\n\n[codemd]:# (link a server.go)\n\nold link\n"
+	md := "[codemd]:# (import a..b server.go go)\n\n```go\nstale\n```\n\n[codemd]:# (link a server.go)\n\n[server.go:9](server.go#L9)\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
@@ -28,8 +57,22 @@ func TestResolveDocumentImportAndLink(t *testing.T) {
 	if !strings.Contains(out, "[server.go:2](server.go#L2)") {
 		t.Fatalf("link not resolved:\n%s", out)
 	}
-	if strings.Contains(out, "stale") || strings.Contains(out, "old link") {
+	if strings.Contains(out, "stale") || strings.Contains(out, "[server.go:9](server.go#L9)") {
 		t.Fatalf("stale content kept:\n%s", out)
+	}
+}
+
+func TestResolveDocumentLinkInsertsUnderNormalLine(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n"), 0o644)
+	md := "[codemd]:# (link a server.go)\n\nkeep me\n"
+	out, errs := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "[codemd]:# (link a server.go)\n[server.go:2](server.go#L2)\n\nkeep me\n"
+	if out != want {
+		t.Fatalf("got:\n%s\nwant:\n%s", out, want)
 	}
 }
 

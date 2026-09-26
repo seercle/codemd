@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -86,27 +87,38 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 	return render.Snippet(fence, res.Lines), nil
 }
 
-// splice replaces the managed region after refLine (1-based) with replacement.
+var generatedLink = regexp.MustCompile(`^\[[^\]]*\]\([^)]*#L\d+\)$`)
+
+func isGeneratedLink(line string) bool {
+	return generatedLink.MatchString(strings.TrimSpace(line))
+}
+
+// splice updates the managed region for the reference on line refLine
+// (1-based). It skips blank lines after the comment to find the first
+// non-blank line. If that line is the corresponding generated artifact (a
+// fenced block for import, a generated link for link) it is replaced in place;
+// otherwise the replacement is inserted directly below the comment, leaving
+// any existing line untouched.
 func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) []string {
-	idx := refLine // 0-based index of the line after the reference
+	insertAt := refLine // 0-based index of the line directly below the comment
+	idx := insertAt
 	for idx < len(lines) && strings.TrimSpace(lines[idx]) == "" {
 		idx++
 	}
-	if idx >= len(lines) {
-		out := append([]string{}, lines...)
-		return append(out, replacement...)
+	if idx < len(lines) {
+		if mode == mdref.Link {
+			if isGeneratedLink(lines[idx]) {
+				out := append([]string{}, lines[:idx]...)
+				out = append(out, replacement...)
+				return append(out, lines[idx+1:]...)
+			}
+		} else if end, ok := mdref.FenceBlockEnd(lines, idx); ok {
+			out := append([]string{}, lines[:idx]...)
+			out = append(out, replacement...)
+			return append(out, lines[end:]...)
+		}
 	}
-	if mode == mdref.Link {
-		out := append([]string{}, lines[:idx]...)
-		out = append(out, replacement...)
-		return append(out, lines[idx+1:]...)
-	}
-	if end, ok := mdref.FenceBlockEnd(lines, idx); ok {
-		out := append([]string{}, lines[:idx]...)
-		out = append(out, replacement...)
-		return append(out, lines[end:]...)
-	}
-	out := append([]string{}, lines[:idx]...)
+	out := append([]string{}, lines[:insertAt]...)
 	out = append(out, replacement...)
-	return append(out, lines[idx:]...)
+	return append(out, lines[insertAt:]...)
 }
