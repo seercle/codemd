@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -23,6 +24,15 @@ type Options struct {
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("codemd", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+	fs.Usage = func() {
+		fmt.Fprint(stderr, "codemd resolves code references embedded in Markdown.\n\n")
+		fmt.Fprint(stderr, "Usage:\n")
+		fmt.Fprint(stderr, "  codemd [flags] file.md...\n")
+		fmt.Fprint(stderr, "  codemd [flags]              (no files: read stdin, write stdout)\n\n")
+		fmt.Fprint(stderr, "Reference: [codemd]:# (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"])\n\n")
+		fmt.Fprint(stderr, "Flags:\n")
+		fs.PrintDefaults()
+	}
 	var opt Options
 	fs.BoolVar(&opt.Write, "w", false, "write result in place")
 	fs.StringVar(&opt.Output, "o", "", "write result to a new file")
@@ -31,6 +41,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.StringVar(&opt.Config, "config", "", "path to config file")
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
 		return 2
 	}
 	if *languages {
