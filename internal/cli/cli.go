@@ -196,11 +196,11 @@ func reportErrors(errs []RefError, stderr io.Writer) int {
 }
 
 func unifiedDiff(name, old, new string) string {
+	oldLines := splitDiffLines(old)
+	newLines := splitDiffLines(new)
 	var b strings.Builder
 	clean := strings.TrimPrefix(name, string(filepath.Separator))
 	fmt.Fprintf(&b, "--- a/%s\n+++ b/%s\n", clean, clean)
-	oldLines := strings.Split(old, "\n")
-	newLines := strings.Split(new, "\n")
 	fmt.Fprintf(&b, "@@ -1,%d +1,%d @@\n", len(oldLines), len(newLines))
 	for _, l := range oldLines {
 		fmt.Fprintf(&b, "-%s\n", l)
@@ -209,4 +209,15 @@ func unifiedDiff(name, old, new string) string {
 		fmt.Fprintf(&b, "+%s\n", l)
 	}
 	return b.String()
+}
+
+func splitDiffLines(s string) []string {
+	if s == "" {
+		return nil
+	}
+	lines := strings.Split(s, "\n")
+	if len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
+	return lines
 }

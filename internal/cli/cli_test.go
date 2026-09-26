@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -101,7 +102,34 @@ func TestUnifiedDiffShape(t *testing.T) {
 	if !strings.Contains(d, "+++ ") {
 		t.Fatalf("missing new header:\n%s", d)
 	}
-	if !strings.Contains(d, "@@ ") {
-		t.Fatalf("missing hunk header:\n%s", d)
+	if !strings.Contains(d, "@@ -1,2 +1,2 @@") {
+		t.Fatalf("wrong hunk header:\n%s", d)
+	}
+	minus, plus := 0, 0
+	for _, l := range strings.Split(d, "\n") {
+		switch {
+		case strings.HasPrefix(l, "--- "), strings.HasPrefix(l, "+++ "):
+		case strings.HasPrefix(l, "-"):
+			minus++
+		case strings.HasPrefix(l, "+"):
+			plus++
+		}
+	}
+	if minus != 2 || plus != 2 {
+		t.Fatalf("expected 2 '-' and 2 '+' lines, got %d and %d:\n%s", minus, plus, d)
+	}
+
+	if _, err := exec.LookPath("patch"); err != nil {
+		t.Skip("patch not available")
+	}
+	dir := t.TempDir()
+	oldPath := filepath.Join(dir, "doc.md")
+	if err := os.WriteFile(oldPath, []byte("a\nb\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("patch", "--dry-run", oldPath)
+	cmd.Stdin = strings.NewReader(d)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("patch --dry-run failed: %v\n%s", err, out)
 	}
 }
