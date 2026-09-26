@@ -40,27 +40,36 @@ func CommentText(line string, form lang.CommentForm) (string, bool) {
 }
 
 func ExtractMarkers(content string, l lang.Language) ([]Marker, error) {
+	return ExtractMarkersMulti(content, []lang.CommentForm{l.Form})
+}
+
+// ExtractMarkersMulti finds markers using any of the given comment forms.
+// For each line, the first form that yields a valid marker wins.
+func ExtractMarkersMulti(content string, forms []lang.CommentForm) ([]Marker, error) {
 	lines := lineutil.Split(content)
 	var out []Marker
 	seen := map[string]int{}
 	for i, line := range lines.Content {
-		text, ok := CommentText(line, l.Form)
-		if !ok {
-			continue
+		for _, form := range forms {
+			text, ok := CommentText(line, form)
+			if !ok {
+				continue
+			}
+			text = strings.TrimSpace(text)
+			if !strings.HasPrefix(text, markerPrefix) {
+				continue
+			}
+			name := strings.TrimSpace(strings.TrimPrefix(text, markerPrefix))
+			if !markerName.MatchString(name) || strings.Contains(name, "..") {
+				continue
+			}
+			if prev, dup := seen[name]; dup {
+				return nil, fmt.Errorf("duplicate marker %q on lines %d and %d", name, prev, i+1)
+			}
+			seen[name] = i + 1
+			out = append(out, Marker{Name: name, Line: i + 1})
+			break
 		}
-		text = strings.TrimSpace(text)
-		if !strings.HasPrefix(text, markerPrefix) {
-			continue
-		}
-		name := strings.TrimSpace(strings.TrimPrefix(text, markerPrefix))
-		if !markerName.MatchString(name) || strings.Contains(name, "..") {
-			continue
-		}
-		if prev, dup := seen[name]; dup {
-			return nil, fmt.Errorf("duplicate marker %q on lines %d and %d", name, prev, i+1)
-		}
-		seen[name] = i + 1
-		out = append(out, Marker{Name: name, Line: i + 1})
 	}
 	return out, nil
 }

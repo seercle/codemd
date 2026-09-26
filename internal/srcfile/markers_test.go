@@ -46,6 +46,22 @@ func TestExtractMarkersDuplicateIsError(t *testing.T) {
 	}
 }
 
+func TestExtractMarkersMultiGenericForms(t *testing.T) {
+	forms := []lang.CommentForm{
+		{Line: "//", Block: [2]string{"/*", "*/"}},
+		{Line: "#"},
+		{Block: [2]string{"<!--", "-->"}},
+	}
+	src := "#codemd:a\n<!--codemd:b-->\n//codemd:c\n"
+	ms, err := ExtractMarkersMulti(src, forms)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ms) != 3 || ms[0].Name != "a" || ms[1].Name != "b" || ms[2].Name != "c" {
+		t.Fatalf("got %+v", ms)
+	}
+}
+
 func TestExtractMarkersIgnoresNonMarkers(t *testing.T) {
 	src := "// just a comment\n//codemd:\n//codemd:has space\n//codemd:ok\n"
 	ms, err := ExtractMarkers(src, lang.Builtins()["go"])
