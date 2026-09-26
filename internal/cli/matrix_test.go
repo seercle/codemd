@@ -282,6 +282,39 @@ func TestIntegrationMatrixLinkLabel(t *testing.T) {
 	}
 }
 
+func TestIntegrationMatrixLinkLabelParens(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
+		"doc.md": "[codemd]:# (link a s.go \"f(x) #L9)\")\n",
+	})
+	docPath := filepath.Join(dir, "doc.md")
+	want := "[codemd]:# (link a s.go \"f(x) #L9)\")\n[f(x) #L9)](s.go#L2)\n"
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", docPath}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("first run code %d stderr %s", code, errb.String())
+	}
+	first, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(first) != want {
+		t.Fatalf("got:\n%s\nwant:\n%s", first, want)
+	}
+	out.Reset()
+	errb.Reset()
+	if code := Run([]string{"-w", docPath}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("second run code %d stderr %s", code, errb.String())
+	}
+	second, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(second) != string(first) {
+		t.Fatalf("not idempotent:\n--- first ---\n%s\n--- second ---\n%s", first, second)
+	}
+}
+
 func TestIntegrationMatrixConfig(t *testing.T) {
 	files := map[string]string{
 		".codemd.yaml": "languages:\n  foo:\n    line: \";;\"\n    fence: foofence\n",

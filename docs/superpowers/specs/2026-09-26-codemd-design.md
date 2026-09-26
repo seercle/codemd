@@ -202,7 +202,7 @@ Single command: `codemd [flags] file.md...`
 - `-d`: print a unified diff
 - `--check`: exit non-zero if any file would change (CI)
 - `--config path`: explicit config file
-- `--languages`: print the supported extension → fence table and exit.
+- `--languages`: print the supported extension → fence/comment-form table and exit.
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive. With no input files,
 input is read from stdin and written to stdout (in-place flags are then

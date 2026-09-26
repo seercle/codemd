@@ -131,6 +131,28 @@ func TestResolveDocumentIdempotentNestedTildeFence(t *testing.T) {
 	}
 }
 
+func TestIsGeneratedLink(t *testing.T) {
+	cases := []struct {
+		name string
+		line string
+		want bool
+	}{
+		{"plain generated link", "[s.go:2](s.go#L2)", true},
+		{"custom label with parens", "[f(x) #L9)](s.go#L2)", true},
+		{"custom label with spaces", "[My Label](s.go#L2)", true},
+		{"surrounding whitespace", "  [s.go:2](s.go#L2)  ", true},
+		{"non-link line", "text", false},
+		{"reference comment", "[codemd]:# (link a s.go)", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := isGeneratedLink(tc.line); got != tc.want {
+				t.Fatalf("isGeneratedLink(%q) = %v, want %v", tc.line, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestResolveDocumentCollectsErrors(t *testing.T) {
 	dir := t.TempDir()
 	md := "[codemd]:# (import a..b missing.go go)\n"
