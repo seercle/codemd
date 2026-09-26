@@ -26,43 +26,43 @@ type Result struct {
 	Lines     []string
 }
 
-func findLine(content string, markers []srcfile.Marker, b Bound) (int, error) {
+func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int, error) {
 	if b.Open {
 		return 0, nil
 	}
 	if b.Name != "" {
 		for _, m := range markers {
-			if m.Name == b.Name {
+			if m.Name == b.Name && m.Line >= from {
 				return m.Line, nil
 			}
 		}
-		return 0, fmt.Errorf("marker %q not found", b.Name)
+		return 0, fmt.Errorf("marker %q not found at or after line %d", b.Name, from)
 	}
 	re, err := regexp.Compile(b.Regex)
 	if err != nil {
 		return 0, fmt.Errorf("bad regex %q: %w", b.Regex, err)
 	}
 	lines := lineutil.Split(content)
-	for i, line := range lines.Content {
-		if re.MatchString(line) {
+	for i := from - 1; i < len(lines.Content); i++ {
+		if re.MatchString(lines.Content[i]) {
 			return i + 1, nil
 		}
 	}
-	return 0, fmt.Errorf("regex %q matched no line", b.Regex)
+	return 0, fmt.Errorf("regex %q matched no line at or after %d", b.Regex, from)
 }
 
 func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Result, error) {
 	lines := lineutil.Split(content)
-	start, err := findLine(content, markers, r.Start)
-	if err != nil {
-		return Result{}, err
-	}
-	end, err := findLine(content, markers, r.End)
+	start, err := findLine(content, markers, r.Start, 1)
 	if err != nil {
 		return Result{}, err
 	}
 	if r.Start.Open {
 		start = 1
+	}
+	end, err := findLine(content, markers, r.End, start)
+	if err != nil {
+		return Result{}, err
 	}
 	if r.End.Open {
 		end = len(lines.Content)
@@ -120,5 +120,5 @@ func dropEmptyBoundaries(lines []string) []string {
 }
 
 func ResolveLink(content string, markers []srcfile.Marker, b Bound) (int, error) {
-	return findLine(content, markers, b)
+	return findLine(content, markers, b, 1)
 }

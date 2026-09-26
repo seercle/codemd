@@ -87,3 +87,35 @@ func TestResolveUnmatchedIsError(t *testing.T) {
 		t.Fatal("expected error")
 	}
 }
+
+func TestResolveEndAtOrAfterStart(t *testing.T) {
+	src := "func g() {}\nfunc f() {}\nfunc g() {}\n"
+	res, err := Resolve(src, nil, Range{Start: Bound{Regex: "func f"}, End: Bound{Regex: "func g"}}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.StartLine != 2 || res.EndLine != 3 {
+		t.Fatalf("bounds %d-%d", res.StartLine, res.EndLine)
+	}
+	if len(res.Lines) != 2 || res.Lines[0] != "func f() {}" || res.Lines[1] != "func g() {}" {
+		t.Fatalf("lines %+v", res.Lines)
+	}
+}
+
+func TestResolveEndBeforeStartIsError(t *testing.T) {
+	src := "func g() {}\nfunc f() {}\n"
+	if _, err := Resolve(src, nil, Range{Start: Bound{Regex: "func f"}, End: Bound{Regex: "func g"}}, false); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestResolveStripLeftmostSingleMatch(t *testing.T) {
+	src := "// a a\ncode\n"
+	res, err := Resolve(src, nil, Range{Start: Bound{Regex: "a"}, End: Bound{Open: true}}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Lines) != 2 || res.Lines[0] != "//  a" || res.Lines[1] != "code" {
+		t.Fatalf("lines %+v", res.Lines)
+	}
+}
