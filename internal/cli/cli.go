@@ -99,7 +99,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			resolver.Table = configTable
 		}
 		out, errs := resolver.ResolveDocument(string(data), ".")
-		errCount := reportErrors(errs, stderr)
+		errCount := reportErrors("<stdin>", errs, stderr)
 		if opt.Check {
 			// --check is not an in-place flag: it is valid with stdin for CI piping.
 			if out != string(data) {
@@ -161,7 +161,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			continue
 		}
 		out, errs := resolver.ResolveDocument(string(data), baseDir)
-		if n := reportErrors(errs, stderr); n > 0 {
+		if n := reportErrors(file, errs, stderr); n > 0 {
 			errCount += n
 			exit = 1
 		}
@@ -201,12 +201,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	return exit
 }
 
-func reportErrors(errs []RefError, stderr io.Writer) int {
+func reportErrors(name string, errs []RefError, stderr io.Writer) int {
 	for _, e := range errs {
 		if e.Line > 0 {
-			fmt.Fprintf(stderr, "codemd: line %d: %v\n", e.Line, e.Err)
+			fmt.Fprintf(stderr, "codemd: %s: line %d: %v\n", name, e.Line, e.Err)
 		} else {
-			fmt.Fprintf(stderr, "codemd: %v\n", e.Err)
+			fmt.Fprintf(stderr, "codemd: %s: %v\n", name, e.Err)
 		}
 	}
 	if len(errs) > 0 {

@@ -54,6 +54,30 @@ func TestRunErrorExit(t *testing.T) {
 	}
 }
 
+func TestRunErrorNamesFile(t *testing.T) {
+	dir := t.TempDir()
+	md := filepath.Join(dir, "doc.md")
+	os.WriteFile(md, []byte("[codemd]:# (import a..b missing.go go)\n"), 0o644)
+	var out, errb bytes.Buffer
+	if code := Run([]string{md}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit")
+	}
+	if !strings.Contains(errb.String(), md+": line 1:") {
+		t.Fatalf("stderr should name the file:\n%s", errb.String())
+	}
+}
+
+func TestRunErrorNamesStdin(t *testing.T) {
+	md := "[codemd]:# (import a..b missing.go go)\n"
+	var out, errb bytes.Buffer
+	if code := Run(nil, strings.NewReader(md), &out, &errb); code == 0 {
+		t.Fatal("expected non-zero exit")
+	}
+	if !strings.Contains(errb.String(), "<stdin>: line 1:") {
+		t.Fatalf("stderr should name stdin:\n%s", errb.String())
+	}
+}
+
 func TestRunCheckStdin(t *testing.T) {
 	dir := t.TempDir()
 	src := filepath.Join(dir, "s.go")
