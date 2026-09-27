@@ -147,6 +147,31 @@ func TestRunLanguagesWithConfig(t *testing.T) {
 	}
 }
 
+func TestRunStdinDiscoversConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		".codemd.yaml": "languages:\n  foo:\n    line: \";;\"\n    fence: foofence\n",
+		"s.foo":        ";;codemd:a\nx\n;;codemd:b\n",
+	})
+	old, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(old)
+
+	md := "[codemd]:# (import a..b s.foo)\n"
+	var out, errb bytes.Buffer
+	if code := Run(nil, strings.NewReader(md), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if !strings.Contains(out.String(), "```foofence\nx\n```") {
+		t.Fatalf("stdin should use discovered config fence:\n%s", out.String())
+	}
+}
+
 func TestRunHelpExitsZero(t *testing.T) {
 	var out, errb bytes.Buffer
 	if code := Run([]string{"-h"}, strings.NewReader(""), &out, &errb); code != 0 {

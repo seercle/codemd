@@ -105,13 +105,16 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	resolver := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 
 	if len(files) == 0 {
-		data, err := io.ReadAll(stdin)
+		table, err := resolveTable(".", configTable)
 		if err != nil {
 			fmt.Fprintf(stderr, "codemd: %v\n", err)
 			return 1
 		}
-		if configTable != nil {
-			resolver.Table = configTable
+		resolver.Table = table
+		data, err := io.ReadAll(stdin)
+		if err != nil {
+			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			return 1
 		}
 		out, errs := resolver.ResolveDocument(string(data), ".")
 		errCount := reportErrors("<stdin>", errs, stderr)
@@ -135,36 +138,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	errCount := 0
 	for _, file := range files {
 		baseDir := filepath.Dir(file)
-		// Derive a fresh table per file so config cannot leak across files.
-		table := lang.Builtins()
-		switch {
-		case configTable != nil:
-			table = configTable
-		default:
-			cfgPath, err := lang.DiscoverConfig(baseDir)
-			if err != nil {
-				fmt.Fprintf(stderr, "codemd: %v\n", err)
-				errCount++
-				exit = 1
-				continue
-			}
-			if cfgPath != "" {
-				cfg, err := lang.LoadConfig(cfgPath)
-				if err != nil {
-					fmt.Fprintf(stderr, "codemd: %v\n", err)
-					errCount++
-					exit = 1
-					continue
-				}
-				merged, err := lang.Merge(lang.Builtins(), cfg)
-				if err != nil {
-					fmt.Fprintf(stderr, "codemd: %v\n", err)
-					errCount++
-					exit = 1
-					continue
-				}
-				table = merged
-			}
+		table, err := resolveTable(baseDir, configTable)
+		if err != nil {
+			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			errCount++
+			exit = 1
+			continue
 		}
 		resolver.Table = table
 
@@ -219,6 +198,27 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "codemd: %d error(s)\n", errCount)
 	}
 	return exit
+}
+
+// resolveTable returns the language table for baseDir. When explicit is
+// non-nil (an --config table) it is used as-is; otherwise the config is
+// discovered by walking up from baseDir.
+func resolveTable(baseDir string, explicit map[string]lang.Language) (map[string]lang.Language, error) {
+	if explicit != nil {
+		return explicit, nil
+	}
+	cfgPath, err := lang.DiscoverConfig(baseDir)
+	if err != nil {
+		return nil, err
+	}
+	if cfgPath == "" {
+		return lang.Builtins(), nil
+	}
+	cfg, err := lang.LoadConfig(cfgPath)
+	if err != nil {
+		return nil, err
+	}
+	return lang.Merge(lang.Builtins(), cfg)
 }
 
 func reportErrors(name string, errs []RefError, stderr io.Writer) int {
