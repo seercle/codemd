@@ -1,2 +1,5 @@
 .worktrees/
 /codemd
+.envrc
+.direnv
+.superpowers
