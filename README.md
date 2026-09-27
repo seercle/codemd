@@ -15,6 +15,21 @@ Release builds set the version with
 `-ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z"`; source
 builds report `dev`.
 
+## Documentation
+
+Full documentation lives in [`docs/`](docs/README.md):
+
+- [Getting started](docs/getting-started.md)
+- [CLI reference](docs/cli-reference.md)
+- [Reference syntax](docs/reference-syntax.md)
+- [Source markers](docs/source-markers.md)
+- [Languages](docs/languages.md)
+- [Configuration](docs/configuration.md)
+- [Recipes](docs/recipes.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Architecture](docs/architecture.md)
+- [Contributing](docs/contributing.md)
+
 ## Usage
 
 `codemd [flags] file.md...` — with no files, reads stdin and writes stdout.
