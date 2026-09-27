@@ -124,9 +124,11 @@ comment are skipped to find the first non-blank line:
   line becomes empty (whitespace only) after stripping, it is dropped. `strip`
   with no regex token is an error.
 - **LINK-TEXT**: link mode only. A double-quoted token after PATH sets the
-  rendered link label; it may contain spaces. It must not contain `]`. A quoted
-  token in import mode, an empty or whitespace-only link text, more than one
-  link text, an unterminated quote, or a quoted PATH is an error.
+  rendered link label; it may contain spaces. Inside the quotes a backslash
+  escapes the next character (`\\`, `\"`, `\]`, or `\c` yielding `c`); a bare
+  `]` is accepted. Rendered labels escape `\` and `]`. A quoted token in import
+  mode, an empty or whitespace-only link text, more than one link text, an
+  unterminated quote, or a quoted PATH is an error.
 
 ### Link rendering
 
@@ -135,6 +137,7 @@ comment are skipped to find the first non-blank line:
 - HTTP source: label `PATH:LINE`, target the source URL with `#LLINE` appended.
 - The label is LINK-TEXT when present, otherwise `PATH:LINE`.
 - Single line only; the anchor is `#L<line>`.
+- Labels are escaped for Markdown: `\` becomes `\\` and `]` becomes `\]`.
 
 ### Range semantics
 
@@ -203,6 +206,7 @@ Single command: `codemd [flags] file.md...`
 - `--check`: exit non-zero if any file would change (CI)
 - `--config path`: explicit config file
 - `--languages`: print the supported extension → fence/comment-form table and exit.
+- `--version`: print the version and exit.
 - `-f`, `--force`: with `-w` or `-o`, write even if some references failed.
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive. With no input files,
@@ -210,9 +214,17 @@ input is read from stdin and written to stdout (in-place flags are then
 invalid); config discovery and relative-path resolution then start from the
 current working directory.
 
+Positional arguments may be files, directories, or globs. A directory is walked
+recursively for `*.md` and `*.markdown` files, skipping hidden directories; a
+glob supports `**` for any number of path segments. Arguments are de-duplicated
+in order, and an argument matching nothing is a usage error.
+
 `-w` and `-o` are all-or-nothing per file: if any reference in a file fails,
 that file is not written (other files still process). `--force` overrides this.
 `-d` and stdout output are unaffected and still print the partial result.
+
+With `--check` and `-w`, a summary line reporting the number of files checked
+and out of date (or updated) is printed to stderr for file inputs.
 
 ## Errors
 

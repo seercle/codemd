@@ -11,9 +11,16 @@ numbers.
 go install github.com/seercle/codemd/cmd/codemd@latest
 ```
 
+Release builds set the version with
+`-ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z"`; source
+builds report `dev`.
+
 ## Usage
 
 `codemd [flags] file.md...` — with no files, reads stdin and writes stdout.
+Arguments may be files, directories (recursed for `*.md` and `*.markdown`),
+or globs (including `**`); an argument matching nothing is an error. Hidden
+directories are skipped when recursing.
 
 ## Grammar
 
@@ -31,8 +38,10 @@ go install github.com/seercle/codemd/cmd/codemd@latest
 - **LANG**: optional fence language; otherwise resolved from the extension.
 - **strip**: optional; removes the regex match from the boundary line.
 - **LINK-TEXT**: `link` only; a quoted token after PATH sets the link label. It
-  may contain spaces and must not contain `]`; an empty or whitespace-only
-  label is an error.
+  may contain spaces. Inside the quotes, a backslash escapes the next character
+  (`\\`, `\"`, `\]`, or `\c` yielding `c`); a bare `]` is also accepted.
+  Generated labels escape `\` and `]`. An empty or whitespace-only label is an
+  error.
 
 The reference manages the content directly below it. Blank lines are skipped to
 find the first non-blank line: an existing fence (for `import`) or generated
@@ -63,8 +72,12 @@ func handler() string {
 | `--config path` | Use an explicit config file. |
 | `-f`, `--force` | Write even if some references failed. |
 | `--languages` | List supported languages and exit. |
+| `--version` | Print the version and exit. |
 
 `-w`, `-o`, `-d`, and `--check` are mutually exclusive.
+
+With `--check` and `-w`, a summary line (`codemd: N file(s) checked, M ...`) is
+printed to stderr for file inputs.
 
 ## Supported languages
 
