@@ -52,6 +52,21 @@ go test ./...
 - **TDD.** Write the failing test first, then make it pass. A bug fix starts
   with a test that reproduces the bug.
 
+### Documentation
+
+The pages under `docs/` are codemd documents themselves: their examples are
+imported from `internal/cli/testdata/integration/`. Regenerate them after any
+change to the examples or the pages:
+
+```bash
+go build -o /tmp/codemd ./cmd/codemd
+/tmp/codemd -w docs
+```
+
+`TestDocsCurrent` (in `internal/cli/docs_test.go`) resolves every `docs/*.md`
+and fails if the committed file differs, so `go test ./...` catches docs that
+were not regenerated.
+
 ## Adding or overriding a language
 
 The built-in table lives in `Builtins()` in `internal/lang/lang.go`. To add a

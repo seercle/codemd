@@ -111,6 +111,10 @@ The verification gate is:
 gofmt -l . && go vet ./... && go test ./...
 ```
 
+The documentation pages in `docs/` are codemd documents: `TestDocsCurrent`
+resolves them and fails if any page is stale, so the examples double as a
+regression check on the tool.
+
 ## Non-goals
 
 These are deliberate design boundaries, not gaps:
