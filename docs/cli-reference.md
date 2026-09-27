@@ -130,7 +130,7 @@ codemd: -o requires exactly one input file
 | `-w` | the input files | Each file rewritten in place when its resolved output differs. |
 | `-o out.md` | `out.md` | Result written to `out.md`; requires exactly one input. |
 | `-d` | stdout | Unified diff per changed file: 3 lines of context, `a/` and `b/` headers. Nothing is written to disk. |
-| `--check` | stderr | Nothing is written; exits non-zero if any input differs. |
+| `--check` | stderr | No document is written; prints status and exits non-zero if any input differs. |
 
 With multiple inputs, the default mode concatenates each resolved document to
 stdout in argument order, with no separator. `-d` emits a separate diff only for

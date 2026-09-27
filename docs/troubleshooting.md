@@ -13,7 +13,8 @@ grammar from [Reference syntax](reference-syntax.md).
 | `1` | One or more reference, config, or I/O errors; or `--check` found changes. |
 | `2` | Usage error: bad flags, mutually exclusive flags, `-o` with other than one input, `-w`/`-o`/`-d` with no file input, or an input argument that matches nothing. |
 
-Usage messages are printed alone to standard error. Document errors are printed
+Usage messages are printed to standard error; for an unknown flag the flag
+parser prints its message and then the usage text. Document errors are printed
 one per line as `codemd: <message>`, or `codemd: <name>: line <n>: <message>`
 when the error belongs to a reference on a specific line. A run that collects
 document errors prints a final `codemd: N error(s)` line and exits `1`; a config
@@ -65,8 +66,9 @@ codemd: no files match "no-such-*.md"
 Check the pattern, or quote it so your shell passes it through unchanged.
 
 **`no Markdown files in %q`.** A directory argument contains no `.md` or
-`.markdown` files. codemd skips hidden directories, so a directory of only
-dotfiles also produces this:
+`.markdown` files. Only directories whose name starts with `.` are skipped, so
+hidden Markdown files are still processed; this error means the directory holds
+no Markdown files at any visited depth:
 
 ```console
 $ codemd docs
@@ -144,7 +146,7 @@ $ codemd doc.md
 codemd: doc.md: line 1: path must not be quoted in "(import a..b \"src.go\")"
 ```
 
-Drop the quotes. See also [paths with spaces](#why-cant-i-reference-a-path-with-spaces).
+Drop the quotes. See also [the FAQ on paths with spaces](#faq).
 
 **`unterminated regex %q`.** A regex token begins with `/` but has no closing
 `/`:
@@ -318,7 +320,7 @@ codemd: bad.yaml: yaml: line 1: did not find expected node content
 Fix the YAML syntax.
 
 **`<path>: language %q defines both line and block`.** A language entry sets
-both `line` and a two-element `block`:
+both `line` and a non-empty `block`:
 
 ```console
 $ codemd --config both.yaml doc.md

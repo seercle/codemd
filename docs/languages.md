@@ -89,8 +89,8 @@ An `import a..b notes.txt` snippet is emitted under a `text` fence.
 
 Two mechanisms override the defaults:
 
-- **Explicit `LANG` token.** A fourth token after the path in a reference
-  comment sets the fence for that one reference. It changes only the emitted
+- **Explicit `LANG` token.** The token after the path in a reference comment
+  sets the fence for that one reference. It changes only the emitted
   fence; codemd still finds markers with the source extension's comment form.
   `[codemd]:# (import a..b s.c python)` emits a `python` fence while reading
   markers from `s.c` with the `c` comment form.

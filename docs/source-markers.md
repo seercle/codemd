@@ -17,7 +17,7 @@ surrounding whitespace.
 | Go, JavaScript, TypeScript | `//` line | `//codemd:name` |
 | Python, Shell, YAML | `#` line | `#codemd:name` |
 | Lua, SQL | `--` line | `--codemd:name` |
-| C, CSS | `/* */` block | `/* codemd:name */` |
+| C (dual-form), CSS | `/* */` block (C also `//`) | `/* codemd:name */` |
 | HTML, XML, Markdown | `<!-- -->` block | `<!-- codemd:name -->` |
 
 A block marker must open and close on the same line. Some languages accept more
@@ -45,7 +45,8 @@ than one form (for example, C accepts both `//` and `/* */`); see
 ## Imports and links
 
 A marker line is excluded from an imported snippet but remains a valid link
-target. Given this source:
+target. The whole line is excluded, including any trailing code on it. Given
+this source:
 
 ```go
 package server

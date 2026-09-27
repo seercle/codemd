@@ -23,8 +23,7 @@ below sets it explicitly.
 
 ## The gate
 
-Run all three checks before you consider a change done. This is the same gate CI
-runs:
+Run all three checks before you consider a change done:
 
 ```bash
 export CGO_ENABLED=0
@@ -41,10 +40,10 @@ go test ./...
 - **Unit tests** live beside the package they cover and are table-driven. Each
   case names its input and expected output, so adding a case is a one-line edit.
   See the `_test.go` files in each `internal/` package.
-- **Integration tests** in `internal/cli/` run the built CLI against fixtures
-  under `internal/cli/testdata/integration/`. A fixture pairs an input `doc.md`
-  with an expected `want.md`; `integration_test.go` compares the resolved output
-  byte for byte. HTTP paths use `httptest` in `http_test.go`.
+- **Integration tests** in `internal/cli/` call `cli.Run` in-process against
+  fixtures under `internal/cli/testdata/integration/`. A fixture pairs an input
+  `doc.md` with an expected `want.md`; `integration_test.go` compares the
+  resolved output byte for byte. HTTP paths use `httptest` in `http_test.go`.
 - **Temp fixtures** are created with the `writeTree` helper in
   `internal/cli/matrix_test.go`, which writes a set of files into a temporary
   directory. The `Run`-level tests in `internal/cli/` (`cli_test.go`,

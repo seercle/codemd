@@ -32,17 +32,17 @@ internal/render/     snippet/link rendering
 internal/lineutil/   line splitting/joining
 ```
 
-Each package has one job. `cli` wires the others together; the rest are
-independent and testable in isolation. The builtin language table and its
-configurable overrides are documented in [Languages](languages.md) and
-[Configuration](configuration.md).
+Each package has one job. `cli` wires the others together; the remaining
+packages are independent of `cli` and each is testable in isolation. The builtin
+language table and its configurable overrides are documented in
+[Languages](languages.md) and [Configuration](configuration.md).
 
 ## Scanning
 
 Scanning is line-based; codemd builds no Markdown AST. It tracks fenced code
 blocks so that a reference comment inside a code block is ignored. A line opens
 or closes a fence when it begins with three or more backticks or three or more
-tildes (with at most three leading spaces). An opening fence is
+tildes (with at most three leading spaces or tabs). An opening fence is
 closed only by a fence of the same character whose run is at least as long;
 an unterminated fence runs to the end of the document.
 
@@ -101,8 +101,9 @@ with errors unless `--force` is given.
 
 Unit tests live beside each package and are table-driven, covering parsing,
 extraction, rendering, line handling, and CLI behavior. Integration tests in
-`internal/cli` run the built CLI against fixtures under `testdata` and compare
-against golden output; the HTTP paths are exercised with `httptest`.
+`internal/cli` call the `cli.Run` entry point in-process against fixtures under
+`testdata` and compare against golden output; the HTTP paths are exercised with
+`httptest`.
 
 The verification gate is:
 

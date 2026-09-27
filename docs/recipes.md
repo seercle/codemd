@@ -5,8 +5,9 @@ Every recipe states the input, the command, and the result observed from the
 built binary. Run the commands in a scratch directory so relative source paths
 resolve from there.
 
-Cases 1–17 use the repository fixture copied from
-`internal/cli/testdata/integration` — `server.go` and `worker.py`:
+Cases 1–11 and 13–17 use the repository fixture copied from
+`internal/cli/testdata/integration` — `server.go` and `worker.py` (case 12
+uses a locally served copy and an external URL instead):
 
 ```go
 package server
@@ -294,7 +295,10 @@ HTTP semantics:
 - A non-200 response is an error for that reference and exits `1`:
   `codemd: doc.md: line 1: http://127.0.0.1:8137/missing.go: HTTP 404`.
 - The request times out after 30 seconds.
-- `https://` URLs are fetched the same way. For example:
+- `https://` URLs are fetched the same way. The example below is illustrative
+  only: `https://example.com/` is a live, externally controlled page, so the
+  matched line and rendered output may differ and cannot be reproduced from
+  this repository.
 
   ```console
   $ cat doc.md
@@ -374,7 +378,7 @@ the same bytes as `-w` writes back.
 
 ## 17. Preview a diff
 
-`-d` prints a unified diff with three lines of context and `a/` and `b/`
+`-d` prints a unified diff with up to three lines of context and `a/` and `b/`
 headers, and writes nothing to disk.
 
 Input `link.md`:

@@ -101,31 +101,41 @@ Each of the following is an error.
 A quoted token in `import` mode:
 
 ```console
+$ codemd doc.md
 codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b x.go \"Label\")"
+codemd: 1 error(s)
 ```
 
 An empty or whitespace-only label:
 
 ```console
+$ codemd doc.md
 codemd: doc.md: line 1: empty link text in "(link a x.go \"\")"
+codemd: 1 error(s)
 ```
 
 More than one label:
 
 ```console
+$ codemd doc.md
 codemd: doc.md: line 1: multiple link labels in "(link a x.go \"A\" \"B\")"
+codemd: 1 error(s)
 ```
 
 An unterminated quote:
 
 ```console
+$ codemd doc.md
 codemd: doc.md: line 1: unterminated quoted string in "(link a x.go \"A)"
+codemd: 1 error(s)
 ```
 
 A quoted `PATH`, in either mode:
 
 ```console
+$ codemd doc.md
 codemd: doc.md: line 1: path must not be quoted in "(link a \"x.go\")"
+codemd: 1 error(s)
 ```
 
 ## Managed region
@@ -146,7 +156,10 @@ another reference comment, codemd inserts the generated content directly below
 the current comment and leaves the next reference in place.
 
 Re-running re-derives the region from the comment, so repeated runs are
-idempotent. Content outside managed regions is preserved byte-for-byte.
+idempotent. Content outside managed regions is preserved as written; a document
+with a consistent LF or CRLF line ending is reproduced byte-for-byte, while a
+document that mixes the two is normalized as described in
+[Architecture](architecture.md#line-endings).
 
 ## Links rendering
 

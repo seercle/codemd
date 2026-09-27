@@ -1,5 +1,7 @@
 # Getting started
 
+## What codemd does
+
 codemd resolves code references embedded in Markdown. A **reference comment** is
 a line of the form `[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])`.
 A reference either **imports** a snippet from a source file or generates a
