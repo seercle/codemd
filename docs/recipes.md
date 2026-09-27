@@ -628,7 +628,17 @@ with CRLF, the whole resolved document is written with CRLF; otherwise LF is
 used. A file without a trailing newline stays without one. Imported source
 content is normalized to the host document's line endings.
 
-A CRLF document:
+A CRLF document importing from `src.go`:
+
+`src.go`:
+
+```go
+package p
+
+//codemd:s
+a := 1
+//codemd:e
+```
 
 ```console
 $ printf '[codemd]:# (import s..e src.go go)\r\n' > doc.md
