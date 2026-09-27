@@ -48,6 +48,9 @@ func TestIntegrationGolden(t *testing.T) {
 }
 
 func TestIntegrationExternalLink(t *testing.T) {
+	if testing.Short() {
+		t.Skip("network")
+	}
 	const url = "https://raw.githubusercontent.com/golang/go/go1.22.0/src/errors/errors.go"
 
 	client := &http.Client{Timeout: 10 * time.Second}
