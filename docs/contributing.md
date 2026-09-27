@@ -14,26 +14,26 @@ layout and the resolution pipeline.
 Build the binary and inspect its usage:
 
 ```console
-$ go build ./cmd/codemd
+$ scripts/build.sh
 $ go run ./cmd/codemd --help
 ```
 
-The commands above work with or without the `CGO_ENABLED=0` prefix; the gate
-below sets it explicitly.
+`scripts/build.sh` writes the binary to `./codemd`, which is gitignored. The
+commands above work with or without the `CGO_ENABLED=0` prefix; the gate below
+sets it explicitly.
 
 ## The gate
 
 Run all three checks before you consider a change done:
 
 ```bash
-export CGO_ENABLED=0
-gofmt -l .
-go vet ./...
-go test ./...
+scripts/test.sh
 ```
 
-`gofmt -l .` must print nothing; `go vet` and `go test` must pass. A non-empty
-`gofmt` listing means one or more files need formatting.
+Under `CGO_ENABLED=0`, the script checks the formatting of tracked Go files,
+then runs `go vet ./...` and `go test ./...`. `gofmt` must report nothing, and
+vet and the tests must pass. A non-empty `gofmt` listing means one or more files
+need formatting; `scripts/format.sh` applies it.
 
 ## Test conventions
 
@@ -59,13 +59,13 @@ imported from `internal/cli/testdata/integration/`. Regenerate them after any
 change to the examples or the pages:
 
 ```bash
-go build -o /tmp/codemd ./cmd/codemd
-/tmp/codemd -w docs
+scripts/update-docs.sh
 ```
 
 `TestDocsCurrent` (in `internal/cli/docs_test.go`) resolves every `docs/*.md`
 and fails if the committed file differs, so `go test ./...` catches docs that
-were not regenerated.
+were not regenerated. For a check that writes nothing, use
+`scripts/docs-check.sh`.
 
 ## Adding or overriding a language
 
