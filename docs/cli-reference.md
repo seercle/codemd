@@ -151,6 +151,7 @@ codemd: N file(s) checked, M updated
 
 ```console
 $ codemd --check doc.md
+codemd: doc.md is out of date
 codemd: 1 file(s) checked, 1 out of date
 codemd: 1 error(s)
 $ codemd -w doc.md
