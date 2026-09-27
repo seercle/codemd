@@ -1,6 +1,9 @@
 package render
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func Snippet(lang string, lines []string) []string {
 	open := "```"
@@ -20,4 +23,12 @@ func LinkLabel(path string, line int) string {
 
 func LinkTarget(path string, line int, isRemote bool) string {
 	return fmt.Sprintf("%s#L%d", path, line)
+}
+
+// EscapeLabel escapes a link label for use inside Markdown link brackets.
+// Backslashes and closing brackets are backslash-escaped.
+func EscapeLabel(label string) string {
+	label = strings.ReplaceAll(label, `\`, `\\`)
+	label = strings.ReplaceAll(label, `]`, `\]`)
+	return label
 }

@@ -78,6 +78,7 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 		if label == "" {
 			label = render.LinkLabel(ref.Ref.Path, line)
 		}
+		label = render.EscapeLabel(label)
 		return []string{fmt.Sprintf("[%s](%s)", label, render.LinkTarget(ref.Ref.Path, line, isRemote))}, nil
 	}
 	res, err := extract.Resolve(content, markers, ref.Ref.Range, ref.Ref.Strip)
@@ -91,7 +92,7 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 	return render.Snippet(fence, res.Lines), nil
 }
 
-var generatedLink = regexp.MustCompile(`^\[[^\]]*\]\([^)]*#L\d+\)$`)
+var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+\)$`)
 
 func isGeneratedLink(line string) bool {
 	return generatedLink.MatchString(strings.TrimSpace(line))

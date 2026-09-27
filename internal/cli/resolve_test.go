@@ -140,6 +140,7 @@ func TestIsGeneratedLink(t *testing.T) {
 		{"plain generated link", "[s.go:2](s.go#L2)", true},
 		{"custom label with parens", "[f(x) #L9)](s.go#L2)", true},
 		{"custom label with spaces", "[My Label](s.go#L2)", true},
+		{"escaped bracket label", `[a\]b](s.go#L2)`, true},
 		{"surrounding whitespace", "  [s.go:2](s.go#L2)  ", true},
 		{"non-link line", "text", false},
 		{"reference comment", "[codemd]:# (link a s.go)", false},

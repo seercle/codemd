@@ -16,6 +16,21 @@ func TestSnippet(t *testing.T) {
 	}
 }
 
+func TestEscapeLabel(t *testing.T) {
+	cases := map[string]string{
+		"plain":     "plain",
+		"a]b":       `a\]b`,
+		`a\b`:       `a\\b`,
+		`a\]b`:      `a\\\]b`,
+		"f(x) #L9)": "f(x) #L9)",
+	}
+	for in, want := range cases {
+		if got := EscapeLabel(in); got != want {
+			t.Fatalf("EscapeLabel(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
 func TestLinks(t *testing.T) {
 	if got := LinkLabel("src/server.go", 13); got != "src/server.go:13" {
 		t.Fatalf("label %q", got)

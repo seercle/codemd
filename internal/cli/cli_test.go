@@ -416,6 +416,31 @@ func TestRunWriteSummary(t *testing.T) {
 	}
 }
 
+func TestRunLinkLabelEscaping(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go":   "package x\n//codemd:a\nfunc A() {}\n",
+		"doc.md": "[codemd]:# (link a s.go go \"a]b\")\n",
+	})
+	docPath := filepath.Join(dir, "doc.md")
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", docPath}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	got, err := os.ReadFile(docPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "[codemd]:# (link a s.go go \"a]b\")\n[a\\]b](s.go#L2)\n"
+	if string(got) != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", got, want)
+	}
+	var out2, errb2 bytes.Buffer
+	if code := Run([]string{"--check", docPath}, strings.NewReader(""), &out2, &errb2); code != 0 {
+		t.Fatalf("re-run not idempotent: %s", errb2.String())
+	}
+}
+
 func TestRunDiffNoTrailingNewline(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{

@@ -49,6 +49,30 @@ func TestParseLinkCustomLabel(t *testing.T) {
 	}
 }
 
+func TestParseLinkLabelEscapes(t *testing.T) {
+	r, err := ParseRef(`(link a src/x.go "a\]b")`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Label != "a]b" {
+		t.Fatalf("got %q", r.Label)
+	}
+	r, err = ParseRef(`(link a src/x.go "say \"hi\"")`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Label != `say "hi"` {
+		t.Fatalf("got %q", r.Label)
+	}
+	r, err = ParseRef(`(link a src/x.go "a]b")`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Label != "a]b" {
+		t.Fatalf("bare bracket should be accepted, got %q", r.Label)
+	}
+}
+
 func TestParseLinkNoLabel(t *testing.T) {
 	r, err := ParseRef("(link a src/x.go go)")
 	if err != nil {
@@ -69,7 +93,6 @@ func TestParseErrors(t *testing.T) {
 		`(import a..b src/x.go "nope")`,   // link text on import
 		`(link a src/x.go "")`,            // empty link text
 		`(link a src/x.go "   ")`,         // whitespace-only link text
-		`(link a src/x.go "a]b")`,         // link text with bracket
 		`(link a src/x.go "A" "B")`,       // multiple link texts
 		`(link a src/x.go "oops)`,         // unterminated quote
 		`(link a "src/x.go")`,             // quoted path

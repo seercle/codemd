@@ -87,12 +87,12 @@ func ParseRef(comment string) (Ref, error) {
 			if r.Mode != Link {
 				return Ref{}, fmt.Errorf("link text is only valid for link mode in %q", comment)
 			}
-			label := tok[1 : len(tok)-1]
+			label, err := unquote(tok)
+			if err != nil {
+				return Ref{}, fmt.Errorf("%v in %q", err, comment)
+			}
 			if strings.TrimSpace(label) == "" {
 				return Ref{}, fmt.Errorf("empty link text in %q", comment)
-			}
-			if strings.Contains(label, "]") {
-				return Ref{}, fmt.Errorf("link text must not contain ']' in %q", comment)
 			}
 			if r.Label != "" {
 				return Ref{}, fmt.Errorf("multiple link labels in %q", comment)
@@ -124,7 +124,14 @@ func splitTokens(s string) ([]string, error) {
 		}
 		if s[i] == '"' {
 			j := i + 1
-			for j < len(s) && s[j] != '"' {
+			for j < len(s) {
+				if s[j] == '\\' && j+1 < len(s) {
+					j += 2
+					continue
+				}
+				if s[j] == '"' {
+					break
+				}
 				j++
 			}
 			if j >= len(s) {
@@ -141,6 +148,23 @@ func splitTokens(s string) ([]string, error) {
 		toks = append(toks, s[start:i])
 	}
 	return toks, nil
+}
+
+// unquote strips the surrounding quotes from a quoted token and interprets
+// backslash escapes: \\, \", \] and any \c yield the following byte.
+func unquote(tok string) (string, error) {
+	if len(tok) < 2 || tok[0] != '"' || tok[len(tok)-1] != '"' {
+		return "", fmt.Errorf("malformed quoted string %q", tok)
+	}
+	body := tok[1 : len(tok)-1]
+	var b strings.Builder
+	for i := 0; i < len(body); i++ {
+		if body[i] == '\\' && i+1 < len(body) {
+			i++
+		}
+		b.WriteByte(body[i])
+	}
+	return b.String(), nil
 }
 
 func isSpace(c byte) bool {
