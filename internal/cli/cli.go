@@ -1,3 +1,5 @@
+// Package cli implements the codemd command-line interface: flag parsing, input
+// expansion, and orchestration of reference resolution.
 package cli
 
 import (
@@ -16,6 +18,8 @@ import (
 // -ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z".
 var Version = "dev"
 
+// Options holds the command-line flags that control how Run reads, rewrites, or
+// reports on its inputs.
 type Options struct {
 	Write  bool
 	Output string
@@ -25,6 +29,10 @@ type Options struct {
 	Force  bool
 }
 
+// Run executes the codemd command line with the given arguments, reading stdin
+// and writing results to stdout and diagnostics to stderr. It returns the
+// process exit code: 0 on success, 1 for reference or I/O errors, and 2 for
+// usage errors.
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("codemd", flag.ContinueOnError)
 	fs.SetOutput(stderr)

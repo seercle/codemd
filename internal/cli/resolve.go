@@ -21,16 +21,25 @@ var genericForms = []lang.CommentForm{
 	{Block: [2]string{"<!--", "-->"}},
 }
 
+// Resolver rewrites codemd references in a Markdown document: it loads each
+// referenced source with Loader and interprets file extensions using Table.
 type Resolver struct {
 	Loader *srcfile.Loader
 	Table  map[string]lang.Language
 }
 
+// RefError pairs a reference error with the 1-based line it occurred on. Line
+// is 0 when the error is not tied to a specific line.
 type RefError struct {
 	Line int
 	Err  error
 }
 
+// ResolveDocument resolves every codemd reference in the Markdown content,
+// reading referenced files relative to baseDir. It returns the rewritten
+// document and the reference errors encountered, ordered by line. References
+// that fail are left unchanged so the rest of the document can still be
+// processed.
 func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError) {
 	lines := lineutil.Split(content)
 	refs, scanErrs := mdref.Scan(content)

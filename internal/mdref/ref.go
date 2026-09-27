@@ -1,3 +1,5 @@
+// Package mdref scans Markdown for codemd reference definitions and parses
+// them into structured references.
 package mdref
 
 import (
@@ -7,13 +9,19 @@ import (
 	"github.com/seercle/codemd/internal/extract"
 )
 
+// Mode selects how a reference is resolved: Import inlines the referenced
+// source, while Link emits a Markdown link to it.
 type Mode int
 
 const (
+	// Import inlines the referenced lines as a fenced code block.
 	Import Mode = iota
+	// Link emits a Markdown link to the referenced line.
 	Link
 )
 
+// Ref is a parsed reference: its resolution Mode, the source Range it selects,
+// the target Path, an optional fence Lang, a Strip flag, and a link Label.
 type Ref struct {
 	Mode  Mode
 	Range extract.Range
@@ -23,6 +31,9 @@ type Ref struct {
 	Label string
 }
 
+// ParseRef parses a reference argument list (the text between the parentheses
+// of a "[codemd]:#" definition) into a Ref. It returns an error when the mode,
+// range, path, or remaining tokens are malformed.
 func ParseRef(comment string) (Ref, error) {
 	s := strings.TrimSpace(comment)
 	s = strings.TrimPrefix(s, "(")

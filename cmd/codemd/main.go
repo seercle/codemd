@@ -1,3 +1,4 @@
+// Command codemd resolves code references embedded in Markdown files.
 package main
 
 import (

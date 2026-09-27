@@ -1,13 +1,21 @@
+// Package lineutil splits and rejoins text while preserving its line endings
+// and trailing-newline state.
 package lineutil
 
 import "strings"
 
+// Lines is text split into its lines along with the line ending in use and
+// whether the original text ended with a newline, so it can be rejoined
+// losslessly.
 type Lines struct {
 	Content         []string
 	EOL             string
 	TrailingNewline bool
 }
 
+// Split splits s into lines while recording the detected line ending and
+// whether the input ended with a newline. A trailing newline does not produce
+// an empty final element.
 func Split(s string) Lines {
 	l := Lines{EOL: "\n"}
 	if s == "" {
@@ -28,6 +36,8 @@ func Split(s string) Lines {
 	return l
 }
 
+// Join reassembles the lines using the recorded line ending and restores the
+// trailing newline, if any.
 func (l Lines) Join() string {
 	if len(l.Content) == 0 {
 		if l.TrailingNewline {

@@ -1,3 +1,5 @@
+// Package srcfile loads local and remote source files and extracts codemd
+// markers from their comments.
 package srcfile
 
 import (
@@ -10,11 +12,15 @@ import (
 	"time"
 )
 
+// Loader reads local and http(s) source files, caching their contents. Build
+// one with NewLoader; the zero value is not ready for use.
 type Loader struct {
 	Client *http.Client
 	cache  map[string]string
 }
 
+// NewLoader returns a Loader with a 30-second-timeout HTTP client and an empty
+// cache.
 func NewLoader() *Loader {
 	return &Loader{
 		Client: &http.Client{Timeout: 30 * time.Second},
@@ -22,6 +28,9 @@ func NewLoader() *Loader {
 	}
 }
 
+// Load returns the contents of path, resolved relative to baseDir unless it is
+// absolute or an http(s) URL. The boolean reports whether the source was
+// remote. Results are memoised in the Loader's cache.
 func (l *Loader) Load(path, baseDir string) (string, bool, error) {
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		if cached, ok := l.cache[path]; ok {

@@ -1,3 +1,5 @@
+// Package lang describes the source languages codemd understands and their
+// comment syntaxes, and loads per-project overrides from a .codemd.yaml config.
 package lang
 
 import (
@@ -6,20 +8,29 @@ import (
 	"strings"
 )
 
+// CommentForm describes a language's comment syntax: an optional Line prefix
+// and/or a two-element Block pair holding the opening and closing delimiters.
 type CommentForm struct {
 	Line  string
 	Block [2]string
 }
 
+// Language pairs the fenced-code info string used when emitting snippets with
+// the language's comment syntax.
 type Language struct {
 	Fence string `yaml:"fence"`
 	Form  CommentForm
 }
 
+// Config is the parsed form of a .codemd.yaml file: an extension-to-Language
+// override map.
 type Config struct {
 	Languages map[string]Language `yaml:"languages"`
 }
 
+// Builtins returns the default extension-to-language table used when no
+// .codemd.yaml overrides are supplied. Keys are bare file extensions without a
+// leading dot.
 func Builtins() map[string]Language {
 	return map[string]Language{
 		"go":   {Fence: "go", Form: CommentForm{Line: "//"}},
@@ -51,11 +62,16 @@ func Builtins() map[string]Language {
 	}
 }
 
+// Resolve looks up ext (case-insensitive, with an optional leading dot) in
+// table and returns the matching Language. ok is false when the extension is
+// unknown.
 func Resolve(ext string, table map[string]Language) (Language, bool) {
 	l, ok := table[strings.ToLower(strings.TrimPrefix(ext, "."))]
 	return l, ok
 }
 
+// FenceFor returns the Markdown fenced-code info string for ext in table, or
+// "text" when the extension is unknown or its entry has no fence.
 func FenceFor(ext string, table map[string]Language) string {
 	if l, ok := Resolve(ext, table); ok && l.Fence != "" {
 		return l.Fence

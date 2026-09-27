@@ -13,11 +13,16 @@ const markerPrefix = "codemd:"
 
 var markerName = regexp.MustCompile(`^[A-Za-z0-9_.-]+$`)
 
+// Marker is a named anchor in a source file, recorded at the 1-based line of
+// its codemd comment.
 type Marker struct {
 	Name string
 	Line int
 }
 
+// CommentText returns the text following the comment delimiter of form on line,
+// or the content between a block comment's delimiters. ok is false when line
+// contains no comment in that form.
 func CommentText(line string, form lang.CommentForm) (string, bool) {
 	if form.Line != "" {
 		if idx := strings.Index(line, form.Line); idx >= 0 {
@@ -39,6 +44,8 @@ func CommentText(line string, form lang.CommentForm) (string, bool) {
 	return "", false
 }
 
+// ExtractMarkers returns the markers found in content using l's single comment
+// form. It returns an error when the same marker name appears more than once.
 func ExtractMarkers(content string, l lang.Language) ([]Marker, error) {
 	return ExtractMarkersMulti(content, []lang.CommentForm{l.Form})
 }

@@ -14,6 +14,9 @@ type yamlLanguage struct {
 	Fence string   `yaml:"fence"`
 }
 
+// LoadConfig reads the YAML config at path and converts its language entries
+// into a Config. It returns an error when the file cannot be read or parsed, or
+// when an entry defines neither or both of line and block.
 func LoadConfig(path string) (Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -43,6 +46,9 @@ func LoadConfig(path string) (Config, error) {
 	return cfg, nil
 }
 
+// DiscoverConfig walks up from startDir looking for a .codemd.yaml file. It
+// returns the path of the first match, or "" with a nil error when none is
+// found up to the filesystem root.
 func DiscoverConfig(startDir string) (string, error) {
 	dir, err := filepath.Abs(startDir)
 	if err != nil {
@@ -61,6 +67,10 @@ func DiscoverConfig(startDir string) (string, error) {
 	}
 }
 
+// Merge returns a copy of base with cfg's language entries overlaid. Each
+// configured entry must define exactly one comment form; an entry without an
+// explicit fence defaults to its extension. It returns an error for an invalid
+// entry.
 func Merge(base map[string]Language, cfg Config) (map[string]Language, error) {
 	out := make(map[string]Language, len(base)+len(cfg.Languages))
 	for k, v := range base {

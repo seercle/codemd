@@ -6,6 +6,8 @@ import (
 	"github.com/seercle/codemd/internal/lineutil"
 )
 
+// Reference is a codemd reference definition found in a Markdown document at a
+// 1-based Line, with its raw Comment text and parsed Ref.
 type Reference struct {
 	Line    int
 	Comment string
@@ -14,6 +16,9 @@ type Reference struct {
 
 const refPrefix = "[codemd]:#"
 
+// ExtractComment returns the reference argument list from a "[codemd]:#"
+// definition line, for example "(import a..b path)". ok is false when line is
+// not a reference definition.
 func ExtractComment(line string) (string, bool) {
 	trimmed := strings.TrimSpace(line)
 	if !strings.HasPrefix(trimmed, refPrefix) {
@@ -30,6 +35,7 @@ func ExtractComment(line string) (string, bool) {
 	return rest[:end+1], true
 }
 
+// ScanError pairs a reference parse error with the 1-based line it occurred on.
 type ScanError struct {
 	Line int
 	Err  error
@@ -71,6 +77,9 @@ func FenceBlockEnd(lines []string, start int) (end int, ok bool) {
 	return len(lines), true
 }
 
+// Scan finds every codemd reference definition in content that lies outside
+// fenced code blocks. It returns the parsed references in document order and
+// the per-line parse errors, allowing valid references to still be resolved.
 func Scan(content string) ([]Reference, []ScanError) {
 	lines := lineutil.Split(content)
 	var refs []Reference

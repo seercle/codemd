@@ -1,3 +1,5 @@
+// Package extract locates a region of a source file by named markers or regular
+// expressions and returns the selected lines.
 package extract
 
 import (
@@ -9,17 +11,23 @@ import (
 	"github.com/seercle/codemd/internal/srcfile"
 )
 
+// Bound is one end of a Range. Exactly one of Name, Regex, or Open is set:
+// Name matches a marker, Regex matches a line pattern, and Open leaves the end
+// unbounded.
 type Bound struct {
 	Name  string
 	Regex string
 	Open  bool
 }
 
+// Range is a pair of bounds selecting a region of a source file.
 type Range struct {
 	Start Bound
 	End   Bound
 }
 
+// Result is the outcome of resolving a Range: the 1-based StartLine and
+// EndLine selected and the extracted Lines.
 type Result struct {
 	StartLine int
 	EndLine   int
@@ -51,6 +59,12 @@ func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int,
 	return 0, fmt.Errorf("regex %q matched no line at or after %d", b.Regex, from)
 }
 
+// Resolve returns the lines of content covered by r, whose bounds are marker
+// names or regexes. Named bounds are excluded and regex bounds included; an
+// open bound extends to the start or end of the file. When strip is true the
+// regex matched by a boundary is removed from that boundary line, and blank
+// lines at the edges of the result are dropped. It returns an error when a
+// bound cannot be found or a regex fails to compile.
 func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Result, error) {
 	lines := lineutil.Split(content)
 	start, err := findLine(content, markers, r.Start, 1)
@@ -119,6 +133,9 @@ func dropEmptyBoundaries(lines []string) []string {
 	return lines
 }
 
+// ResolveLink returns the 1-based line number in content matched by bound b,
+// used to build a link to a single source location. It returns an error when
+// the bound cannot be found.
 func ResolveLink(content string, markers []srcfile.Marker, b Bound) (int, error) {
 	return findLine(content, markers, b, 1)
 }
