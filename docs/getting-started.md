@@ -42,8 +42,9 @@ func handler() string {
 //codemd:handler-end
 ```
 
-A Markdown file with a reference comment that imports the region between the
-two markers:
+The repository's canonical copy is `starter.md`; create your own `doc.md` with
+the same contents. It holds a reference comment that imports the region between
+the two markers:
 
 [codemd]:# (import .. ../internal/cli/testdata/integration/starter.md markdown)
 ```markdown

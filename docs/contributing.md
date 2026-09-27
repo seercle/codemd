@@ -47,12 +47,12 @@ go test ./...
 - **Temp fixtures** are created with the `writeTree` helper in
   `internal/cli/matrix_test.go`, which writes a set of files into a temporary
   directory. The `Run`-level tests in `internal/cli/` (`cli_test.go`,
-  `matrix_test.go`, `integration_test.go`, `http_test.go`) drive the CLI
-  end to end.
+  `matrix_test.go`, `integration_test.go`, `http_test.go`, `docs_test.go`)
+  drive the CLI end to end.
 - **TDD.** Write the failing test first, then make it pass. A bug fix starts
   with a test that reproduces the bug.
 
-### Documentation
+### Documentation build
 
 The pages under `docs/` are codemd documents themselves: their examples are
 imported from `internal/cli/testdata/integration/`. Regenerate them after any

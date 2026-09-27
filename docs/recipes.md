@@ -1,9 +1,10 @@
 # Recipes
 
 Prior pages describe each feature on its own; this page puts them together.
-Every recipe states the input, the command, and the result observed from the
-built binary. Run the commands in a scratch directory so relative source paths
-resolve from there.
+Most recipes state the input, the command, and the result observed from the
+built binary; the rest generate their output live and instead show the reference
+and its resolved result. Run the commands in a scratch directory so relative
+source paths resolve from there.
 
 Cases 1–11 and 13–17 use the repository fixture copied from
 `internal/cli/testdata/integration` — `server.go` and `worker.py` (case 12
@@ -567,7 +568,7 @@ Input `doc.md`:
 Body text.
 ```
 
-[src.md:1](src.md#L1)
+The `link` reference resolves to `[src.md:1](src.md#L1)`.
 
 ## 25. CRLF files
 
