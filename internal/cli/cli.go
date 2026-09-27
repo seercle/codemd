@@ -12,6 +12,10 @@ import (
 	"github.com/seercle/codemd/internal/srcfile"
 )
 
+// Version is the reported build version. Override at build time with
+// -ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z".
+var Version = "dev"
+
 type Options struct {
 	Write  bool
 	Output string
@@ -42,11 +46,16 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opt.Force, "f", false, "write even if some references failed")
 	fs.BoolVar(&opt.Force, "force", false, "write even if some references failed")
 	languages := fs.Bool("languages", false, "list supported languages and exit")
+	version := fs.Bool("version", false, "print version and exit")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
 		return 2
+	}
+	if *version {
+		fmt.Fprintf(stdout, "codemd %s\n", Version)
+		return 0
 	}
 	if *languages {
 		table := lang.Builtins()

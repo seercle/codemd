@@ -119,6 +119,16 @@ func TestRunDiscoveredConfigError(t *testing.T) {
 	}
 }
 
+func TestRunVersion(t *testing.T) {
+	var out, errb bytes.Buffer
+	if code := Run([]string{"--version"}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if got := strings.TrimSpace(out.String()); got != "codemd "+Version {
+		t.Fatalf("got %q", got)
+	}
+}
+
 func TestRunLanguages(t *testing.T) {
 	var out, errb bytes.Buffer
 	if code := Run([]string{"--languages"}, strings.NewReader(""), &out, &errb); code != 0 {
