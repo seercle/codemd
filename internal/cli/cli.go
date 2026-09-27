@@ -87,6 +87,14 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 2
 	}
 	files := fs.Args()
+	if len(files) > 0 {
+		expanded, err := expandInputs(files)
+		if err != nil {
+			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			return 2
+		}
+		files = expanded
+	}
 	if opt.Output != "" && len(files) != 1 {
 		fmt.Fprintln(stderr, "codemd: -o requires exactly one input file")
 		return 2
