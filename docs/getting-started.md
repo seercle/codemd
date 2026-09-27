@@ -28,8 +28,9 @@ codemd dev
 
 ## Your first import
 
-Create a source file named `server.go` with a **source marker**:
+The canonical source file has a **source marker**:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
 ```go
 package server
 
@@ -41,16 +42,18 @@ func handler() string {
 //codemd:handler-end
 ```
 
-Create a Markdown file named `doc.md` with a reference comment that imports the
-region between the two markers:
+A Markdown file with a reference comment that imports the region between the
+two markers:
 
-````markdown
+[codemd]:# (import .. ../internal/cli/testdata/integration/starter.md markdown)
+```markdown
 # My docs
 
 [codemd]:# (import handler-start..handler-end server.go go)
-````
+```
 
-Run codemd without writing to see the result on stdout:
+Running `codemd doc.md` inserts the snippet below the comment (the transcript
+that follows is hand-written; codemd cannot generate console output):
 
 ````console
 $ codemd doc.md
