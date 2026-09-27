@@ -386,6 +386,36 @@ func TestUnifiedDiffNoTrailingNewlineContext(t *testing.T) {
 	}
 }
 
+func TestRunCheckSummary(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go": "//codemd:a\nx\n//codemd:b\n",
+		"a.md": "[codemd]:# (import a..b s.go go)\n",
+	})
+	var out, errb bytes.Buffer
+	if code := Run([]string{"--check", dir}, strings.NewReader(""), &out, &errb); code == 0 {
+		t.Fatal("expected out-of-date")
+	}
+	if !strings.Contains(errb.String(), "1 file(s) checked, 1 out of date") {
+		t.Fatalf("stderr:\n%s", errb.String())
+	}
+}
+
+func TestRunWriteSummary(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"s.go": "//codemd:a\nx\n//codemd:b\n",
+		"a.md": "[codemd]:# (import a..b s.go go)\n",
+	})
+	var out, errb bytes.Buffer
+	if code := Run([]string{"-w", dir}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if !strings.Contains(errb.String(), "1 file(s) checked, 1 updated") {
+		t.Fatalf("stderr:\n%s", errb.String())
+	}
+}
+
 func TestRunDiffNoTrailingNewline(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{

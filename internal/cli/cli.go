@@ -153,6 +153,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 
 	exit := 0
 	errCount := 0
+	checked := 0
+	updated := 0
+	changedCount := 0
 	for _, file := range files {
 		baseDir := filepath.Dir(file)
 		table, err := resolveTable(baseDir, configTable)
@@ -178,6 +181,10 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			exit = 1
 		}
 		changed := out != string(data)
+		checked++
+		if changed {
+			changedCount++
+		}
 		switch {
 		case opt.Check:
 			if changed {
@@ -197,6 +204,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 					fmt.Fprintf(stderr, "codemd: %v\n", err)
 					errCount++
 					exit = 1
+				} else {
+					updated++
 				}
 			}
 		case opt.Output != "":
@@ -210,6 +219,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		default:
 			io.WriteString(stdout, out)
 		}
+	}
+	if opt.Check {
+		fmt.Fprintf(stderr, "codemd: %d file(s) checked, %d out of date\n", checked, changedCount)
+	}
+	if opt.Write {
+		fmt.Fprintf(stderr, "codemd: %d file(s) checked, %d updated\n", checked, updated)
 	}
 	if errCount > 0 {
 		fmt.Fprintf(stderr, "codemd: %d error(s)\n", errCount)
