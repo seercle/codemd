@@ -120,6 +120,7 @@ This example adds `coffee` to the table and uses it from both an `import` and a
 
 `.codemd.yaml`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/.codemd.yaml yaml)
 ```yaml
 languages:
   coffee:
@@ -129,6 +130,7 @@ languages:
 
 `src.coffee`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/src.coffee coffee)
 ```coffee
 #codemd:s
 x = 1
@@ -142,6 +144,11 @@ x = 1
 
 [codemd]:# (link s src.coffee)
 ````
+
+The resolved result stays hand-written: the config is discovered relative to the
+Markdown file, and a docs page cannot carry a `.codemd.yaml` of its own without
+changing every other page. The config files above are still the canonical ones,
+imported from testdata.
 
 `codemd doc.md` finds the config by discovery and emits a `coffee`-fenced block
 and a link to the named point:
