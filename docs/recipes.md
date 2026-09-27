@@ -9,6 +9,7 @@ Cases 1–11 and 13–17 use the repository fixture copied from
 `internal/cli/testdata/integration` — `server.go` and `worker.py` (case 12
 uses a locally served copy and an external URL instead):
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
 ```go
 package server
 
@@ -20,6 +21,7 @@ func handler() string {
 //codemd:handler-end
 ```
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/worker.py python)
 ```python
 import os
 
@@ -40,37 +42,20 @@ the [Command-line reference](cli-reference.md) for flags and exit codes.
 
 Import the lines between two named markers. Both marker lines are excluded.
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import handler-start..handler-end server.go go)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import handler-start..handler-end server.go go)
+[codemd]:# (import handler-start..handler-end ../internal/cli/testdata/integration/server.go go)
 ```go
 func handler() string {
 	return "ok"
 }
 
 ```
-````
 
 ## 2. Import by regex
 
 A token that begins with `/` is a line regex. Regex boundary lines are
 **included**, so both marker lines appear here.
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python)
+[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ ../internal/cli/testdata/integration/worker.py python)
 ```python
 #codemd:worker-start
 def work(x):
@@ -78,7 +63,6 @@ def work(x):
 
 #codemd:worker-end
 ```
-````
 
 ## 3. Import with `strip`
 
@@ -86,56 +70,34 @@ def work(x):
 that becomes blank is dropped, and leading and trailing blank lines are
 trimmed. The interior source lines are unchanged.
 
-Input `doc.md`:
+The blank line before the end marker is a *trailing* blank line once the marker
+line is stripped, so the leading/trailing trim removes it; interior blank lines
+are kept.
 
-```markdown
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
+[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ ../internal/cli/testdata/integration/worker.py python strip)
 ```python
 def work(x):
     return x * 2
 ```
-````
 
 ## 4. Open range to end of file
 
 An empty end (`start..`) runs to the last line, including any trailing markers.
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import worker-start.. worker.py)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import worker-start.. worker.py)
+[codemd]:# (import worker-start.. ../internal/cli/testdata/integration/worker.py python)
 ```python
 def work(x):
     return x * 2
 
 #codemd:worker-end
 ```
-````
 
 ## 5. Open range from start of file
 
 An empty start (`..end`) begins at the first line. The named end marker is
 excluded.
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import ..handler-end server.go)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import ..handler-end server.go)
+[codemd]:# (import ..handler-end ../internal/cli/testdata/integration/server.go go)
 ```go
 package server
 
@@ -145,7 +107,6 @@ func handler() string {
 }
 
 ```
-````
 
 ## 6. Mixed named and regex range
 
@@ -153,15 +114,7 @@ One boundary may be a named point and the other a regex. This example keeps the
 named start (excluded) and ends on a regex that matches the Go marker line
 (included).
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import handler-start../codemd:handler-end/ server.go go)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import handler-start../codemd:handler-end/ server.go go)
+[codemd]:# (import handler-start../codemd:handler-end/ ../internal/cli/testdata/integration/server.go go)
 ```go
 func handler() string {
 	return "ok"
@@ -169,29 +122,19 @@ func handler() string {
 
 //codemd:handler-end
 ```
-````
 
 ## 7. Per-reference fence override
 
 The `LANG` token after the path sets the fence. It may differ from the source's
 extension.
 
-Input `doc.md`:
-
-```markdown
-[codemd]:# (import handler-start..handler-end server.go bash)
-```
-
-````console
-$ codemd doc.md
-[codemd]:# (import handler-start..handler-end server.go bash)
+[codemd]:# (import handler-start..handler-end ../internal/cli/testdata/integration/server.go bash)
 ```bash
 func handler() string {
 	return "ok"
 }
 
 ```
-````
 
 ## 8. Link by named point
 
@@ -327,6 +270,7 @@ disk.
 
 Input `link.md`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/link.md markdown)
 ```markdown
 [codemd]:# (link handler-start server.go go)
 ```
@@ -383,6 +327,7 @@ headers, and writes nothing to disk.
 
 Input `link.md`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/link.md markdown)
 ```markdown
 [codemd]:# (link handler-start server.go go)
 ```
@@ -463,6 +408,7 @@ and errors are named `<stdin>`.
 
 Input `link.md`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/link.md markdown)
 ```markdown
 [codemd]:# (link handler-start server.go go)
 ```
@@ -489,6 +435,7 @@ does not suppress the error, and the exit code stays `1`.
 
 Input `broken.md`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/broken.md markdown)
 ```markdown
 [codemd]:# (import handler-start..handler-end server.go go)
 
@@ -525,6 +472,7 @@ entry maps `#` comments and a `coffee` fence; see
 
 `.codemd.yaml`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/.codemd.yaml yaml)
 ```yaml
 languages:
   coffee:
@@ -534,6 +482,7 @@ languages:
 
 `src.coffee`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/src.coffee coffee)
 ```coffee
 #codemd:s
 x = 1
@@ -567,6 +516,7 @@ When the extension is unknown, codemd tries the generic comment forms (`//` with
 
 `src.txt`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/src.txt text)
 ```text
 //codemd:s
 line one
@@ -580,14 +530,11 @@ Input `doc.md`:
 [codemd]:# (import s..e src.txt)
 ```
 
-````console
-$ codemd doc.md
-[codemd]:# (import s..e src.txt)
+[codemd]:# (import s..e ../internal/cli/testdata/integration/src.txt)
 ```text
 line one
 line two
 ```
-````
 
 ## 24. Markdown-in-Markdown
 
@@ -596,6 +543,7 @@ A `.md` source uses the `<!-- -->` comment form, and the generated fence is
 
 `src.md`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/src.md markdown)
 ```markdown
 <!-- codemd:s -->
 # Title
@@ -612,18 +560,14 @@ Input `doc.md`:
 [codemd]:# (link s src.md)
 ```
 
-````console
-$ codemd doc.md
-[codemd]:# (import s..e src.md)
+[codemd]:# (import s..e ../internal/cli/testdata/integration/src.md)
 ```markdown
 # Title
 
 Body text.
 ```
 
-[codemd]:# (link s src.md)
 [src.md:1](src.md#L1)
-````
 
 ## 25. CRLF files
 
@@ -636,11 +580,13 @@ A CRLF document importing from `src.go`:
 
 `src.go`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/src.go go)
 ```go
 package p
 
 //codemd:s
-a := 1
+var a = 1
+
 //codemd:e
 ```
 
