@@ -201,6 +201,7 @@ link, a custom link label, and a regex link.
 
 `server.go`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
 ```go
 package server
 
@@ -214,6 +215,7 @@ func handler() string {
 
 `worker.py`:
 
+[codemd]:# (import .. ../internal/cli/testdata/integration/worker.py python)
 ```python
 import os
 
@@ -226,7 +228,8 @@ def work(x):
 
 Input `doc.md`:
 
-````markdown
+[codemd]:# (import .. ../internal/cli/testdata/integration/doc.md markdown)
+```markdown
 # Docs
 
 [codemd]:# (import handler-start..handler-end server.go go)
@@ -244,7 +247,10 @@ Input `doc.md`:
 [codemd]:# (link /^func handler/ server.go go)
 
 [codemd]:# (link worker-start worker.py)
-````
+```
+
+The output is reproduced here for reading; the integration test
+`TestIntegrationGolden` verifies it byte-for-byte against `codemd doc.md`.
 
 Output `want.md`, produced by `codemd doc.md`:
 
