@@ -77,6 +77,32 @@ func TestExpandInputsGlobDoubleStar(t *testing.T) {
 	}
 }
 
+func TestExpandInputsDotSlashGlob(t *testing.T) {
+	dir := t.TempDir()
+	writeTree(t, dir, map[string]string{
+		"a.md":      "a\n",
+		"sub/b.md":  "b\n",
+		"sub/c.txt": "c\n",
+	})
+	old, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(old)
+
+	got, err := expandInputs([]string{"./**/*.md"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"a.md", filepath.Join("sub", "b.md")}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v want %#v", got, want)
+	}
+}
+
 func TestExpandInputsNoMatch(t *testing.T) {
 	dir := t.TempDir()
 	if _, err := expandInputs([]string{filepath.Join(dir, "*.md")}); err == nil {

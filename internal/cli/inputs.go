@@ -96,6 +96,7 @@ func walkMarkdown(dir string) ([]string, error) {
 // globExpand expands a glob pattern, supporting "**" for any number of path
 // segments. Only regular files are returned.
 func globExpand(pattern string) ([]string, error) {
+	pattern = filepath.Clean(pattern)
 	var matches []string
 	err := filepath.WalkDir(globRoot(pattern), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
