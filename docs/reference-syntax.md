@@ -1,0 +1,281 @@
+# Reference syntax
+
+This page is the authoritative reference for the reference-comment grammar and
+the managed-region rules. It uses the terms defined in
+[Getting started](getting-started.md): **reference comment**, **import**,
+**link**, **source marker**, **managed region**, and **idempotent**.
+
+## Grammar
+
+```text
+[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
+```
+
+A reference is a Markdown link-reference definition. `[codemd]:#` declares a
+link label that nothing ever references, so renderers hide the line. The
+definition must sit on its own line; leading indentation is allowed. A
+reference inside a fenced code block is ignored by the scanner.
+
+## MODE
+
+`MODE` is `import` or `link`. Any other value is an error:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: unknown mode "bogus"
+codemd: 1 error(s)
+```
+
+## RANGE
+
+For `import`, `RANGE` is exactly two tokens joined by `..`. A single token
+without `..` is an error:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: import range must contain '..': "a"
+codemd: 1 error(s)
+```
+
+For `link`, `RANGE` is exactly one token; a `..` range is rejected:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: link takes a single token, got "a..b"
+codemd: 1 error(s)
+```
+
+A token is a **named point** (`handler-start`) or a **line regex**
+(`/^func handler/`). A token is a regex if and only if it begins with `/`; it
+ends at the first unescaped `/`, and a literal `/` is written `\/`. An
+unterminated regex is an error:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: unterminated regex "/foo x.go"
+codemd: 1 error(s)
+```
+
+Ranges may be open: `a..` runs to the end of the file, and `..b` starts at the
+beginning of the file. Named points and regexes may be mixed (`func1../end/`,
+`/start/..func2`). A regex may contain spaces and `..`, because each token is
+read left to right, so `/a..b/../c/` is the regex `a..b`, then `..`, then the
+regex `c`.
+
+## PATH
+
+`PATH` is a local path or an `http://` or `https://` URL. A relative local path
+is resolved against the directory of the Markdown file. Paths with spaces are
+not supported, because tokens are whitespace-separated; a token after the path
+is read as `LANG`.
+
+## LANG
+
+`LANG` is the optional fence language. When it is absent, codemd resolves the
+language from the source file extension (see `languages.md`); an unknown
+extension falls back to `text`.
+
+## strip
+
+`strip` is optional and is only meaningful when a range token is a regex. It
+removes the matched substring (Go's leftmost match) from the boundary lines; a
+boundary line that becomes empty (whitespace only) is dropped. `strip` with no
+regex token is an error:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: strip requires a regex token in "(import a..b x.go strip)"
+codemd: 1 error(s)
+```
+
+## LINK-TEXT
+
+`LINK-TEXT` is valid in `link` mode only. A double-quoted token after `PATH`
+sets the rendered link label and may contain spaces. Inside the quotes a
+backslash escapes the next character: `\\` becomes `\`, `\"` becomes `"`, `\]`
+becomes `]`, and `\c` becomes `c` for any other character `c`. A bare `]` is
+also accepted. codemd escapes `\` and `]` in the generated label.
+
+Each of the following is an error.
+
+A quoted token in `import` mode:
+
+```console
+codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b x.go \"Label\")"
+```
+
+An empty or whitespace-only label:
+
+```console
+codemd: doc.md: line 1: empty link text in "(link a x.go \"\")"
+```
+
+More than one label:
+
+```console
+codemd: doc.md: line 1: multiple link labels in "(link a x.go \"A\" \"B\")"
+```
+
+An unterminated quote:
+
+```console
+codemd: doc.md: line 1: unterminated quoted string in "(link a x.go \"A)"
+```
+
+A quoted `PATH`, in either mode:
+
+```console
+codemd: doc.md: line 1: path must not be quoted in "(link a \"x.go\")"
+```
+
+## Managed region
+
+The content directly below the reference is the managed region. codemd skips
+blank lines to find the first non-blank line, then applies the rules for the
+mode:
+
+- `import`: if that line opens a fenced block, the whole block (opening fence,
+  body, closing fence) is replaced. Otherwise the generated fence is inserted
+  directly below the comment, leaving the existing lines untouched.
+- `link`: if that line is a generated link (`[label](target#L<n>)`), it is
+  replaced. Otherwise the generated link is inserted directly below the
+  comment.
+
+A following reference comment is never consumed: if the first non-blank line is
+another reference comment, codemd inserts the generated content directly below
+the current comment and leaves the next reference in place.
+
+Re-running re-derives the region from the comment, so repeated runs are
+idempotent. Content outside managed regions is preserved byte-for-byte.
+
+## Links rendering
+
+A `link` reference resolves a single line. The anchor is `#L<line>`, and lines
+are 1-based.
+
+- **Local source**: the label is `PATH:LINE` and the target is `PATH#LLINE`.
+  codemd loads `PATH` relative to the Markdown file's directory and emits it as
+  written.
+- **HTTP source**: the label is `PATH:LINE` and the target is the URL with
+  `#LLINE` appended.
+
+`LINK-TEXT` replaces the label when present.
+
+## Boundary semantics
+
+Named-point marker lines are excluded from imported content; regex-matched
+boundary lines are included. codemd locates the start first, then locates the
+end at or after the start. A token that matches nothing is an error for that
+reference:
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: marker "nope" not found at or after line 1
+codemd: 1 error(s)
+```
+
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: regex "zzz" matched no line at or after 1
+codemd: 1 error(s)
+```
+
+## Worked example
+
+The example is the repository fixture in `internal/cli/testdata/integration`.
+It exercises a named import, a regex import, `strip`, an open range, a default
+link, a custom link label, and a regex link.
+
+`server.go`:
+
+```go
+package server
+
+//codemd:handler-start
+func handler() string {
+	return "ok"
+}
+
+//codemd:handler-end
+```
+
+`worker.py`:
+
+```python
+import os
+
+#codemd:worker-start
+def work(x):
+    return x * 2
+
+#codemd:worker-end
+```
+
+Input `doc.md`:
+
+````markdown
+# Docs
+
+[codemd]:# (import handler-start..handler-end server.go go)
+
+[codemd]:# (import worker-start..worker-end worker.py)
+
+[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
+
+[codemd]:# (import worker-start.. worker.py)
+
+[codemd]:# (link handler-start server.go go)
+
+[codemd]:# (link handler-start server.go go "Handler")
+
+[codemd]:# (link /^func handler/ server.go go)
+
+[codemd]:# (link worker-start worker.py)
+````
+
+Output `want.md`, produced by `codemd doc.md`:
+
+````markdown
+# Docs
+
+[codemd]:# (import handler-start..handler-end server.go go)
+```go
+func handler() string {
+	return "ok"
+}
+
+```
+
+[codemd]:# (import worker-start..worker-end worker.py)
+```python
+def work(x):
+    return x * 2
+
+```
+
+[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
+```python
+def work(x):
+    return x * 2
+```
+
+[codemd]:# (import worker-start.. worker.py)
+```python
+def work(x):
+    return x * 2
+
+#codemd:worker-end
+```
+
+[codemd]:# (link handler-start server.go go)
+[server.go:3](server.go#L3)
+
+[codemd]:# (link handler-start server.go go "Handler")
+[Handler](server.go#L3)
+
+[codemd]:# (link /^func handler/ server.go go)
+[server.go:4](server.go#L4)
+
+[codemd]:# (link worker-start worker.py)
+[worker.py:3](worker.py#L3)
+````
