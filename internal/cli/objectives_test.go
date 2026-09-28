@@ -208,8 +208,12 @@ func TestObjectiveRunnerDetectsDrift(t *testing.T) {
 	writeTree(t, dir, map[string]string{
 		"transcript.console": "$ codemd --version\nstale output\n",
 	})
-	if err := verifyScenario(bin, dir, dir, false); err == nil {
+	err := verifyScenario(bin, dir, dir, false)
+	if err == nil {
 		t.Fatal("expected stale transcript to be detected as drift")
+	}
+	if !strings.Contains(err.Error(), "out of date") {
+		t.Fatalf("expected out-of-date mismatch, got: %v", err)
 	}
 	if err := verifyScenario(bin, dir, dir, true); err != nil {
 		t.Fatalf("update failed: %v", err)

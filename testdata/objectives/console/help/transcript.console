@@ -1,0 +1,25 @@
+$ codemd --help
+codemd resolves code references embedded in Markdown.
+
+Usage:
+  codemd [flags] file.md...
+  codemd [flags]              (no files: read stdin, write stdout)
+
+Reference: [codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
+
+Flags:
+  -check
+    	exit non-zero if any file would change
+  -config string
+    	path to config file
+  -d	print a unified diff
+  -f	write even if some references failed
+  -force
+    	write even if some references failed
+  -languages
+    	list supported languages and exit
+  -o string
+    	write result to a new file
+  -version
+    	print version and exit
+  -w	write result in place

@@ -47,16 +47,16 @@ need formatting; `scripts/format.sh` applies it.
 - **Temp fixtures** are created with the `writeTree` helper in
   `internal/cli/matrix_test.go`, which writes a set of files into a temporary
   directory. The `Run`-level tests in `internal/cli/` (`cli_test.go`,
-  `matrix_test.go`, `integration_test.go`, `http_test.go`, `docs_test.go`)
-  drive the CLI end to end.
+  `matrix_test.go`, `integration_test.go`, `http_test.go`, `docs_test.go`,
+  `objectives_test.go`) drive the CLI end to end.
 - **TDD.** Write the failing test first, then make it pass. A bug fix starts
   with a test that reproduces the bug.
 
 ### Documentation build
 
 The pages under `docs/` are codemd documents themselves: their examples are
-imported from `testdata/objectives/snippets/`. Regenerate them after any
-change to the examples or the pages:
+imported from the objectives under `testdata/objectives/`. Regenerate them after
+any change to the examples or the pages:
 
 ```bash
 scripts/update-docs.sh
@@ -66,6 +66,21 @@ scripts/update-docs.sh
 and fails if the committed file differs, so `go test ./...` catches docs that
 were not regenerated. For a check that writes nothing, use
 `scripts/docs-check.sh`.
+
+### Console objectives
+
+Console examples in `docs/` are generated, not typed. Each scenario lives under
+`testdata/objectives/console/<name>/` as a `transcript.console` holding a
+`$ command` line and the exact combined stdout and stderr.
+`scripts/update-objectives.sh` replays every scenario with the real built binary
+and rewrites the transcripts; `go test ./...` replays them again and compares
+byte for byte, so a stale transcript fails the gate. `scripts/update-docs.sh`
+runs the objective updater first, then resolves the pages. Import a transcript
+instead of hand-writing its output by putting
+`[codemd]:# (import .. ../testdata/objectives/console/<name>/transcript.console console)`
+on the line before a `console` fence; `TestConsoleFencesAreImported` enforces
+this. Blocks that cannot be replayed (for example `scripts/build.sh`, which
+writes files) use `console-norun`.
 
 ## Adding or overriding a language
 

@@ -18,7 +18,9 @@ standard output.
 
 Run `codemd --help` to print usage to standard error and exit `0`:
 
-```text
+[codemd]:# (import .. ../testdata/objectives/console/help/transcript.console console)
+```console
+$ codemd --help
 codemd resolves code references embedded in Markdown.
 
 Usage:
