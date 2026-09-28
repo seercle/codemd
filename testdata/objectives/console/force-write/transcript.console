@@ -1,0 +1,19 @@
+$ codemd -w broken.md
+codemd: broken.md: line 3: import range must contain '..': "nope"
+codemd: broken.md: not written due to errors (use --force to write anyway)
+codemd: 1 file(s) checked, 0 updated
+codemd: 1 error(s)
+$ codemd -w --force broken.md
+codemd: broken.md: line 3: import range must contain '..': "nope"
+codemd: 1 file(s) checked, 1 updated
+codemd: 1 error(s)
+$ cat broken.md
+[codemd]:# (import handler-start..handler-end server.go go)
+```go
+func handler() string {
+	return "ok"
+}
+
+```
+
+[codemd]:# (import nope server.go go)

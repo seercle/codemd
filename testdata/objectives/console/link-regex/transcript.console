@@ -1,0 +1,3 @@
+$ codemd doc.md
+[codemd]:# (link /^func handler/ server.go go)
+[server.go:4](server.go#L4)

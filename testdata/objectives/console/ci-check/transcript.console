@@ -1,0 +1,12 @@
+$ codemd --check '**/*.md'
+codemd: doc.md is out of date
+codemd: 1 file(s) checked, 1 out of date
+codemd: 1 error(s)
+$ echo $?
+1
+$ codemd -w doc.md
+codemd: 1 file(s) checked, 1 updated
+$ codemd --check '**/*.md'
+codemd: 1 file(s) checked, 0 out of date
+$ echo $?
+0

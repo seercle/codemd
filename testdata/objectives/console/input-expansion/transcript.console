@@ -1,0 +1,18 @@
+$ codemd --check doc.md
+codemd: doc.md is out of date
+codemd: 1 file(s) checked, 1 out of date
+codemd: 1 error(s)
+$ codemd --check .
+codemd: doc.md is out of date
+codemd: sub/nested.md is out of date
+codemd: 2 file(s) checked, 2 out of date
+codemd: 2 error(s)
+$ codemd --check '*.md'
+codemd: doc.md is out of date
+codemd: 1 file(s) checked, 1 out of date
+codemd: 1 error(s)
+$ codemd --check './**/*.md'
+codemd: doc.md is out of date
+codemd: sub/nested.md is out of date
+codemd: 2 file(s) checked, 2 out of date
+codemd: 2 error(s)

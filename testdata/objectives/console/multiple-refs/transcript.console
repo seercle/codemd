@@ -1,0 +1,2 @@
+$ diff <(codemd doc.md) want.md && echo FIXTURE_OK
+FIXTURE_OK

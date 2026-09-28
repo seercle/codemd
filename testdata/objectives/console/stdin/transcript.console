@@ -1,0 +1,8 @@
+$ cat link.md | codemd
+[codemd]:# (link handler-start server.go go)
+[server.go:3](server.go#L3)
+$ cat link.md | codemd --check
+codemd: <stdin> is out of date
+codemd: 1 error(s)
+$ echo $?
+1

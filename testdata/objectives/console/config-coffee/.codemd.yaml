@@ -1,0 +1,4 @@
+languages:
+  coffee:
+    line: "#"
+    fence: coffee

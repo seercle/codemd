@@ -1,0 +1,12 @@
+$ codemd -w doc.md
+codemd: 1 file(s) checked, 1 updated
+$ cat doc.md
+[codemd]:# (import handler-start..handler-end server.go go)
+```go
+func handler() string {
+	return "ok"
+}
+
+```
+$ codemd -w doc.md
+codemd: 1 file(s) checked, 0 updated

@@ -1,0 +1,8 @@
+$ codemd doc.md
+[codemd]:# (import s..e src.coffee)
+```coffee
+x = 1
+```
+
+[codemd]:# (link s src.coffee)
+[src.coffee:1](src.coffee#L1)

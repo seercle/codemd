@@ -1,0 +1,7 @@
+$ codemd -o out.md doc.md
+$ diff out.md want.md && echo MATCHES_WANT
+MATCHES_WANT
+$ codemd -o out.md a.md b.md
+codemd: a.md: stat a.md: no such file or directory
+$ echo $?
+2

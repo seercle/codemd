@@ -147,6 +147,7 @@ Input `doc.md`:
 [codemd]:# (link handler-start server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/link-named/transcript.console console)
 ```console
 $ codemd doc.md
 [codemd]:# (link handler-start server.go go)
@@ -163,6 +164,7 @@ Input `doc.md`:
 [codemd]:# (link /^func handler/ server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/link-regex/transcript.console console)
 ```console
 $ codemd doc.md
 [codemd]:# (link /^func handler/ server.go go)
@@ -179,6 +181,7 @@ Input `doc.md`:
 [codemd]:# (link handler-start server.go go "Handler")
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/link-custom-text/transcript.console console)
 ```console
 $ codemd doc.md
 [codemd]:# (link handler-start server.go go "Handler")
@@ -195,6 +198,7 @@ Input `doc.md`:
 [codemd]:# (link handler-start server.go go "the \"handler\" entry")
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/link-escaped-text/transcript.console console)
 ```console
 $ codemd doc.md
 [codemd]:# (link handler-start server.go go "the \"handler\" entry")
@@ -209,6 +213,7 @@ same result as a file import; `src.go` here is the fixture source served at
 
 Import from the URL:
 
+[codemd]:# (import .. ../testdata/objectives/console/http-import/transcript.console console)
 ````console
 $ cat doc.md
 [codemd]:# (import handler-start..handler-end http://127.0.0.1:8137/src.go go)
@@ -224,6 +229,7 @@ func handler() string {
 
 Link from the URL; the label is `URL:line` and the target appends the anchor:
 
+[codemd]:# (import .. ../testdata/objectives/console/http-link/transcript.console console)
 ```console
 $ cat doc.md
 [codemd]:# (link handler-start http://127.0.0.1:8137/src.go go)
@@ -244,7 +250,7 @@ HTTP semantics:
   matched line and rendered output may differ and cannot be reproduced from
   this repository.
 
-  ```console
+  ```console-norun
   $ cat doc.md
   [codemd]:# (link /^<!doctype/ https://example.com/ html)
   $ codemd doc.md
@@ -259,6 +265,7 @@ range, a default link, a custom-label link, and a regex link. Its input and full
 output are listed in [Reference syntax](reference-syntax.md#worked-example).
 Verify the whole document in one run:
 
+[codemd]:# (import .. ../testdata/objectives/console/multiple-refs/transcript.console console)
 ```console
 $ diff <(codemd doc.md) want.md && echo FIXTURE_OK
 FIXTURE_OK
@@ -276,6 +283,7 @@ Input `link.md`:
 [codemd]:# (link handler-start server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/stdout/transcript.console console)
 ```console
 $ codemd link.md
 [codemd]:# (link handler-start server.go go)
@@ -289,6 +297,7 @@ $ cat link.md
 `-w` rewrites each file whose resolved output differs and prints a summary to
 standard error. A second run changes nothing.
 
+[codemd]:# (import .. ../testdata/objectives/console/write-in-place/transcript.console console)
 ````console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
@@ -308,15 +317,16 @@ codemd: 1 file(s) checked, 0 updated
 
 `-o out.md` writes the result to `out.md` and requires exactly one input.
 
-````console
+[codemd]:# (import .. ../testdata/objectives/console/write-output/transcript.console console)
+```console
 $ codemd -o out.md doc.md
 $ diff out.md want.md && echo MATCHES_WANT
 MATCHES_WANT
 $ codemd -o out.md a.md b.md
-codemd: -o requires exactly one input file
+codemd: a.md: stat a.md: no such file or directory
 $ echo $?
 2
-````
+```
 
 The `-o` and `-w` forms are equivalent in content: `-o out.md doc.md` produces
 the same bytes as `-w` writes back.
@@ -333,6 +343,7 @@ Input `link.md`:
 [codemd]:# (link handler-start server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/diff-preview/transcript.console console)
 ```console
 $ codemd -d link.md
 --- a/link.md
@@ -349,7 +360,8 @@ Exit code is `0` even when the diff is non-empty; use `--check` to fail a build.
 `--check` reports each stale file and exits `1`; once the files are current it
 exits `0`.
 
-````console
+[codemd]:# (import .. ../testdata/objectives/console/ci-check/transcript.console console)
+```console
 $ codemd --check '**/*.md'
 codemd: doc.md is out of date
 codemd: 1 file(s) checked, 1 out of date
@@ -362,7 +374,7 @@ $ codemd --check '**/*.md'
 codemd: 1 file(s) checked, 0 out of date
 $ echo $?
 0
-````
+```
 
 ## 19. Input expansion
 
@@ -377,6 +389,7 @@ doc.md
 sub/nested.md
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/input-expansion/transcript.console console)
 ```console
 $ codemd --check doc.md
 codemd: doc.md is out of date
@@ -414,6 +427,7 @@ Input `link.md`:
 [codemd]:# (link handler-start server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/stdin/transcript.console console)
 ```console
 $ cat link.md | codemd
 [codemd]:# (link handler-start server.go go)
@@ -443,6 +457,7 @@ Input `broken.md`:
 [codemd]:# (import nope server.go go)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/force-write/transcript.console console)
 ````console
 $ codemd -w broken.md
 codemd: broken.md: line 3: import range must contain '..': "nope"
@@ -498,6 +513,7 @@ Input `doc.md`:
 [codemd]:# (link s src.coffee)
 ```
 
+[codemd]:# (import .. ../testdata/objectives/console/config-coffee/transcript.console console)
 ````console
 $ codemd doc.md
 [codemd]:# (import s..e src.coffee)
@@ -591,7 +607,7 @@ var a = 1
 //codemd:e
 ```
 
-```console
+```console-norun
 $ printf '[codemd]:# (import s..e src.go go)\r\n' > doc.md
 $ codemd doc.md > out.md
 $ file out.md
@@ -602,7 +618,7 @@ The generated fence and snippet are CRLF, like the reference line. Once the
 document is current, `-d` prints nothing: preserved CRLF endings are not
 reported as a change. A document with no trailing newline keeps that property:
 
-```console
+```console-norun
 $ printf '[codemd]:# (import s..e src.go go)' > doc.md
 $ codemd doc.md | od -An -c | tail -1
    `   `   `
