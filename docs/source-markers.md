@@ -31,9 +31,12 @@ than one form (for example, C accepts both `//` and `/* */`); see
 - The name matches `[A-Za-z0-9_.-]+` and must not contain `..`. A comment whose
   name fails either rule is not a marker: `//codemd:has space`,
   `//codemd:a..b`, and `//codemd:` declare nothing.
-- Duplicate marker names within one source file are an error:
+- Markers are recognized according to the source's comment form. A file whose
+  extension is unknown uses the fallback forms described below.
 
-[codemd]:# (import .. ../testdata/objectives/console/marker-duplicate/transcript.console console)
+Duplicate marker names within one source file are an error:
+
+[codemd]:# (import .. ../testdata/console/marker-duplicate/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
@@ -41,16 +44,13 @@ codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
 codemd: 1 error(s)
 ```
 
-- Markers are recognized according to the source's comment form. A file whose
-  extension is unknown uses the fallback forms described below.
-
 ## Imports and links
 
 A marker line is excluded from an imported snippet but remains a valid link
 target. The whole line is excluded, including any trailing code on it. Given
 this source:
 
-[codemd]:# (import .. ../testdata/objectives/snippets/server.go go)
+[codemd]:# (import .. ../testdata/snippets/server.go go)
 ```go
 package server
 

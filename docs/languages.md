@@ -106,7 +106,7 @@ Two mechanisms override the defaults:
 is given, its entries are merged over the built-ins first. The table is sorted
 by extension; each line is `ext -> fence (form)`:
 
-[codemd]:# (import .. ../testdata/objectives/console/languages-list/transcript.console console)
+[codemd]:# (import .. ../testdata/console/languages-list/transcript.console console)
 ```console
 $ codemd --languages
 bash -> bash (line "#")

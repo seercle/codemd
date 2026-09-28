@@ -1,4 +1,0 @@
-$ codemd doc.md
-codemd: doc.md: line 1: http://127.0.0.1:8099/missing.txt: HTTP 404
-[codemd]:# (link a http://127.0.0.1:8099/missing.txt go)
-codemd: 1 error(s)

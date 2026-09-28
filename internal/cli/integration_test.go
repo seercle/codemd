@@ -11,7 +11,7 @@ import (
 )
 
 func TestIntegrationGolden(t *testing.T) {
-	dir := filepath.Join("..", "..", "testdata", "objectives", "snippets")
+	dir := filepath.Join("..", "..", "testdata", "snippets")
 	var out, errb bytes.Buffer
 	code := Run([]string{filepath.Join(dir, "doc.md")}, strings.NewReader(""), &out, &errb)
 	if code != 0 {

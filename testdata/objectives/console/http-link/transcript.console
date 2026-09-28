@@ -1,5 +1,0 @@
-$ cat doc.md
-[codemd]:# (link handler-start http://127.0.0.1:8137/src.go go)
-$ codemd doc.md
-[codemd]:# (link handler-start http://127.0.0.1:8137/src.go go)
-[http://127.0.0.1:8137/src.go:3](http://127.0.0.1:8137/src.go#L3)

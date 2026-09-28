@@ -29,7 +29,7 @@ Use `codemd --help` to list the flags.
 **Mutually exclusive flags.** `-w`, `-o`, `-d`, and `--check` may not be
 combined:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-mutually-exclusive/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-mutually-exclusive/transcript.console console)
 ```console
 $ codemd -w -d doc.md
 codemd: -w, -o, -d and --check are mutually exclusive
@@ -40,7 +40,7 @@ Pick one output mode.
 **`-o requires exactly one input file`.** `-o` needs one input, so it fails
 with zero inputs (stdin) or with more than one:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-output-needs-one/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-output-needs-one/transcript.console console)
 ```console
 $ printf 'x\n' | codemd -o out.md
 codemd: -o requires exactly one input file
@@ -51,7 +51,7 @@ Pass exactly one file.
 **`in-place flags require an input file`.** `-w`, `-o`, and `-d` need a file to
 read; with no file arguments codemd reads stdin and cannot write in place:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-inplace-needs-file/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-inplace-needs-file/transcript.console console)
 ```console
 $ printf 'x\n' | codemd -w
 codemd: in-place flags require an input file
@@ -61,7 +61,7 @@ Supply a file argument, or drop the in-place flag and capture stdout instead.
 
 **`no files match %q`.** A glob argument expanded to nothing:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-no-files-match/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-no-files-match/transcript.console console)
 ```console
 $ codemd 'no-such-*.md'
 codemd: no files match "no-such-*.md"
@@ -74,7 +74,7 @@ Check the pattern, or quote it so your shell passes it through unchanged.
 hidden Markdown files are still processed; this error means the directory holds
 no Markdown files at any visited depth:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-no-md-in-dir/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-no-md-in-dir/transcript.console console)
 ```console
 $ codemd docs
 codemd: no Markdown files in "docs"
@@ -85,7 +85,7 @@ Point codemd at a directory that contains Markdown files.
 **`<argument>: stat <argument>: no such file or directory`.** An explicit path
 does not exist:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-explicit-missing/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-explicit-missing/transcript.console console)
 ```console
 $ codemd missing.md
 codemd: missing.md: stat missing.md: no such file or directory
@@ -101,7 +101,7 @@ the remaining references. The message is prefixed with
 
 **`reference too short: %q`.** The reference has no mode, or no range token:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-reference-too-short/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-reference-too-short/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: reference too short: "()"
@@ -113,7 +113,7 @@ Supply a mode and a range.
 
 **`unknown mode %q`.** The first token is neither `import` nor `link`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-unknown-mode/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-unknown-mode/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unknown mode "bogus"
@@ -126,7 +126,7 @@ Use `import` or `link`.
 **`import range must contain '..': %q`.** An `import` range is a single token
 with no `..`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-import-range/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-import-range/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: import range must contain '..': "a"
@@ -138,7 +138,7 @@ Write two bounds joined by `..`, such as `a..b`.
 
 **`link takes a single token, got %q`.** A `link` range contains `..`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-link-token/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-link-token/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: link takes a single token, got "a..b"
@@ -150,7 +150,7 @@ A link targets one line; pass a single named point or regex.
 
 **`missing path in %q`.** The reference has a mode and range but no path:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-missing-path/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-missing-path/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: missing path in "(import a..b)"
@@ -162,7 +162,7 @@ Add a source path or URL after the range.
 
 **`path must not be quoted in %q`.** The path token is double-quoted:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-quoted-path/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-quoted-path/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: path must not be quoted in "(import a..b \"src.go\")"
@@ -175,7 +175,7 @@ Drop the quotes. See also [the FAQ on paths with spaces](#faq).
 **`unterminated regex %q`.** A regex token begins with `/` but has no closing
 `/`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-unterminated-regex/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-unterminated-regex/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unterminated regex "/foo src.go"
@@ -188,7 +188,7 @@ Close the regex, and escape a literal slash as `\/`.
 **`strip requires a regex token in %q`.** `strip` is present but neither range
 bound is a regex:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-strip-needs-regex/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-strip-needs-regex/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: strip requires a regex token in "(import a..b src.go strip)"
@@ -201,7 +201,7 @@ Give at least one bound as a `/regex/`, or remove `strip`.
 **`link text is only valid for link mode in %q`.** A quoted label follows a
 path in `import` mode:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-link-text-import/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-link-text-import/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b src.go \"x\")"
@@ -213,7 +213,7 @@ Use `link` mode for a custom label, or remove the label.
 
 **`empty link text in %q`.** The label is empty or whitespace only:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-empty-link-text/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-empty-link-text/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: empty link text in "(link a src.go \"\")"
@@ -225,7 +225,7 @@ Put non-blank text in the quotes, or omit the label.
 
 **`multiple link labels in %q`.** More than one quoted label is present:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-multiple-labels/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-multiple-labels/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: multiple link labels in "(link a src.go \"x\" \"y\")"
@@ -238,7 +238,7 @@ Keep a single label.
 **`unexpected token %q in %q`.** A token appears after the optional `LANG`
 position; codemd has nowhere left to put it:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-unexpected-token/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-unexpected-token/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unexpected token "extra" in "(import a..b src.go go extra)"
@@ -250,7 +250,7 @@ Remove the extra token, or fold it into a valid position.
 
 **`unterminated quoted string in %q`.** A double quote is not closed:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-unterminated-quote/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-unterminated-quote/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unterminated quoted string in "(import a..b src.go \"x)"
@@ -269,7 +269,7 @@ comment.
 **`marker %q not found at or after line %d`.** No source marker with that name
 exists at or after the search position:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-marker-missing/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-marker-missing/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: marker "foo" not found at or after line 1
@@ -282,7 +282,7 @@ Check the marker name and spelling (see
 
 **`regex %q matched no line at or after %d`.** The line regex matched nothing:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-regex-no-match/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-regex-no-match/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: regex "nomatch" matched no line at or after 1
@@ -294,7 +294,7 @@ Adjust the regex, remembering it matches a whole line.
 
 **`bad regex %q: <regexp error>`.** The regex does not compile:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-bad-regex/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-bad-regex/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: bad regex "[": error parsing regexp: missing closing ]: `[`
@@ -307,7 +307,7 @@ Fix the Go regular expression.
 **`open <path>: no such file or directory`.** The reference's source file does
 not exist relative to the Markdown file's directory:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-open-missing/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-open-missing/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: open no-such.go: no such file or directory
@@ -319,11 +319,11 @@ Fix the path or add the file.
 
 **`<url>: HTTP <code>`.** The remote source returned a non-200 status:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-http-404/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-http-404/transcript.console console)
 ```console
 $ codemd doc.md
-codemd: doc.md: line 1: http://127.0.0.1:8099/missing.txt: HTTP 404
-[codemd]:# (link a http://127.0.0.1:8099/missing.txt go)
+codemd: doc.md: line 1: https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt: HTTP 404
+[codemd]:# (link a https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt go)
 codemd: 1 error(s)
 ```
 
@@ -336,7 +336,7 @@ underlying error instead, for example
 **`duplicate marker %q on lines %d and %d`.** A source file defines the same
 marker name twice:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-duplicate-marker/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-duplicate-marker/transcript.console console)
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: duplicate marker "a" on lines 3 and 6
@@ -375,7 +375,7 @@ with the discovered path. The message is prefixed with `codemd: `.
 
 **`<path>: yaml: <yaml error>`.** The config is not valid YAML:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-config-yaml/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-config-yaml/transcript.console console)
 ```console
 $ codemd --config bad.yaml doc.md
 codemd: bad.yaml: yaml: did not find expected key
@@ -386,7 +386,7 @@ Fix the YAML syntax.
 **`<path>: language %q defines both line and block`.** A language entry sets
 both `line` and a non-empty `block`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-config-both/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-config-both/transcript.console console)
 ```console
 $ codemd --config both.yaml doc.md
 codemd: both.yaml: language "foo" defines both line and block
@@ -397,7 +397,7 @@ Keep exactly one comment form.
 **`<path>: language %q must define exactly one of line or block`.** A language
 entry sets neither `line` nor a two-element `block`:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-config-neither/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-config-neither/transcript.console console)
 ```console
 $ codemd --config neither.yaml doc.md
 codemd: neither.yaml: language "foo" must define exactly one of line or block
@@ -433,7 +433,7 @@ directory to remove the spaces.
 non-flag argument, so any flag after a positional file is read as another input
 path:
 
-[codemd]:# (import .. ../testdata/objectives/console/err-flag-after-file/transcript.console console)
+[codemd]:# (import .. ../testdata/console/err-flag-after-file/transcript.console console)
 ```console
 $ codemd doc.md --check
 codemd: --check: stat --check: no such file or directory

@@ -3,9 +3,11 @@ package cli
 import (
 	"fmt"
 	"io/fs"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"syscall"
@@ -13,13 +15,23 @@ import (
 	"time"
 )
 
-const objectivesRoot = "../../testdata/objectives/console"
+const consoleRoot = "../../testdata/console"
 
 var (
 	buildOnce sync.Once
 	builtBin  string
 	buildErr  error
 )
+
+// TestMain removes the shared binary built by codemdBinary once the package's
+// tests finish.
+func TestMain(m *testing.M) {
+	code := m.Run()
+	if builtBin != "" {
+		_ = os.RemoveAll(filepath.Dir(builtBin))
+	}
+	os.Exit(code)
+}
 
 // codemdBinary builds the real binary once and returns its path.
 func codemdBinary(t *testing.T) string {
@@ -75,7 +87,12 @@ func buildScript(transcript string) string {
 	var b strings.Builder
 	b.WriteString("set +e\n__st=0\n")
 	for _, c := range transcriptCommands(transcript) {
-		exec := strings.ReplaceAll(c, "$?", "${__st}")
+		exec := c
+		// `echo $?` observes the previous command's status; rewrite only that
+		// exact command so a literal `$?` elsewhere is left untouched.
+		if strings.TrimSpace(c) == "echo $?" {
+			exec = `echo "${__st}"`
+		}
 		fmt.Fprintf(&b, "printf '%%s\\n' %s\n", shellQuote("$ "+c))
 		fmt.Fprintf(&b, "{ %s\n} 2>&1\n", exec)
 		b.WriteString("__st=$?\n")
@@ -148,8 +165,78 @@ func copyDir(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(target, data, 0o755)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, info.Mode().Perm())
 	})
+}
+
+var urlHostPattern = regexp.MustCompile(`(https?)://([^/\s)"']+)`)
+
+// urlHost is an external (non-loopback) URL host and its scheme.
+type urlHost struct {
+	scheme string
+	host   string
+}
+
+// externalURLHosts returns the non-loopback hosts referenced by transcript.
+func externalURLHosts(transcript string) []urlHost {
+	var hosts []urlHost
+	for _, m := range urlHostPattern.FindAllStringSubmatch(transcript, -1) {
+		host := m[2]
+		if h, _, err := net.SplitHostPort(host); err == nil {
+			host = h
+		}
+		if host == "localhost" || host == "127.0.0.1" || host == "::1" {
+			continue
+		}
+		hosts = append(hosts, urlHost{scheme: m[1], host: host})
+	}
+	return hosts
+}
+
+// networkReachable reports whether the external hosts referenced by a
+// transcript can be dialed. A transcript with no external host is always
+// reachable (it needs no network). Scenarios that do reference one are skipped
+// when offline, mirroring TestIntegrationExternalLink.
+func networkReachable(transcript string) bool {
+	hosts := externalURLHosts(transcript)
+	if len(hosts) == 0 {
+		return true
+	}
+	for _, h := range hosts {
+		port := "443"
+		if h.scheme == "http" {
+			port = "80"
+		}
+		conn, err := net.DialTimeout("tcp", net.JoinHostPort(h.host, port), 10*time.Second)
+		if err == nil {
+			_ = conn.Close()
+			return true
+		}
+	}
+	return false
+}
+
+func TestExternalURLHosts(t *testing.T) {
+	if got := externalURLHosts("no urls here"); len(got) != 0 {
+		t.Fatalf("expected no hosts, got %v", got)
+	}
+	if got := externalURLHosts("$ codemd http://127.0.0.1:8137/x.go"); len(got) != 0 {
+		t.Fatalf("localhost must not be external, got %v", got)
+	}
+	got := externalURLHosts("$ codemd https://example.com/a http://127.0.0.1/b")
+	if len(got) != 1 || got[0].host != "example.com" || got[0].scheme != "https" {
+		t.Fatalf("unexpected hosts: %v", got)
+	}
+	if !networkReachable("no urls here") {
+		t.Fatal("a transcript with no URL needs no network and must be reachable")
+	}
+	if !networkReachable("$ codemd http://127.0.0.1:8137/x.go") {
+		t.Fatal("a localhost URL must not require external network")
+	}
 }
 
 // verifyScenario replays runDir with bin and checks the result against the
@@ -178,7 +265,7 @@ func verifyScenario(bin, srcDir, runDir string, update bool) error {
 func TestConsoleObjectives(t *testing.T) {
 	bin := codemdBinary(t)
 	update := os.Getenv("OBJECTIVES_UPDATE") == "1"
-	entries, err := os.ReadDir(objectivesRoot)
+	entries, err := os.ReadDir(consoleRoot)
 	if err != nil {
 		t.Fatalf("read objectives: %v", err)
 	}
@@ -187,9 +274,13 @@ func TestConsoleObjectives(t *testing.T) {
 			continue
 		}
 		t.Run(e.Name(), func(t *testing.T) {
-			src := filepath.Join(objectivesRoot, e.Name())
-			if _, err := os.Stat(filepath.Join(src, "transcript.console")); err != nil {
+			src := filepath.Join(consoleRoot, e.Name())
+			obj, err := os.ReadFile(filepath.Join(src, "transcript.console"))
+			if err != nil {
 				t.Skipf("no transcript.console: %v", err)
+			}
+			if !networkReachable(string(obj)) {
+				t.Skipf("network unreachable; skipping %s", e.Name())
 			}
 			dst := t.TempDir()
 			if err := copyDir(src, dst); err != nil {

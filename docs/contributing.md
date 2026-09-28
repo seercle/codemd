@@ -41,7 +41,7 @@ need formatting; `scripts/format.sh` applies it.
   case names its input and expected output, so adding a case is a one-line edit.
   See the `_test.go` files in each `internal/` package.
 - **Integration tests** in `internal/cli/` call `cli.Run` in-process against
-  fixtures under `testdata/objectives/snippets/`. A fixture pairs an input
+  fixtures under `testdata/snippets/`. A fixture pairs an input
   `doc.md` with an expected `want.md`; `integration_test.go` compares the
   resolved output byte for byte. HTTP paths use `httptest` in `http_test.go`.
 - **Temp fixtures** are created with the `writeTree` helper in
@@ -55,7 +55,7 @@ need formatting; `scripts/format.sh` applies it.
 ### Documentation build
 
 The pages under `docs/` are codemd documents themselves: their examples are
-imported from the objectives under `testdata/objectives/`. Regenerate them after
+imported from the objectives under `testdata/`. Regenerate them after
 any change to the examples or the pages:
 
 ```bash
@@ -70,14 +70,16 @@ were not regenerated. For a check that writes nothing, use
 ### Console objectives
 
 Console examples in `docs/` are generated, not typed. Each scenario lives under
-`testdata/objectives/console/<name>/` as a `transcript.console` holding a
+`testdata/console/<name>/` as a `transcript.console` holding a
 `$ command` line and the exact combined stdout and stderr.
-`scripts/update-objectives.sh` replays every scenario with the real built binary
-and rewrites the transcripts; `go test ./...` replays them again and compares
-byte for byte, so a stale transcript fails the gate. `scripts/update-docs.sh`
+`scripts/update-objectives.sh` runs the updater in place
+(`OBJECTIVES_UPDATE=1 go test ./internal/cli -run TestConsoleObjectives`), which
+replays every scenario with the real built binary and rewrites the transcripts;
+`go test ./...` replays them again and compares byte for byte, so a stale
+transcript fails the gate. `scripts/update-docs.sh`
 runs the objective updater first, then resolves the pages. Import a transcript
 instead of hand-writing its output by putting
-`[codemd]:# (import .. ../testdata/objectives/console/<name>/transcript.console console)`
+`[codemd]:# (import .. ../testdata/console/<name>/transcript.console console)`
 on the line before a `console` fence; `TestConsoleFencesAreImported` enforces
 this. Blocks that cannot be replayed (for example `scripts/build.sh`, which
 writes files) use `console-norun`.

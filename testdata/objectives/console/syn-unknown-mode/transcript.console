@@ -1,4 +1,0 @@
-$ codemd doc.md
-codemd: doc.md: line 1: unknown mode "bogus"
-[codemd]:# (bogus a)
-codemd: 1 error(s)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate the console objective transcripts under testdata/objectives/console/.
+# Regenerate the console objective transcripts under testdata/console/.
 #
 # Replays each scenario with the built binary and rewrites transcript.console.
 # Run scripts/update-docs.sh afterwards, or on its own via that script. Works
