@@ -1,0 +1,2 @@
+$ codemd doc.md --check
+codemd: --check: stat --check: no such file or directory

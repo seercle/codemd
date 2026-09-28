@@ -1,0 +1,2 @@
+$ codemd -w -d doc.md
+codemd: -w, -o, -d and --check are mutually exclusive

@@ -1,0 +1,2 @@
+$ codemd missing.md
+codemd: missing.md: stat missing.md: no such file or directory

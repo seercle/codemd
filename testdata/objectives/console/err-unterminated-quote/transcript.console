@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: unterminated quoted string in "(import a..b src.go \"x)"
+[codemd]:# (import a..b src.go "x)
+codemd: 1 error(s)

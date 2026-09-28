@@ -1,0 +1,2 @@
+$ printf 'x\n' | codemd -w
+codemd: in-place flags require an input file

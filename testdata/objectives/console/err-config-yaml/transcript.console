@@ -1,0 +1,2 @@
+$ codemd --config bad.yaml doc.md
+codemd: bad.yaml: yaml: did not find expected key

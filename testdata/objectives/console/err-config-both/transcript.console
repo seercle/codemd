@@ -1,0 +1,2 @@
+$ codemd --config both.yaml doc.md
+codemd: both.yaml: language "foo" defines both line and block

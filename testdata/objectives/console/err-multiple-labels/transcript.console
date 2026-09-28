@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: multiple link labels in "(link a src.go \"x\" \"y\")"
+[codemd]:# (link a src.go "x" "y")
+codemd: 1 error(s)

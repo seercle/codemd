@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: path must not be quoted in "(import a..b \"src.go\")"
+[codemd]:# (import a..b "src.go")
+codemd: 1 error(s)

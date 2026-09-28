@@ -1,0 +1,2 @@
+$ codemd 'no-such-*.md'
+codemd: no files match "no-such-*.md"

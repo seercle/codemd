@@ -1,0 +1,2 @@
+$ printf 'x\n' | codemd -o out.md
+codemd: -o requires exactly one input file

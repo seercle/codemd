@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: open no-such.go: no such file or directory
+[codemd]:# (import a..b no-such.go go)
+codemd: 1 error(s)

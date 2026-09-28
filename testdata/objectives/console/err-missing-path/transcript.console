@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: missing path in "(import a..b)"
+[codemd]:# (import a..b)
+codemd: 1 error(s)

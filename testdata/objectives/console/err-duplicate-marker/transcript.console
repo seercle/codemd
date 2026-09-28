@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: duplicate marker "a" on lines 3 and 6
+[codemd]:# (import a..b src.go go)
+codemd: 1 error(s)
