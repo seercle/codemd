@@ -48,7 +48,7 @@ A marker line is excluded from an imported snippet but remains a valid link
 target. The whole line is excluded, including any trailing code on it. Given
 this source:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
+[codemd]:# (import .. ../testdata/objectives/snippets/server.go go)
 ```go
 package server
 

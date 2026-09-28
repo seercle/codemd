@@ -41,7 +41,7 @@ need formatting; `scripts/format.sh` applies it.
   case names its input and expected output, so adding a case is a one-line edit.
   See the `_test.go` files in each `internal/` package.
 - **Integration tests** in `internal/cli/` call `cli.Run` in-process against
-  fixtures under `internal/cli/testdata/integration/`. A fixture pairs an input
+  fixtures under `testdata/objectives/snippets/`. A fixture pairs an input
   `doc.md` with an expected `want.md`; `integration_test.go` compares the
   resolved output byte for byte. HTTP paths use `httptest` in `http_test.go`.
 - **Temp fixtures** are created with the `writeTree` helper in
@@ -55,7 +55,7 @@ need formatting; `scripts/format.sh` applies it.
 ### Documentation build
 
 The pages under `docs/` are codemd documents themselves: their examples are
-imported from `internal/cli/testdata/integration/`. Regenerate them after any
+imported from `testdata/objectives/snippets/`. Regenerate them after any
 change to the examples or the pages:
 
 ```bash

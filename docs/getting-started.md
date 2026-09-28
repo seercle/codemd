@@ -30,7 +30,7 @@ codemd dev
 
 The canonical source file has a **source marker**:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
+[codemd]:# (import .. ../testdata/objectives/snippets/server.go go)
 ```go
 package server
 
@@ -46,7 +46,7 @@ The repository's canonical copy is `starter.md`; create your own `doc.md` with
 the same contents. It holds a reference comment that imports the region between
 the two markers:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/starter.md markdown)
+[codemd]:# (import .. ../testdata/objectives/snippets/starter.md markdown)
 ```markdown
 # My docs
 

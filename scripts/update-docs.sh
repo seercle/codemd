@@ -2,7 +2,7 @@
 # Regenerate the docs/ pages that contain codemd references.
 #
 # Builds a throwaway codemd binary and runs it with -w against docs/. The pages
-# under docs/ import examples from internal/cli/testdata/integration/, so run
+# under docs/ import examples from testdata/objectives/snippets/, so run
 # this after changing those examples or the pages. The script works from any
 # directory.
 set -euo pipefail

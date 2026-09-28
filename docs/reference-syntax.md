@@ -195,13 +195,13 @@ codemd: 1 error(s)
 
 ## Worked example
 
-The example is the repository fixture in `internal/cli/testdata/integration`.
+The example is the repository fixture in `testdata/objectives/snippets`.
 It exercises a named import, a regex import, `strip`, an open range, a default
 link, a custom link label, and a regex link.
 
 `server.go`:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/server.go go)
+[codemd]:# (import .. ../testdata/objectives/snippets/server.go go)
 ```go
 package server
 
@@ -215,7 +215,7 @@ func handler() string {
 
 `worker.py`:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/worker.py python)
+[codemd]:# (import .. ../testdata/objectives/snippets/worker.py python)
 ```python
 import os
 
@@ -228,7 +228,7 @@ def work(x):
 
 Input `doc.md`:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/doc.md markdown)
+[codemd]:# (import .. ../testdata/objectives/snippets/doc.md markdown)
 ```markdown
 # Docs
 

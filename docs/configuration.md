@@ -120,7 +120,7 @@ This example adds `coffee` to the table and uses it from both an `import` and a
 
 `.codemd.yaml`:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/.codemd.yaml yaml)
+[codemd]:# (import .. ../testdata/objectives/snippets/coffee/.codemd.yaml yaml)
 ```yaml
 languages:
   coffee:
@@ -130,7 +130,7 @@ languages:
 
 `src.coffee`:
 
-[codemd]:# (import .. ../internal/cli/testdata/integration/coffee/src.coffee coffee)
+[codemd]:# (import .. ../testdata/objectives/snippets/coffee/src.coffee coffee)
 ```coffee
 #codemd:s
 x = 1
