@@ -13,6 +13,8 @@ cd "$root"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+"$root/scripts/update-objectives.sh"
+
 go build -o "$tmp/codemd" ./cmd/codemd
 "$tmp/codemd" -w docs
 echo "docs updated"
