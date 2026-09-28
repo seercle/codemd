@@ -16,6 +16,26 @@ func TestSnippet(t *testing.T) {
 	}
 }
 
+func TestSnippetLongerFence(t *testing.T) {
+	got := Snippet("console", []string{"$ codemd doc.md", "```go", "x", "```"})
+	want := []string{"````console", "$ codemd doc.md", "```go", "x", "```", "````"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	// A run of four requires five.
+	got = Snippet("", []string{"````"})
+	want = []string{"`````", "````", "`````"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	// Leading whitespace is allowed before a fence.
+	got = Snippet("", []string{"   ```"})
+	want = []string{"````", "   ```", "````"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+}
+
 func TestEscapeLabel(t *testing.T) {
 	cases := map[string]string{
 		"plain":     "plain",

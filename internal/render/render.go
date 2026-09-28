@@ -8,17 +8,41 @@ import (
 )
 
 // Snippet wraps lines in a Markdown fenced code block, using lang as the fence
-// info string when it is non-empty.
+// info string when it is non-empty. The fence is made longer than the longest
+// run of backticks at the start of any body line so embedded fences cannot
+// close the block early.
 func Snippet(lang string, lines []string) []string {
-	open := "```"
+	fence := fenceFor(lines)
+	open := fence
 	if lang != "" {
 		open += lang
 	}
 	out := make([]string, 0, len(lines)+2)
 	out = append(out, open)
 	out = append(out, lines...)
-	out = append(out, "```")
+	out = append(out, fence)
 	return out
+}
+
+// fenceFor returns the shortest backtick run (at least three) that is longer
+// than every leading backtick run in lines.
+func fenceFor(lines []string) string {
+	longest := 0
+	for _, line := range lines {
+		trimmed := strings.TrimLeft(line, " \t")
+		n := 0
+		for n < len(trimmed) && trimmed[n] == '`' {
+			n++
+		}
+		if n > longest {
+			longest = n
+		}
+	}
+	n := 3
+	if longest >= n {
+		n = longest + 1
+	}
+	return strings.Repeat("`", n)
 }
 
 // LinkLabel returns the default link label for a source location, formatted as
