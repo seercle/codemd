@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"sync"
 	"syscall"
 	"testing"
+	"time"
 )
 
 const objectivesRoot = "../../testdata/objectives/console"
@@ -96,22 +96,39 @@ func produceTranscript(bin, dir string) (string, error) {
 	}
 	script += buildScript(string(obj))
 
+	// Capture stdout to a real file rather than a bytes.Buffer: os/exec hands an
+	// *os.File straight to the child with no copy goroutine, so Run returns even
+	// when a background server started by setup.sh holds the descriptor open.
+	// setup.sh should still redirect background-server output to avoid races.
+	out, err := os.CreateTemp("", "codemd-objective-")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_ = out.Close()
+		_ = os.Remove(out.Name())
+	}()
+
 	cmd := exec.Command("bash", "-c", script)
 	cmd.Dir = dir
 	cmd.Env = scenarioEnv(dir, bin)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	var out bytes.Buffer
-	cmd.Stdout = &out
+	cmd.Stdout = out
 	cmd.Stderr = os.Stderr
-	err = cmd.Run()
+	cmd.WaitDelay = 10 * time.Second
+	runErr := cmd.Run()
 	// Reap any background server started by setup.sh.
 	if cmd.Process != nil {
 		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 	}
-	if err != nil {
-		return "", fmt.Errorf("replay: %w\n%s", err, out.String())
+	data, readErr := os.ReadFile(out.Name())
+	if runErr != nil {
+		return "", fmt.Errorf("replay: %w\n%s", runErr, data)
 	}
-	return out.String(), nil
+	if readErr != nil {
+		return "", readErr
+	}
+	return string(data), nil
 }
 
 func copyDir(src, dst string) error {
@@ -135,6 +152,29 @@ func copyDir(src, dst string) error {
 	})
 }
 
+// verifyScenario replays runDir with bin and checks the result against the
+// stored transcript in srcDir. In update mode it rewrites srcDir's
+// transcript.console with the produced output; otherwise it byte-compares and
+// reports a mismatch.
+func verifyScenario(bin, srcDir, runDir string, update bool) error {
+	got, err := produceTranscript(bin, runDir)
+	if err != nil {
+		return err
+	}
+	objPath := filepath.Join(srcDir, "transcript.console")
+	if update {
+		return os.WriteFile(objPath, []byte(got), 0o644)
+	}
+	want, err := os.ReadFile(objPath)
+	if err != nil {
+		return err
+	}
+	if got != string(want) {
+		return fmt.Errorf("objective out of date; run scripts/update-objectives.sh\n--- got ---\n%s\n--- want ---\n%s", got, want)
+	}
+	return nil
+}
+
 func TestConsoleObjectives(t *testing.T) {
 	bin := codemdBinary(t)
 	update := os.Getenv("OBJECTIVES_UPDATE") == "1"
@@ -155,23 +195,8 @@ func TestConsoleObjectives(t *testing.T) {
 			if err := copyDir(src, dst); err != nil {
 				t.Fatal(err)
 			}
-			got, err := produceTranscript(bin, dst)
-			if err != nil {
-				t.Fatal(err)
-			}
-			objPath := filepath.Join(src, "transcript.console")
-			if update {
-				if err := os.WriteFile(objPath, []byte(got), 0o644); err != nil {
-					t.Fatal(err)
-				}
-				return
-			}
-			want, err := os.ReadFile(objPath)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got != string(want) {
-				t.Errorf("objective out of date; run scripts/update-objectives.sh\n--- got ---\n%s\n--- want ---\n%s", got, want)
+			if err := verifyScenario(bin, src, dst, update); err != nil {
+				t.Error(err)
 			}
 		})
 	}
@@ -181,13 +206,15 @@ func TestObjectiveRunnerDetectsDrift(t *testing.T) {
 	bin := codemdBinary(t)
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
-		"transcript.console": "$ true\nnope\n",
+		"transcript.console": "$ codemd --version\nstale output\n",
 	})
-	got, err := produceTranscript(bin, dir)
-	if err != nil {
-		t.Fatal(err)
+	if err := verifyScenario(bin, dir, dir, false); err == nil {
+		t.Fatal("expected stale transcript to be detected as drift")
 	}
-	if got != "$ true\n" {
-		t.Fatalf("expected produced transcript %q, got %q", "$ true\n", got)
+	if err := verifyScenario(bin, dir, dir, true); err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	if err := verifyScenario(bin, dir, dir, false); err != nil {
+		t.Fatalf("round-trip after update failed: %v", err)
 	}
 }
