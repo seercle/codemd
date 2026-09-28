@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: import range must contain '..': "a"
+[codemd]:# (import a src.go go)
+codemd: 1 error(s)

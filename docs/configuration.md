@@ -80,6 +80,7 @@ The message names the config file.
 
 An entry that defines both `line` and `block`:
 
+[codemd]:# (import .. ../testdata/objectives/console/cfg-both/transcript.console console)
 ```console
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: language "coffee" defines both line and block
@@ -88,6 +89,7 @@ codemd: config.yaml: language "coffee" defines both line and block
 An entry that defines neither, or whose `block` does not have exactly two
 elements:
 
+[codemd]:# (import .. ../testdata/objectives/console/cfg-neither/transcript.console console)
 ```console
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: language "coffee" must define exactly one of line or block
@@ -95,6 +97,7 @@ codemd: config.yaml: language "coffee" must define exactly one of line or block
 
 A file that is not valid YAML:
 
+[codemd]:# (import .. ../testdata/objectives/console/cfg-bad-yaml/transcript.console console)
 ```console
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: yaml: line 4: did not find expected node content
@@ -102,6 +105,7 @@ codemd: config.yaml: yaml: line 4: did not find expected node content
 
 An unreadable `--config` path:
 
+[codemd]:# (import .. ../testdata/objectives/console/cfg-missing/transcript.console console)
 ```console
 $ codemd --config missing.yaml doc.md
 codemd: open missing.yaml: no such file or directory

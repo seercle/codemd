@@ -33,11 +33,13 @@ than one form (for example, C accepts both `//` and `/* */`); see
   `//codemd:a..b`, and `//codemd:` declare nothing.
 - Duplicate marker names within one source file are an error:
 
-  ```console
-  $ codemd doc.md
-  codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
-  codemd: 1 error(s)
-  ```
+[codemd]:# (import .. ../testdata/objectives/console/marker-duplicate/transcript.console console)
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
+[codemd]:# (import a..b src.txt)
+codemd: 1 error(s)
+```
 
 - Markers are recognized according to the source's comment form. A file whose
   extension is unknown uses the fallback forms described below.

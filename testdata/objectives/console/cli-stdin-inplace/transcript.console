@@ -1,0 +1,4 @@
+$ printf 'x\n' | codemd -w
+codemd: in-place flags require an input file
+$ printf 'x\n' | codemd -o out.md
+codemd: -o requires exactly one input file

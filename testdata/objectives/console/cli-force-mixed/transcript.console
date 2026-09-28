@@ -1,0 +1,5 @@
+$ codemd -w mixed.md
+codemd: mixed.md: line 5: open missing.go: no such file or directory
+codemd: mixed.md: not written due to errors (use --force to write anyway)
+codemd: 1 file(s) checked, 0 updated
+codemd: 1 error(s)

@@ -1,0 +1,4 @@
+languages:
+  go:
+    line: "//"
+  python: [

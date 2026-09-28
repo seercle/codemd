@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: unterminated regex "/foo x.go"
+[codemd]:# (link /foo x.go)
+codemd: 1 error(s)

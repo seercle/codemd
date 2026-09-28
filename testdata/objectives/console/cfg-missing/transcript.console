@@ -1,0 +1,2 @@
+$ codemd --config missing.yaml doc.md
+codemd: open missing.yaml: no such file or directory

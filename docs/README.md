@@ -32,6 +32,7 @@ Give `server.go` a `handler-start` marker and a matching `handler-end` marker
 
 Run codemd to generate the snippet:
 
+[codemd]:# (import .. ../testdata/objectives/console/first-import/transcript.console console)
 ````console
 $ codemd doc.md
 # My docs

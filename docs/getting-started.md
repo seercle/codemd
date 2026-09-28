@@ -21,6 +21,7 @@ Release builds set the version with
 `-ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z"`; source
 builds report `dev`.
 
+[codemd]:# (import .. ../testdata/objectives/console/version/transcript.console console)
 ```console
 $ codemd --version
 codemd dev
@@ -53,9 +54,9 @@ the two markers:
 [codemd]:# (import handler-start..handler-end server.go go)
 ```
 
-Running `codemd doc.md` inserts the snippet below the comment (the transcript
-that follows is hand-written; codemd cannot generate console output):
+Running `codemd doc.md` inserts the snippet below the comment:
 
+[codemd]:# (import .. ../testdata/objectives/console/first-import/transcript.console console)
 ````console
 $ codemd doc.md
 # My docs
@@ -71,6 +72,7 @@ func handler() string {
 
 Pass `-w` to write the result back to the file in place:
 
+[codemd]:# (import .. ../testdata/objectives/console/first-write/transcript.console console)
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
@@ -91,6 +93,7 @@ snippet. Add this line to `doc.md`:
 
 Run codemd to write the link:
 
+[codemd]:# (import .. ../testdata/objectives/console/first-link-write/transcript.console console)
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
@@ -126,6 +129,7 @@ Because the reference comment is preserved and the generated content is
 replaced in place, a second run changes nothing. Run codemd with `-w` again and
 the summary reports no updates:
 
+[codemd]:# (import .. ../testdata/objectives/console/idempotent-write/transcript.console console)
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 0 updated

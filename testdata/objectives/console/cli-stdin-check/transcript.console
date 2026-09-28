@@ -1,0 +1,3 @@
+$ codemd --check < doc.md
+codemd: <stdin> is out of date
+codemd: 1 error(s)

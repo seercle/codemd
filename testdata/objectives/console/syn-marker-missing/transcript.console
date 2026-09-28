@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: marker "nope" not found at or after line 1
+[codemd]:# (import nope..end x.go go)
+codemd: 1 error(s)

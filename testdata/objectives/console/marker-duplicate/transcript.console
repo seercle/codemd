@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
+[codemd]:# (import a..b src.txt)
+codemd: 1 error(s)

@@ -7,7 +7,7 @@ modes, and exit codes. It uses the terms defined in
 
 ## Synopsis
 
-```console
+```console-norun
 codemd [flags] file.md...
 codemd [flags]              (no files: read stdin, write stdout)
 ```
@@ -94,6 +94,7 @@ Arguments are de-duplicated in order after cleaning: the first occurrence of a
 path wins, so `codemd a.md a.md ./a.md` processes `a.md` once. An argument that
 matches nothing is a usage error (exit `2`):
 
+[codemd]:# (import .. ../testdata/objectives/console/err-no-files-match/transcript.console console)
 ```console
 $ codemd 'no-such-*.md'
 codemd: no files match "no-such-*.md"
@@ -113,6 +114,7 @@ reported with the name `<stdin>`.
 In-place flags (`-w`, `-o`, `-d`) require a file input; using them with stdin is
 a usage error:
 
+[codemd]:# (import .. ../testdata/objectives/console/cli-stdin-inplace/transcript.console console)
 ```console
 $ printf 'x\n' | codemd -w
 codemd: in-place flags require an input file
@@ -149,6 +151,7 @@ codemd: N file(s) checked, M updated
 `N` is the number of files processed and `M` is the number that differed
 (`--check`) or were rewritten (`-w`). For example:
 
+[codemd]:# (import .. ../testdata/objectives/console/cli-check-summary/transcript.console console)
 ```console
 $ codemd --check doc.md
 codemd: doc.md is out of date
@@ -164,6 +167,7 @@ The file-count summary is not printed for stdin. A stdin `--check` that differs
 prints the per-input line `codemd: <stdin> is out of date`, counts it as an
 error, and exits `1`:
 
+[codemd]:# (import .. ../testdata/objectives/console/cli-stdin-check/transcript.console console)
 ```console
 $ codemd --check < doc.md
 codemd: <stdin> is out of date
@@ -179,6 +183,7 @@ Writing with `-w` and `-o` is all-or-nothing per file: if any reference in a
 file fails to resolve, that file is not written, while other files still
 process. The failure is reported and the file is left untouched:
 
+[codemd]:# (import .. ../testdata/objectives/console/cli-force-mixed/transcript.console console)
 ```console
 $ codemd -w mixed.md
 codemd: mixed.md: line 5: open missing.go: no such file or directory
@@ -209,6 +214,7 @@ print the partial result and exit `1`.
 Prints the version to stdout as `codemd <version>` and exits `0`. Source builds
 report `dev`; release builds set the version at link time.
 
+[codemd]:# (import .. ../testdata/objectives/console/version/transcript.console console)
 ```console
 $ codemd --version
 codemd dev
@@ -220,7 +226,7 @@ Prints the effective language table and exits `0`. When `--config` is given, its
 entries are merged over the built-ins first. The table is sorted by extension and
 each line is `ext -> fence (form)`:
 
-```console
+```console-norun
 $ codemd --languages
 bash -> bash (line "#")
 c -> c (line "//" or block "/*" "*/")

@@ -13,7 +13,7 @@ layout and the resolution pipeline.
 
 Build the binary and inspect its usage:
 
-```console
+```console-norun
 $ scripts/build.sh
 $ go run ./cmd/codemd --help
 ```

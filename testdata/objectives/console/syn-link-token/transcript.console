@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: link takes a single token, got "a..b"
+[codemd]:# (link a..b src.go go)
+codemd: 1 error(s)

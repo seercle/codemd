@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: unterminated quoted string in "(link a x.go \"A)"
+[codemd]:# (link a x.go "A)
+codemd: 1 error(s)

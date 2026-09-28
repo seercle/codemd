@@ -1,0 +1,2 @@
+$ codemd --config config.yaml doc.md
+codemd: config.yaml: yaml: line 4: did not find expected node content
