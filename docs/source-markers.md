@@ -34,7 +34,8 @@ than one form (for example, C accepts both `//` and `/* */`); see
 - Markers are recognized according to the source's comment form. A file whose
   extension is unknown uses the fallback forms described below.
 
-Duplicate marker names within one source file are an error:
+A marker name used by a reference must be unique; an unreferenced duplicate does
+not fail the file. Duplicating a referenced name is an error:
 
 <!-- codemd: (import .. ../testdata/console/marker-duplicate/transcript.console console) -->
 ```console

@@ -13,12 +13,13 @@ grammar from [Reference syntax](reference-syntax.md).
 | `1` | One or more reference, config, or I/O errors; or `--check` found changes. |
 | `2` | Usage error: bad flags, mutually exclusive flags, `-o` with other than one input, `-w`/`-o`/`-d` with no file input, or an input argument that matches nothing. |
 
-Usage messages are printed to standard error; for an unknown flag the flag
-parser prints its message and then the usage text. Document errors are printed
-one per line as `codemd: <message>`, or `codemd: <name>: line <n>: <message>`
-when the error belongs to a reference on a specific line. A run that collects
-document errors prints a final `codemd: N error(s)` line and exits `1`; a config
-load failure prints only its message and exits `1`.
+Usage errors are printed to standard error; `--help` prints usage to standard
+output. For an unknown flag the flag parser prints its message and then the
+usage text. Document errors are printed one per line as `codemd: <message>`, or
+`codemd: <name>: line <n>: <message>` when the error belongs to a reference on a
+specific line. A run that collects document errors prints a final
+`codemd: N error(s)` line and exits `1`; a config load failure prints only its
+message and exits `1`.
 
 ## Usage errors (exit 2)
 
@@ -344,8 +345,8 @@ underlying error instead, for example
 
 ## Marker errors (exit 1)
 
-**`duplicate marker %q on lines %d and %d`.** A source file defines the same
-marker name twice:
+**`duplicate marker %q on lines %d and %d`.** A reference binds a marker name
+that its source file defines more than once:
 
 <!-- codemd: (import .. ../testdata/console/err-duplicate-marker/transcript.console console) -->
 ```console
@@ -355,7 +356,8 @@ codemd: doc.md: line 1: duplicate marker "a" on lines 3 and 6
 codemd: 1 error(s)
 ```
 
-Marker names must be unique within a source file. Rename one of them.
+A marker name used by a reference must be unique; an unreferenced duplicate
+does not fail the file. Rename one of them.
 
 ## Status and write messages
 
