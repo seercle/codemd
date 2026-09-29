@@ -1,7 +1,6 @@
 package srcfile
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -44,18 +43,28 @@ func CommentText(line string, form lang.CommentForm) (string, bool) {
 	return "", false
 }
 
+// MarkerSet is the markers found in a source plus the names that occurred more
+// than once. Markers holds the first occurrence of each name in line order.
+type MarkerSet struct {
+	Markers    []Marker
+	Duplicates map[string][]int
+}
+
 // ExtractMarkers returns the markers found in content using l's single comment
-// form. It returns an error when the same marker name appears more than once.
-func ExtractMarkers(content string, l lang.Language) ([]Marker, error) {
+// form.
+func ExtractMarkers(content string, l lang.Language) MarkerSet {
 	return ExtractMarkersMulti(content, []lang.CommentForm{l.Form})
 }
 
-// ExtractMarkersMulti finds markers using any of the given comment forms.
-// For each line, the first form that yields a valid marker wins.
-func ExtractMarkersMulti(content string, forms []lang.CommentForm) ([]Marker, error) {
+// ExtractMarkersMulti finds markers using any of the given comment forms. For
+// each line, the first form that yields a valid marker wins. A name that
+// appears more than once is recorded in Duplicates with every line number;
+// Markers keeps the first occurrence. Callers decide whether the reference they
+// resolve is ambiguous, so an unrelated duplicate does not fail the file.
+func ExtractMarkersMulti(content string, forms []lang.CommentForm) MarkerSet {
 	lines := lineutil.Split(content)
-	var out []Marker
-	seen := map[string]int{}
+	set := MarkerSet{Duplicates: map[string][]int{}}
+	first := map[string]int{}
 	for i, line := range lines.Content {
 		for _, form := range forms {
 			text, ok := CommentText(line, form)
@@ -70,13 +79,17 @@ func ExtractMarkersMulti(content string, forms []lang.CommentForm) ([]Marker, er
 			if !markerName.MatchString(name) || strings.Contains(name, "..") {
 				continue
 			}
-			if prev, dup := seen[name]; dup {
-				return nil, fmt.Errorf("duplicate marker %q on lines %d and %d", name, prev, i+1)
+			if prev, dup := first[name]; dup {
+				if _, seen := set.Duplicates[name]; !seen {
+					set.Duplicates[name] = []int{prev}
+				}
+				set.Duplicates[name] = append(set.Duplicates[name], i+1)
+			} else {
+				first[name] = i + 1
+				set.Markers = append(set.Markers, Marker{Name: name, Line: i + 1})
 			}
-			seen[name] = i + 1
-			out = append(out, Marker{Name: name, Line: i + 1})
 			break
 		}
 	}
-	return out, nil
+	return set
 }

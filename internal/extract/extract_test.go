@@ -11,11 +11,7 @@ const goSrc = "package x\n\ntype lv int //codemd:a\nfunc f() {}\nfunc g() {}\n//
 
 func markers(t *testing.T) []srcfile.Marker {
 	t.Helper()
-	ms, err := srcfile.ExtractMarkers(goSrc, mustGo())
-	if err != nil {
-		t.Fatal(err)
-	}
-	return ms
+	return srcfile.ExtractMarkers(goSrc, mustGo()).Markers
 }
 
 func mustGo() lang.Language { return lang.Builtins()["go"] }

@@ -74,10 +74,14 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 	} else {
 		forms = genericForms
 	}
-	markers, err := srcfile.ExtractMarkersMulti(content, forms)
-	if err != nil {
+	set := srcfile.ExtractMarkersMulti(content, forms)
+	if err := checkDuplicate(set, ref.Ref.Range.Start); err != nil {
 		return nil, err
 	}
+	if err := checkDuplicate(set, ref.Ref.Range.End); err != nil {
+		return nil, err
+	}
+	markers := set.Markers
 	if ref.Ref.Mode == mdref.Link {
 		line, err := extract.ResolveLink(content, markers, ref.Ref.Range.Start)
 		if err != nil {
@@ -99,6 +103,17 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 		fence = lang.FenceFor(ext, r.Table)
 	}
 	return render.Snippet(fence, res.Lines), nil
+}
+
+func checkDuplicate(set srcfile.MarkerSet, b extract.Bound) error {
+	if b.Name == "" {
+		return nil
+	}
+	lines := set.Duplicates[b.Name]
+	if len(lines) < 2 {
+		return nil
+	}
+	return fmt.Errorf("duplicate marker %q on lines %d and %d", b.Name, lines[0], lines[len(lines)-1])
 }
 
 var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+\)$`)

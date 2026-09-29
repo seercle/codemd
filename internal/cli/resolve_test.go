@@ -177,6 +177,24 @@ func TestResolveIndentedReferenceIndentsOutput(t *testing.T) {
 	}
 }
 
+func TestDuplicateMarkerDoesNotBlockOtherReferences(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:a\nx\n//codemd:b\ny\n//codemd:c\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	doc := "<!-- codemd: (import b..c s.go go) -->\n"
+	out, errs := r.ResolveDocument(doc, dir)
+	if len(errs) != 0 {
+		t.Fatalf("unrelated reference failed: %v", errs)
+	}
+	if !strings.Contains(out, "y") {
+		t.Fatalf("expected snippet in output, got:\n%s", out)
+	}
+
+	bad := "<!-- codemd: (import a..c s.go go) -->\n"
+	if _, errs := r.ResolveDocument(bad, dir); len(errs) != 1 {
+		t.Fatalf("expected one duplicate-marker error, got: %v", errs)
+	}
+}
+
 func TestResolveDocumentCollectsErrors(t *testing.T) {
 	dir := t.TempDir()
 	md := "<!-- codemd: (import a..b missing.go go) -->\n"
