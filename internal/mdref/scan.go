@@ -14,25 +14,35 @@ type Reference struct {
 	Ref     Ref
 }
 
-const refPrefix = "[codemd]:#"
+const (
+	refOpen   = "<!-- codemd:"
+	refClose  = "-->"
+	legacyRef = "[codemd]:#"
+)
 
-// ExtractComment returns the reference argument list from a "[codemd]:#"
-// definition line, for example "(import a..b path)". ok is false when line is
-// not a reference definition.
+// ExtractComment returns the reference argument list from a reference
+// definition, for example "(import a..b path)": either the HTML-comment form
+// "<!-- codemd: (...) -->" or the legacy "[codemd]:# (...)" form. ok is false
+// when line is not a reference definition.
 func ExtractComment(line string) (string, bool) {
 	trimmed := strings.TrimSpace(line)
-	if !strings.HasPrefix(trimmed, refPrefix) {
+	if strings.HasPrefix(trimmed, refOpen) && strings.HasSuffix(trimmed, refClose) {
+		inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, refOpen), refClose))
+		if strings.HasPrefix(inner, "(") && strings.HasSuffix(inner, ")") {
+			return inner, true
+		}
 		return "", false
 	}
-	rest := strings.TrimSpace(strings.TrimPrefix(trimmed, refPrefix))
-	if !strings.HasPrefix(rest, "(") {
-		return "", false
+	if strings.HasPrefix(trimmed, legacyRef) {
+		rest := strings.TrimSpace(strings.TrimPrefix(trimmed, legacyRef))
+		if !strings.HasPrefix(rest, "(") {
+			return "", false
+		}
+		if end := strings.LastIndex(rest, ")"); end >= 0 {
+			return rest[:end+1], true
+		}
 	}
-	end := strings.LastIndex(rest, ")")
-	if end < 0 {
-		return "", false
-	}
-	return rest[:end+1], true
+	return "", false
 }
 
 // ScanError pairs a reference parse error with the 1-based line it occurred on.

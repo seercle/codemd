@@ -1,5 +1,6 @@
 // Package mdref scans Markdown for codemd reference definitions and parses
-// them into structured references.
+// them into structured references. References use the HTML-comment form
+// "<!-- codemd: (...) -->" or the legacy "[codemd]:# (...)" form.
 package mdref
 
 import (
@@ -31,10 +32,13 @@ type Ref struct {
 	Label string
 }
 
-// ParseRef parses a reference argument list (the text between the parentheses
-// of a "[codemd]:#" definition) into a Ref. It returns an error when the mode,
+// ParseRef parses a reference argument list (the text inside the parentheses
+// of a reference definition) into a Ref. It returns an error when the mode,
 // range, path, or remaining tokens are malformed.
 func ParseRef(comment string) (Ref, error) {
+	if strings.Contains(comment, refClose) {
+		return Ref{}, fmt.Errorf("reference must not contain %q", refClose)
+	}
 	s := strings.TrimSpace(comment)
 	s = strings.TrimPrefix(s, "(")
 	s = strings.TrimSuffix(s, ")")
