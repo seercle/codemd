@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,6 +17,24 @@ type yamlLanguage struct {
 	Line  string   `yaml:"line"`
 	Block []string `yaml:"block"`
 	Fence string   `yaml:"fence"`
+}
+
+var unknownKeyPattern = regexp.MustCompile(`^line (\d+): field (.+) not found in type `)
+
+func configDecodeError(path string, err error) error {
+	var te *yaml.TypeError
+	if !errors.As(err, &te) || len(te.Errors) == 0 {
+		return fmt.Errorf("%s: %w", path, err)
+	}
+	lines := make([]string, 0, len(te.Errors))
+	for _, entry := range te.Errors {
+		m := unknownKeyPattern.FindStringSubmatch(entry)
+		if m == nil {
+			return fmt.Errorf("%s: %w", path, err)
+		}
+		lines = append(lines, fmt.Sprintf("%s: line %s: unknown key %q", path, m[1], m[2]))
+	}
+	return errors.New(strings.Join(lines, "\n"))
 }
 
 // LoadConfig reads the YAML config at path and converts its language entries
@@ -31,7 +51,7 @@ func LoadConfig(path string) (Config, error) {
 	dec := yaml.NewDecoder(bytes.NewReader(data))
 	dec.KnownFields(true)
 	if err := dec.Decode(&raw); err != nil && !errors.Is(err, io.EOF) {
-		return Config{}, fmt.Errorf("%s: %w", path, err)
+		return Config{}, configDecodeError(path, err)
 	}
 	cfg := Config{Languages: map[string]Language{}}
 	for ext, y := range raw.Languages {

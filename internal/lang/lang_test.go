@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -60,6 +61,41 @@ func TestLoadConfigRejectsUnknownKeys(t *testing.T) {
 			}
 			if _, err := LoadConfig(path); err == nil {
 				t.Fatalf("expected an error for unknown key in %q", body)
+			}
+		})
+	}
+}
+
+func TestLoadConfigUnknownKeyMessage(t *testing.T) {
+	dir := t.TempDir()
+	cases := map[string]struct {
+		body string
+		want string
+	}{
+		"toplevel": {
+			body: "languagez:\n  foo:\n    line: \"//\"\n",
+			want: `: line 1: unknown key "languagez"`,
+		},
+		"entry": {
+			body: "languages:\n  foo:\n    line: \"//\"\n    fencee: foo\n",
+			want: `: line 4: unknown key "fencee"`,
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(dir, name+".yaml")
+			if err := os.WriteFile(path, []byte(tc.body), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			_, err := LoadConfig(path)
+			if err == nil {
+				t.Fatalf("expected an error for %q", tc.body)
+			}
+			if !strings.HasSuffix(err.Error(), tc.want) {
+				t.Fatalf("error = %q, want suffix %q", err, tc.want)
+			}
+			if strings.Contains(err.Error(), "struct {") || strings.Contains(err.Error(), "yamlLanguage") {
+				t.Fatalf("error leaks Go type details: %q", err)
 			}
 		})
 	}

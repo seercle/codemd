@@ -423,8 +423,7 @@ entry accepts only `line`, `block`, and `fence`:
 <!-- codemd: (import .. ../testdata/console/err-config-unknown-key/transcript.console console) -->
 ```console
 $ codemd --config config.yaml doc.md
-codemd: config.yaml: yaml: unmarshal errors:
-  line 1: field languagez not found in type struct { Languages map[string]lang.yamlLanguage "yaml:\"languages\"" }
+codemd: config.yaml: line 1: unknown key "languagez"
 ```
 
 Remove the key or correct its spelling.
