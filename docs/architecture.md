@@ -61,6 +61,11 @@ skips blank lines to find the first non-blank line, then:
 - `link`: if that line is a generated link, it is replaced; otherwise the
   generated link is inserted directly below the comment.
 
+Because a generated block carries no identity, a hand-written fenced block
+placed directly below an `import` reference is indistinguishable from a stale
+generated one and is replaced, whereas `link` replaces only a line matching its
+generated shape.
+
 The reference line's leading whitespace is copied onto every generated line,
 so a reference inside a list item keeps its snippet inside that item.
 

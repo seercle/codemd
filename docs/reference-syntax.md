@@ -171,6 +171,13 @@ mode:
   replaced. Otherwise the generated link is inserted directly below the
   comment.
 
+For `import`, the managed region is the first non-blank fenced block below the
+reference; codemd replaces it in place. A generated block carries no identity,
+so a hand-written fenced block placed directly below an `import` reference is
+indistinguishable from a stale generated one and will be replaced. Keep
+hand-written blocks separated from a reference by intervening text, or use a
+`link` reference (which only replaces a line matching the generated link shape).
+
 The reference line's leading whitespace is copied onto every generated line,
 so a reference inside a list item keeps its snippet inside that item.
 
