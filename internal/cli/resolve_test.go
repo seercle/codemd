@@ -16,6 +16,15 @@ func resolver() Resolver {
 	return Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 }
 
+func writeSource(t *testing.T, name, content string) string {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
 func TestSpliceInsertsBelowComment(t *testing.T) {
 	lines := []string{"<!-- codemd: (link a s.go) -->", "", "keep me"}
 	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
@@ -151,6 +160,20 @@ func TestIsGeneratedLink(t *testing.T) {
 				t.Fatalf("isGeneratedLink(%q) = %v, want %v", tc.line, got, tc.want)
 			}
 		})
+	}
+}
+
+func TestResolveIndentedReferenceIndentsOutput(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	in := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n"
+	out, errs := r.ResolveDocument(in, dir)
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	want := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n  ```go\n  x\n  ```\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
 	}
 }
 

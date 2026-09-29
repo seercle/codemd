@@ -114,6 +114,8 @@ func isGeneratedLink(line string) bool {
 // otherwise the replacement is inserted directly below the comment, leaving
 // any existing line untouched.
 func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) []string {
+	indent := leadingIndent(lines[refLine-1])
+	replacement = indentLines(replacement, indent)
 	insertAt := refLine // 0-based index of the line directly below the comment
 	idx := insertAt
 	for idx < len(lines) && strings.TrimSpace(lines[idx]) == "" {
@@ -135,4 +137,24 @@ func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) 
 	out := append([]string{}, lines[:insertAt]...)
 	out = append(out, replacement...)
 	return append(out, lines[insertAt:]...)
+}
+
+func leadingIndent(line string) string {
+	trimmed := strings.TrimLeft(line, " \t")
+	return line[:len(line)-len(trimmed)]
+}
+
+func indentLines(lines []string, indent string) []string {
+	if indent == "" {
+		return lines
+	}
+	out := make([]string, len(lines))
+	for i, l := range lines {
+		if l == "" {
+			out[i] = l
+			continue
+		}
+		out[i] = indent + l
+	}
+	return out
 }

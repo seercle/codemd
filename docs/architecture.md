@@ -41,8 +41,8 @@ language table and its configurable overrides are documented in
 
 Scanning is line-based; codemd builds no Markdown AST. It tracks fenced code
 blocks so that a reference comment inside a code block is ignored. A line opens
-or closes a fence when it begins with three or more backticks or three or more
-tildes (with at most three leading spaces or tabs). An opening fence is
+or closes a fence when it begins, after any leading whitespace, with three or
+more backticks or three or more tildes. An opening fence is
 closed only by a fence of the same character whose run is at least as long;
 an unterminated fence runs to the end of the document.
 
@@ -60,6 +60,9 @@ skips blank lines to find the first non-blank line, then:
   otherwise the generated fence is inserted directly below the comment.
 - `link`: if that line is a generated link, it is replaced; otherwise the
   generated link is inserted directly below the comment.
+
+The reference line's leading whitespace is copied onto every generated line,
+so a reference inside a list item keeps its snippet inside that item.
 
 A following reference comment is never consumed: codemd inserts below the
 current comment and leaves the next reference in place. Because the reference

@@ -28,6 +28,24 @@ func TestReferenceLinesAreHiddenByMarkdown(t *testing.T) {
 	}
 }
 
+// TestIndentedSnippetStaysInListItem locks the property that an indented
+// reference's managed fence is indented with it, so its code block renders
+// inside the list item rather than breaking out of it.
+func TestIndentedSnippetStaysInListItem(t *testing.T) {
+	doc := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n  ```go\n  x\n  ```\n"
+	var out strings.Builder
+	if err := goldmark.Convert([]byte(doc), &out); err != nil {
+		t.Fatal(err)
+	}
+	html := out.String()
+	li := strings.Index(html, "<li>")
+	code := strings.Index(html, "<code")
+	closeLi := strings.Index(html, "</li>")
+	if li < 0 || code < 0 || closeLi < 0 || !(li < code && code < closeLi) {
+		t.Fatalf("code block is not inside the list item:\n%s", html)
+	}
+}
+
 // TestLegacyReferenceRendersVisibly documents the bug the HTML-comment syntax
 // fixes: the old parenthesized-title form is only hidden while it contains no
 // unescaped parentheses.

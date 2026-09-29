@@ -171,6 +171,9 @@ mode:
   replaced. Otherwise the generated link is inserted directly below the
   comment.
 
+The reference line's leading whitespace is copied onto every generated line,
+so a reference inside a list item keeps its snippet inside that item.
+
 A following reference comment is never consumed: if the first non-blank line is
 another reference comment, codemd inserts the generated content directly below
 the current comment and leaves the next reference in place.
