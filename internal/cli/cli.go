@@ -58,7 +58,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	version := fs.Bool("version", false, "print version and exit")
 	args = reorderFlags(fs, args)
-	for _, a := range args {
+	for i := 0; i < len(args); i++ {
+		a := args[i]
 		if a == "--" {
 			break
 		}
@@ -66,6 +67,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			fs.SetOutput(stdout)
 			printUsage(stdout)
 			return 0
+		}
+		if len(a) >= 2 && a[0] == '-' && !strings.Contains(a, "=") {
+			name := strings.TrimLeft(a, "-")
+			if name != "h" && name != "help" && !isBoolFlag(fs, name) {
+				i++
+			}
 		}
 	}
 	if err := fs.Parse(args); err != nil {
@@ -253,23 +260,30 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	return exit
 }
 
+// isBoolFlag reports whether the named flag in fs is a boolean flag (one that
+// consumes no value token of its own). Unknown flags report false.
+func isBoolFlag(fs *flag.FlagSet, name string) bool {
+	f := fs.Lookup(name)
+	if f == nil {
+		return false
+	}
+	bf, ok := f.Value.(interface{ IsBoolFlag() bool })
+	return ok && bf.IsBoolFlag()
+}
+
 // reorderFlags moves flag arguments (and, for non-boolean flags, their values)
 // ahead of positional arguments so a flag may appear after a file path. An
-// explicit "--" ends flag parsing; everything after it is positional.
+// explicit "--" ends flag parsing. The result is always flags, then a single
+// "--" boundary if one was present, then every positional in original order;
+// flag.FlagSet.Parse stops at the boundary, so fs.Args() holds the positionals
+// with no "--" among them.
 func reorderFlags(fs *flag.FlagSet, args []string) []string {
-	isBool := func(name string) bool {
-		f := fs.Lookup(name)
-		if f == nil {
-			return false
-		}
-		bf, ok := f.Value.(interface{ IsBoolFlag() bool })
-		return ok && bf.IsBoolFlag()
-	}
 	var flags, positionals []string
+	terminated := false
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		if a == "--" {
-			positionals = append(positionals, a)
+			terminated = true
 			positionals = append(positionals, args[i+1:]...)
 			break
 		}
@@ -282,13 +296,16 @@ func reorderFlags(fs *flag.FlagSet, args []string) []string {
 		if eq := strings.IndexByte(name, '='); eq >= 0 {
 			continue
 		}
-		if name == "h" || name == "help" || isBool(name) {
+		if name == "h" || name == "help" || isBoolFlag(fs, name) {
 			continue
 		}
 		if i+1 < len(args) {
 			i++
 			flags = append(flags, args[i])
 		}
+	}
+	if terminated {
+		return append(flags, append([]string{"--"}, positionals...)...)
 	}
 	return append(flags, positionals...)
 }

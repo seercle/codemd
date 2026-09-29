@@ -2,10 +2,12 @@ package cli
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -204,6 +206,20 @@ func TestRunHelpAfterDoubleDashIsPositional(t *testing.T) {
 	}
 	if strings.Contains(out.String(), "Usage:") {
 		t.Fatalf("help must not print usage to stdout after --: %q", out.String())
+	}
+}
+
+func TestHelpScanSkipsNonBoolFlagValue(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := Run([]string{"--config", "-h"}, strings.NewReader(""), &out, &errb)
+	if strings.Contains(out.String(), "Usage:") {
+		t.Fatalf("value -h of --config must not trigger help; stdout=%q", out.String())
+	}
+	if code == 0 {
+		t.Fatalf("expected failure loading a config literally named -h, got exit 0")
+	}
+	if !strings.Contains(errb.String(), "-h") {
+		t.Fatalf("-h must be used as the --config value, got stderr=%q", errb.String())
 	}
 }
 
@@ -422,6 +438,65 @@ func TestDoubleDashEndsFlagParsing(t *testing.T) {
 	}
 	if !strings.Contains(errb.String(), "no such file") {
 		t.Fatalf("expected --version to be treated as an input path, got: %s", errb.String())
+	}
+}
+
+func TestDoubleDashAloneLeavesPositionals(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := Run([]string{"--", "--version"}, strings.NewReader(""), &out, &errb)
+	if code == 0 {
+		t.Fatalf("--version after -- must not be parsed as a flag")
+	}
+	if strings.Contains(out.String(), "codemd "+Version) {
+		t.Fatalf("version banner must not be printed: %q", out.String())
+	}
+	if strings.Contains(errb.String(), "codemd: --:") {
+		t.Fatalf("the -- terminator must not become an operand: %s", errb.String())
+	}
+	if !strings.Contains(errb.String(), "--version") {
+		t.Fatalf("expected --version to be treated as an input path: %s", errb.String())
+	}
+}
+
+func TestDoubleDashAfterFlagLeavesPositionals(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := Run([]string{"--check", "--", "--version"}, strings.NewReader(""), &out, &errb)
+	if code == 0 {
+		t.Fatalf("--version after -- must not be parsed as a flag")
+	}
+	if strings.Contains(errb.String(), "codemd: --:") {
+		t.Fatalf("the -- terminator must not become an operand: %s", errb.String())
+	}
+	if !strings.Contains(errb.String(), "--version") {
+		t.Fatalf("expected --version to be treated as an input path: %s", errb.String())
+	}
+}
+
+func TestDoubleDashAfterFileLeavesPositionals(t *testing.T) {
+	fs := flag.NewFlagSet("codemd", flag.ContinueOnError)
+	fs.Bool("check", false, "")
+	if err := fs.Parse(reorderFlags(fs, []string{"FILE.md", "--", "--version"})); err != nil {
+		t.Fatal(err)
+	}
+	got := fs.Args()
+	want := []string{"FILE.md", "--version"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("fs.Args() = %q, want %q", got, want)
+	}
+}
+
+func TestFlagsAfterPositionalStillParsedWithoutDoubleDash(t *testing.T) {
+	dir := writeSource(t, "doc.md", "<!-- codemd: (link a src.go) -->\n")
+	if err := os.WriteFile(filepath.Join(dir, "src.go"), []byte("// a comment\nline\n//codemd:a\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	code := Run([]string{filepath.Join(dir, "doc.md"), "--check"}, strings.NewReader(""), &out, &errb)
+	if code != 1 {
+		t.Fatalf("--check after a path must still be parsed as a flag: code=%d stderr=%s", code, errb.String())
+	}
+	if !strings.Contains(errb.String(), "out of date") {
+		t.Fatalf("expected an out-of-date report, got: %s", errb.String())
 	}
 }
 
