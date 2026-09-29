@@ -93,7 +93,7 @@ built-in language, add an entry keyed by its extension:
 "coffee": {Fence: "coffee", Form: CommentForm{Line: "#"}},
 ```
 
-A `Language` defines exactly one comment form: `Line` for a single-line prefix
+A `Language` defines one or both comment forms: `Line` for a single-line prefix
 or `Block` for a two-element open/close pair. `Fence` is the tag written on a
 generated code block and defaults to the extension when empty.
 

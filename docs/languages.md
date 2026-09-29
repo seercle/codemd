@@ -96,9 +96,9 @@ Two mechanisms override the defaults:
   markers from `s.c` with the `c` comment form.
 - **A `.codemd.yaml` entry.** Add or replace an extension's language in the
   config file. The entry replaces the built-in for that extension and must
-  define exactly one of `line` or `block`; `fence` defaults to the extension
-  name. See [Configuration](configuration.md) for the file format and
-  discovery rules.
+  define at least one of `line` or `block`; both may be given. `fence` defaults
+  to the extension name. See [Configuration](configuration.md) for the file
+  format and discovery rules.
 
 ## `--languages`
 
