@@ -65,11 +65,23 @@ func TestExtractCommentNewSyntax(t *testing.T) {
 		{"<!-- codemd: (import a..b src.go go)", "", false},
 		{"<!-- codemd: not-parenthesized -->", "", false},
 		{"plain text", "", false},
+		{"[codemd]:# (import a..b src.go go)", "", false},
 	}
 	for _, tc := range cases {
 		got, ok := ExtractComment(tc.line)
 		if ok != tc.ok || got != tc.want {
 			t.Errorf("ExtractComment(%q) = (%q, %v), want (%q, %v)", tc.line, got, ok, tc.want, tc.ok)
 		}
+	}
+}
+
+func TestScanTreatsIndentedFenceAsBlock(t *testing.T) {
+	md := "<!-- codemd: (import a..b s.go go) -->\n\n    ```go\n    <!-- codemd: (import x..y s.go go) -->\n    ```\n\n<!-- codemd: (import c..d s.go go) -->\n"
+	refs, errs := Scan(md)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	if len(refs) != 2 || refs[0].Line != 1 || refs[1].Line != 7 {
+		t.Fatalf("indented fence must hide the reference inside it: %+v", refs)
 	}
 }

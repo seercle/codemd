@@ -228,6 +228,25 @@ func TestRunUnknownFlagExitsTwo(t *testing.T) {
 	if code := Run([]string{"--bogus"}, strings.NewReader(""), &out, &errb); code != 2 {
 		t.Fatalf("unknown flag should exit 2, got %d", code)
 	}
+	if !strings.Contains(errb.String(), "Usage:") {
+		t.Fatalf("unknown flag usage should go to stderr, got stderr=%q stdout=%q", errb.String(), out.String())
+	}
+}
+
+func TestFlagNameStripsAtMostTwoDashes(t *testing.T) {
+	cases := map[string]string{
+		"--check":    "check",
+		"-w":         "w",
+		"---check":   "-check",
+		"check":      "check",
+		"--":         "",
+		"--config=x": "config=x",
+	}
+	for in, want := range cases {
+		if got := flagName(in); got != want {
+			t.Errorf("flagName(%q) = %q, want %q", in, got, want)
+		}
+	}
 }
 
 func TestRunWriteAllOrNothing(t *testing.T) {

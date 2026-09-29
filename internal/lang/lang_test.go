@@ -101,6 +101,31 @@ func TestLoadConfigUnknownKeyMessage(t *testing.T) {
 	}
 }
 
+func TestLoadConfigTypeErrorsDoNotLeakGoTypes(t *testing.T) {
+	dir := t.TempDir()
+	cases := map[string]string{
+		"languages-not-map": "languages: [a]\n",
+		"block-not-list":    "languages:\n  coffee:\n    block: \"/*\"\n",
+	}
+	for name, body := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(dir, name+".yaml")
+			if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			_, err := LoadConfig(path)
+			if err == nil {
+				t.Fatalf("expected an error for %q", body)
+			}
+			for _, leak := range []string{"[]string", "yamlLanguage", "map[string", "struct {"} {
+				if strings.Contains(err.Error(), leak) {
+					t.Fatalf("error leaks Go type %q: %v", leak, err)
+				}
+			}
+		})
+	}
+}
+
 func TestDualFormConfigEntry(t *testing.T) {
 	cfg := Config{Languages: map[string]Language{
 		"coffee": {Fence: "coffee", Form: CommentForm{

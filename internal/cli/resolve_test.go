@@ -193,6 +193,41 @@ func TestDuplicateMarkerDoesNotBlockOtherReferences(t *testing.T) {
 	if _, errs := r.ResolveDocument(bad, dir); len(errs) != 1 {
 		t.Fatalf("expected one duplicate-marker error, got: %v", errs)
 	}
+
+	badEnd := "<!-- codemd: (import c..a s.go go) -->\n"
+	if _, errs := r.ResolveDocument(badEnd, dir); len(errs) != 1 {
+		t.Fatalf("expected one duplicate-marker error on the End bound, got: %v", errs)
+	}
+}
+
+func TestDuplicateMarkerMessageListsEveryLine(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:a\n//codemd:a\nx\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	doc := "<!-- codemd: (import a.. s.go go) -->\n"
+	_, errs := r.ResolveDocument(doc, dir)
+	if len(errs) != 1 {
+		t.Fatalf("expected one error, got: %v", errs)
+	}
+	if msg := errs[0].Err.Error(); !strings.Contains(msg, "lines 1, 2, 3") {
+		t.Fatalf("message must list every occurrence, got: %q", msg)
+	}
+}
+
+func TestResolveIndentedReferenceIsIdempotent(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	in := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n"
+	once, errs := r.ResolveDocument(in, dir)
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	twice, errs := r.ResolveDocument(once, dir)
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors on re-run: %v", errs)
+	}
+	if once != twice {
+		t.Fatalf("resolve is not idempotent:\nonce:\n%q\ntwice:\n%q", once, twice)
+	}
 }
 
 func TestResolveDocumentCollectsErrors(t *testing.T) {

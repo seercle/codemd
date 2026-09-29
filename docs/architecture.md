@@ -66,8 +66,9 @@ placed directly below an `import` reference is indistinguishable from a stale
 generated one and is replaced, whereas `link` replaces only a line matching its
 generated shape.
 
-The reference line's leading whitespace is copied onto every generated line,
-so a reference inside a list item keeps its snippet inside that item.
+The reference line's leading whitespace is copied onto every non-blank
+generated line, so a reference inside a list item keeps its snippet inside that
+item.
 
 A following reference comment is never consumed: codemd inserts below the
 current comment and leaves the next reference in place. Because the reference

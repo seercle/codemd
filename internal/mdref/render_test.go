@@ -22,8 +22,8 @@ func TestReferenceLinesAreHiddenByMarkdown(t *testing.T) {
 		if err := goldmark.Convert([]byte(ref+"\n"), &out); err != nil {
 			t.Fatalf("%s: %v", ref, err)
 		}
-		if strings.Contains(out.String(), "codemd") || strings.Contains(out.String(), "import") {
-			t.Errorf("reference rendered visibly:\nref:  %s\nhtml: %s", ref, out.String())
+		if got := out.String(); got != "<!-- raw HTML omitted -->\n" {
+			t.Errorf("reference rendered visibly:\nref:  %s\nhtml: %q", ref, got)
 		}
 	}
 }

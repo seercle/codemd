@@ -172,14 +172,17 @@ mode:
   comment.
 
 For `import`, the managed region is the first non-blank fenced block below the
-reference; codemd replaces it in place. A generated block carries no identity,
-so a hand-written fenced block placed directly below an `import` reference is
+reference; codemd replaces that whole block in place. If the first non-blank
+line below the reference is not a fence, the generated snippet is inserted
+directly below the reference instead. A generated block carries no identity, so
+a hand-written fenced block placed directly below an `import` reference is
 indistinguishable from a stale generated one and will be replaced. Keep
 hand-written blocks separated from a reference by intervening text, or use a
 `link` reference (which only replaces a line matching the generated link shape).
 
-The reference line's leading whitespace is copied onto every generated line,
-so a reference inside a list item keeps its snippet inside that item.
+The reference line's leading whitespace is copied onto every non-blank
+generated line, so a reference inside a list item keeps its snippet inside that
+item.
 
 A following reference comment is never consumed: if the first non-blank line is
 another reference comment, codemd inserts the generated content directly below

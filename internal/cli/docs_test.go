@@ -36,22 +36,38 @@ func TestDocsCurrent(t *testing.T) {
 }
 
 func TestDocsUseHiddenReferenceSyntax(t *testing.T) {
+	var files []string
 	dir := filepath.Join("..", "..", "docs")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		t.Fatalf("read docs: %v", err)
 	}
 	for _, e := range entries {
-		if e.IsDir() || filepath.Ext(e.Name()) != ".md" {
-			continue
+		if !e.IsDir() && filepath.Ext(e.Name()) == ".md" {
+			files = append(files, filepath.Join(dir, e.Name()))
 		}
-		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+	}
+	files = append(files, filepath.Join("..", "..", "README.md"))
+	if err := filepath.Walk(filepath.Join("..", "..", "testdata"), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".md" {
+			files = append(files, path)
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("walk testdata: %v", err)
+	}
+
+	for _, path := range files {
+		data, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
 		for i, line := range strings.Split(string(data), "\n") {
 			if strings.Contains(line, "[codemd]:#") {
-				t.Errorf("%s:%d: legacy reference syntax; use <!-- codemd: (...) -->", e.Name(), i+1)
+				t.Errorf("%s:%d: legacy reference syntax; use <!-- codemd: (...) -->", path, i+1)
 			}
 		}
 	}

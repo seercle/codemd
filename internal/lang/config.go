@@ -19,8 +19,13 @@ type yamlLanguage struct {
 	Fence string   `yaml:"fence"`
 }
 
-var unknownKeyPattern = regexp.MustCompile(`^line (\d+): field (.+) not found in type `)
+var (
+	unknownKeyPattern = regexp.MustCompile(`^line (\d+): field (.+) not found in type `)
+	goTypePattern     = regexp.MustCompile(` (?:in type|into) \S+`)
+)
 
+// configDecodeError rewrites yaml.v3's strict-decode errors so they name the
+// config file and the offending key without exposing Go type names.
 func configDecodeError(path string, err error) error {
 	var te *yaml.TypeError
 	if !errors.As(err, &te) || len(te.Errors) == 0 {
@@ -28,19 +33,19 @@ func configDecodeError(path string, err error) error {
 	}
 	lines := make([]string, 0, len(te.Errors))
 	for _, entry := range te.Errors {
-		m := unknownKeyPattern.FindStringSubmatch(entry)
-		if m == nil {
-			return fmt.Errorf("%s: %w", path, err)
+		if m := unknownKeyPattern.FindStringSubmatch(entry); m != nil {
+			lines = append(lines, fmt.Sprintf("%s: line %s: unknown key %q", path, m[1], m[2]))
+			continue
 		}
-		lines = append(lines, fmt.Sprintf("%s: line %s: unknown key %q", path, m[1], m[2]))
+		lines = append(lines, fmt.Sprintf("%s: %s", path, goTypePattern.ReplaceAllString(entry, "")))
 	}
 	return errors.New(strings.Join(lines, "\n"))
 }
 
 // LoadConfig reads the YAML config at path and converts its language entries
-// into a Config. It returns an error when the file cannot be read or parsed, or
-// when an entry defines neither line nor block, or a block that is not exactly
-// two elements.
+// into a Config. It returns an error when the file cannot be read or parsed,
+// when the document has unknown keys, or when an entry defines neither line nor
+// block, or a block that is not exactly two elements.
 func LoadConfig(path string) (Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

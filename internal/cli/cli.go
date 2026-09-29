@@ -69,7 +69,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			return 0
 		}
 		if len(a) >= 2 && a[0] == '-' && !strings.Contains(a, "=") {
-			name := strings.TrimLeft(a, "-")
+			name := flagName(a)
 			if name != "h" && name != "help" && !isBoolFlag(fs, name) {
 				i++
 			}
@@ -260,6 +260,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	return exit
 }
 
+// flagName returns arg's flag name with at most one or two leading dashes
+// removed, matching the flag package's own parsing (so "---x" yields "-x").
+func flagName(arg string) string {
+	return strings.TrimPrefix(strings.TrimPrefix(arg, "-"), "-")
+}
+
 // isBoolFlag reports whether the named flag in fs is a boolean flag (one that
 // consumes no value token of its own). Unknown flags report false.
 func isBoolFlag(fs *flag.FlagSet, name string) bool {
@@ -292,7 +298,7 @@ func reorderFlags(fs *flag.FlagSet, args []string) []string {
 			continue
 		}
 		flags = append(flags, a)
-		name := strings.TrimLeft(a, "-")
+		name := flagName(a)
 		if eq := strings.IndexByte(name, '='); eq >= 0 {
 			continue
 		}

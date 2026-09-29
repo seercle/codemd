@@ -113,7 +113,14 @@ func checkDuplicate(set srcfile.MarkerSet, b extract.Bound) error {
 	if len(lines) < 2 {
 		return nil
 	}
-	return fmt.Errorf("duplicate marker %q on lines %d and %d", b.Name, lines[0], lines[len(lines)-1])
+	if len(lines) == 2 {
+		return fmt.Errorf("duplicate marker %q on lines %d and %d", b.Name, lines[0], lines[1])
+	}
+	parts := make([]string, len(lines))
+	for i, n := range lines {
+		parts[i] = fmt.Sprint(n)
+	}
+	return fmt.Errorf("duplicate marker %q on lines %s", b.Name, strings.Join(parts, ", "))
 }
 
 var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+\)$`)

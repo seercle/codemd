@@ -96,6 +96,7 @@ func TestParseErrors(t *testing.T) {
 		`(link a src/x.go "A" "B")`,       // multiple link texts
 		`(link a src/x.go "oops)`,         // unterminated quote
 		`(link a "src/x.go")`,             // quoted path
+		`(link a src/x.go "x --> y")`,     // comment terminator in body
 	}
 	for _, s := range bad {
 		if _, err := ParseRef(s); err == nil {

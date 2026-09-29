@@ -1,0 +1,2 @@
+$ codemd --config config.yaml doc.md
+codemd: config.yaml: line 3: cannot unmarshal !!str `/*`

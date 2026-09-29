@@ -118,6 +118,13 @@ func TestResolveEmptyRangeIsError(t *testing.T) {
 	}
 }
 
+func TestResolveEmptyOpenRangeIsError(t *testing.T) {
+	_, err := Resolve(goSrc, markers(t), Range{Start: Bound{Name: "b"}, End: Bound{Open: true}}, false)
+	if err == nil {
+		t.Fatal("expected an error for an open range with no lines after the final marker")
+	}
+}
+
 func TestResolveStripLeftmostSingleMatch(t *testing.T) {
 	src := "// a a\ncode\n"
 	res, err := Resolve(src, nil, Range{Start: Bound{Regex: "a"}, End: Bound{Open: true}}, true)
