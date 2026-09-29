@@ -64,7 +64,7 @@ func TestIntegrationExternalLink(t *testing.T) {
 	}
 
 	dir := t.TempDir()
-	doc := "[codemd]:# (link /^package errors/ " + url + " go)\n"
+	doc := "<!-- codemd: (link /^package errors/ " + url + " go) -->\n"
 	writeTree(t, dir, map[string]string{"doc.md": doc})
 
 	var out, errb bytes.Buffer

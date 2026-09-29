@@ -22,7 +22,7 @@ func TestIntegrationHTTP(t *testing.T) {
 
 	dir := t.TempDir()
 	url := srv.URL + "/s.go"
-	doc := "[codemd]:# (import a..b " + url + " go)\n\n[codemd]:# (link a " + url + ")\n"
+	doc := "<!-- codemd: (import a..b " + url + " go) -->\n\n<!-- codemd: (link a " + url + ") -->\n"
 	writeTree(t, dir, map[string]string{"doc.md": doc})
 
 	var out, errb bytes.Buffer
@@ -34,7 +34,7 @@ func TestIntegrationHTTP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "[codemd]:# (import a..b " + url + " go)\n```go\nfunc A() {}\n```\n\n[codemd]:# (link a " + url + ")\n[" + url + ":2](" + url + "#L2)\n"
+	want := "<!-- codemd: (import a..b " + url + " go) -->\n```go\nfunc A() {}\n```\n\n<!-- codemd: (link a " + url + ") -->\n[" + url + ":2](" + url + "#L2)\n"
 	if string(got) != want {
 		t.Fatalf("got:\n%s\nwant:\n%s", got, want)
 	}
@@ -51,7 +51,7 @@ func TestIntegrationHTTPError(t *testing.T) {
 
 	dir := t.TempDir()
 	url := srv.URL + "/missing.go"
-	doc := "[codemd]:# (import a..b " + url + " go)\n"
+	doc := "<!-- codemd: (import a..b " + url + " go) -->\n"
 	writeTree(t, dir, map[string]string{"doc.md": doc})
 
 	var out, errb bytes.Buffer

@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: unterminated regex "/foo src.go"
-[codemd]:# (link /foo src.go)
+<!-- codemd: (link /foo src.go) -->
 codemd: 1 error(s)

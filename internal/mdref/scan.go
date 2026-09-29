@@ -15,32 +15,22 @@ type Reference struct {
 }
 
 const (
-	refOpen   = "<!-- codemd:"
-	refClose  = "-->"
-	legacyRef = "[codemd]:#"
+	refOpen  = "<!-- codemd:"
+	refClose = "-->"
 )
 
 // ExtractComment returns the reference argument list from a reference
-// definition, for example "(import a..b path)": either the HTML-comment form
-// "<!-- codemd: (...) -->" or the legacy "[codemd]:# (...)" form. ok is false
-// when line is not a reference definition.
+// definition, for example "(import a..b path)": the inner text of the HTML
+// comment "<!-- codemd: (...) -->". ok is false when line is not a reference
+// definition.
 func ExtractComment(line string) (string, bool) {
 	trimmed := strings.TrimSpace(line)
-	if strings.HasPrefix(trimmed, refOpen) && strings.HasSuffix(trimmed, refClose) {
-		inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, refOpen), refClose))
-		if strings.HasPrefix(inner, "(") && strings.HasSuffix(inner, ")") {
-			return inner, true
-		}
+	if !strings.HasPrefix(trimmed, refOpen) || !strings.HasSuffix(trimmed, refClose) {
 		return "", false
 	}
-	if strings.HasPrefix(trimmed, legacyRef) {
-		rest := strings.TrimSpace(strings.TrimPrefix(trimmed, legacyRef))
-		if !strings.HasPrefix(rest, "(") {
-			return "", false
-		}
-		if end := strings.LastIndex(rest, ")"); end >= 0 {
-			return rest[:end+1], true
-		}
+	inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(trimmed, refOpen), refClose))
+	if strings.HasPrefix(inner, "(") && strings.HasSuffix(inner, ")") {
+		return inner, true
 	}
 	return "", false
 }

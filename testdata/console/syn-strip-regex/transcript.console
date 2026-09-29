@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: strip requires a regex token in "(import a..b x.go strip)"
-[codemd]:# (import a..b x.go strip)
+<!-- codemd: (import a..b x.go strip) -->
 codemd: 1 error(s)

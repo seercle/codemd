@@ -1,1 +1,1 @@
-[codemd]:# (import nope..end x.go go)
+<!-- codemd: (import nope..end x.go go) -->

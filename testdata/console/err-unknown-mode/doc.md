@@ -1,1 +1,1 @@
-[codemd]:# (bogus a)
+<!-- codemd: (bogus a) -->

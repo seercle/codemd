@@ -17,27 +17,27 @@ func resolver() Resolver {
 }
 
 func TestSpliceInsertsBelowComment(t *testing.T) {
-	lines := []string{"[codemd]:# (link a s.go)", "", "keep me"}
+	lines := []string{"<!-- codemd: (link a s.go) -->", "", "keep me"}
 	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
-	want := []string{"[codemd]:# (link a s.go)", "[s.go:2](s.go#L2)", "", "keep me"}
+	want := []string{"<!-- codemd: (link a s.go) -->", "[s.go:2](s.go#L2)", "", "keep me"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
 	}
 }
 
 func TestSpliceReplacesGeneratedLink(t *testing.T) {
-	lines := []string{"[codemd]:# (link a s.go)", "", "[s.go:9](s.go#L9)"}
+	lines := []string{"<!-- codemd: (link a s.go) -->", "", "[s.go:9](s.go#L9)"}
 	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
-	want := []string{"[codemd]:# (link a s.go)", "", "[s.go:2](s.go#L2)"}
+	want := []string{"<!-- codemd: (link a s.go) -->", "", "[s.go:2](s.go#L2)"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
 	}
 }
 
 func TestSpliceBackToBackComments(t *testing.T) {
-	lines := []string{"[codemd]:# (import a..b s.go go)", "[codemd]:# (link a s.go)"}
+	lines := []string{"<!-- codemd: (import a..b s.go go) -->", "<!-- codemd: (link a s.go) -->"}
 	got := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
-	want := []string{"[codemd]:# (import a..b s.go go)", "```go", "x", "```", "[codemd]:# (link a s.go)"}
+	want := []string{"<!-- codemd: (import a..b s.go go) -->", "```go", "x", "```", "<!-- codemd: (link a s.go) -->"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
 	}
@@ -46,7 +46,7 @@ func TestSpliceBackToBackComments(t *testing.T) {
 func TestResolveDocumentImportAndLink(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n//codemd:b\n"), 0o644)
-	md := "[codemd]:# (import a..b server.go go)\n\n```go\nstale\n```\n\n[codemd]:# (link a server.go)\n\n[server.go:9](server.go#L9)\n"
+	md := "<!-- codemd: (import a..b server.go go) -->\n\n```go\nstale\n```\n\n<!-- codemd: (link a server.go) -->\n\n[server.go:9](server.go#L9)\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
@@ -65,12 +65,12 @@ func TestResolveDocumentImportAndLink(t *testing.T) {
 func TestResolveDocumentLinkInsertsUnderNormalLine(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n"), 0o644)
-	md := "[codemd]:# (link a server.go)\n\nkeep me\n"
+	md := "<!-- codemd: (link a server.go) -->\n\nkeep me\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
 	}
-	want := "[codemd]:# (link a server.go)\n[server.go:2](server.go#L2)\n\nkeep me\n"
+	want := "<!-- codemd: (link a server.go) -->\n[server.go:2](server.go#L2)\n\nkeep me\n"
 	if out != want {
 		t.Fatalf("got:\n%s\nwant:\n%s", out, want)
 	}
@@ -79,7 +79,7 @@ func TestResolveDocumentLinkInsertsUnderNormalLine(t *testing.T) {
 func TestResolveDocumentIsIdempotent(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
-	md := "[codemd]:# (import a..b s.go go)\n"
+	md := "<!-- codemd: (import a..b s.go go) -->\n"
 	once, _ := resolver().ResolveDocument(md, dir)
 	twice, _ := resolver().ResolveDocument(once, dir)
 	if once != twice {
@@ -90,7 +90,7 @@ func TestResolveDocumentIsIdempotent(t *testing.T) {
 func TestResolveDocumentUnknownExtensionFallback(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "notes.txt"), []byte("#codemd:a\nhello\n#codemd:b\n"), 0o644)
-	md := "[codemd]:# (import a..b notes.txt)\n"
+	md := "<!-- codemd: (import a..b notes.txt) -->\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
@@ -103,7 +103,7 @@ func TestResolveDocumentUnknownExtensionFallback(t *testing.T) {
 func TestResolveDocumentContinuesPastBadRef(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
-	md := "[codemd]:# (bogus ref)\n[codemd]:# (import a..b s.go go)\n"
+	md := "<!-- codemd: (bogus ref) -->\n<!-- codemd: (import a..b s.go go) -->\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 1 {
 		t.Fatalf("want 1 error, got %+v", errs)
@@ -117,7 +117,7 @@ func TestResolveDocumentIdempotentNestedTildeFence(t *testing.T) {
 	dir := t.TempDir()
 	src := "<!--codemd:a-->\nhello\n~~~\nworld\n<!--codemd:b-->\n"
 	os.WriteFile(filepath.Join(dir, "doc.md"), []byte(src), 0o644)
-	md := "[codemd]:# (import a..b doc.md)\n"
+	md := "<!-- codemd: (import a..b doc.md) -->\n"
 	once, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
@@ -143,7 +143,7 @@ func TestIsGeneratedLink(t *testing.T) {
 		{"escaped bracket label", `[a\]b](s.go#L2)`, true},
 		{"surrounding whitespace", "  [s.go:2](s.go#L2)  ", true},
 		{"non-link line", "text", false},
-		{"reference comment", "[codemd]:# (link a s.go)", false},
+		{"reference comment", "<!-- codemd: (link a s.go) -->", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestIsGeneratedLink(t *testing.T) {
 
 func TestResolveDocumentCollectsErrors(t *testing.T) {
 	dir := t.TempDir()
-	md := "[codemd]:# (import a..b missing.go go)\n"
+	md := "<!-- codemd: (import a..b missing.go go) -->\n"
 	out, errs := resolver().ResolveDocument(md, dir)
 	if len(errs) != 1 || out != md {
 		t.Fatalf("out=%q errs=%+v", out, errs)

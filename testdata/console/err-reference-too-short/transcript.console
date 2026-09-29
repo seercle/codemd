@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: reference too short: "()"
-[codemd]:# ()
+<!-- codemd: () -->
 codemd: 1 error(s)

@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: regex "nomatch" matched no line at or after 1
-[codemd]:# (link /nomatch/ src.go go)
+<!-- codemd: (link /nomatch/ src.go go) -->
 codemd: 1 error(s)

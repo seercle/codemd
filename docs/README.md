@@ -27,17 +27,17 @@ Give `server.go` a `handler-start` marker and a matching `handler-end` marker
 ````markdown
 # My docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ````
 
 Run codemd to generate the snippet:
 
-[codemd]:# (import .. ../testdata/console/first-import/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/first-import/transcript.console console) -->
 ````console
 $ codemd doc.md
 # My docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"

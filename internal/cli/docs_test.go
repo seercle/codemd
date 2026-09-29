@@ -35,11 +35,33 @@ func TestDocsCurrent(t *testing.T) {
 	}
 }
 
+func TestDocsUseHiddenReferenceSyntax(t *testing.T) {
+	dir := filepath.Join("..", "..", "docs")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read docs: %v", err)
+	}
+	for _, e := range entries {
+		if e.IsDir() || filepath.Ext(e.Name()) != ".md" {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, line := range strings.Split(string(data), "\n") {
+			if strings.Contains(line, "[codemd]:#") {
+				t.Errorf("%s:%d: legacy reference syntax; use <!-- codemd: (...) -->", e.Name(), i+1)
+			}
+		}
+	}
+}
+
 // isConsoleImport reports whether line is a codemd import directive whose
 // requested fence language is `console`.
 func isConsoleImport(line string) bool {
 	line = strings.TrimSpace(line)
-	return strings.HasPrefix(line, "[codemd]:# (import ") && strings.HasSuffix(line, " console)")
+	return strings.HasPrefix(line, "<!-- codemd: (import ") && strings.HasSuffix(line, " console) -->")
 }
 
 // fence is an opened backtick code fence: its 1-based line and info string.
@@ -130,7 +152,7 @@ func consoleFenceViolations(doc string) []int {
 // parser used to miss: four-backtick openers and fences that embed other fence
 // lines.
 func TestConsoleFenceScan(t *testing.T) {
-	imp := "[codemd]:# (import .. ../testdata/console/x/transcript.console console)"
+	imp := "<!-- codemd: (import .. ../testdata/console/x/transcript.console console) -->"
 	cases := []struct {
 		name string
 		doc  string

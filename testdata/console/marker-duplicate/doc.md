@@ -1,1 +1,1 @@
-[codemd]:# (import a..b src.txt)
+<!-- codemd: (import a..b src.txt) -->

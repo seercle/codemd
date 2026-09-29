@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: empty link text in "(link a src.go \"\")"
-[codemd]:# (link a src.go "")
+<!-- codemd: (link a src.go "") -->
 codemd: 1 error(s)

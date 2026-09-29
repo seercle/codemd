@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: unexpected token "extra" in "(import a..b src.go go extra)"
-[codemd]:# (import a..b src.go go extra)
+<!-- codemd: (import a..b src.go go extra) -->
 codemd: 1 error(s)

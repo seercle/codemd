@@ -1,3 +1,3 @@
 $ codemd doc.md
-[codemd]:# (link handler-start server.go go "the \"handler\" entry")
+<!-- codemd: (link handler-start server.go go "the \"handler\" entry") -->
 [the "handler" entry](server.go#L3)

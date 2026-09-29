@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt: HTTP 404
-[codemd]:# (link a https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt go)
+<!-- codemd: (link a https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt go) -->
 codemd: 1 error(s)

@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: marker "foo" not found at or after line 1
-[codemd]:# (import foo..bar src.go go)
+<!-- codemd: (import foo..bar src.go go) -->
 codemd: 1 error(s)

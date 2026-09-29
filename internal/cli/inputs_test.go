@@ -120,8 +120,8 @@ func TestRunWriteDirectory(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":            "//codemd:a\nx\n//codemd:b\n",
-		"docs/a.md":       "[codemd]:# (import a..b ../s.go go)\n",
-		"docs/sub/b.md":   "[codemd]:# (import a..b ../../s.go go)\n",
+		"docs/a.md":       "<!-- codemd: (import a..b ../s.go go) -->\n",
+		"docs/sub/b.md":   "<!-- codemd: (import a..b ../../s.go go) -->\n",
 		"docs/ignore.txt": "no refs\n",
 	})
 	var out, errb bytes.Buffer

@@ -1,1 +1,1 @@
-[codemd]:# (link a x.go "A" "B")
+<!-- codemd: (link a x.go "A" "B") -->

@@ -10,7 +10,7 @@ Cases 1–11 and 13–17 use the repository fixture copied from
 `testdata/snippets` — `server.go` and `worker.py`. Case 12 instead
 fetches a source over the network from a commit-pinned URL:
 
-[codemd]:# (import .. ../testdata/snippets/server.go go)
+<!-- codemd: (import .. ../testdata/snippets/server.go go) -->
 ```go
 package server
 
@@ -22,7 +22,7 @@ func handler() string {
 //codemd:handler-end
 ```
 
-[codemd]:# (import .. ../testdata/snippets/worker.py python)
+<!-- codemd: (import .. ../testdata/snippets/worker.py python) -->
 ```python
 import os
 
@@ -43,7 +43,7 @@ the [Command-line reference](cli-reference.md) for flags and exit codes.
 
 Import the lines between two named markers. Both marker lines are excluded.
 
-[codemd]:# (import handler-start..handler-end ../testdata/snippets/server.go go)
+<!-- codemd: (import handler-start..handler-end ../testdata/snippets/server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -56,7 +56,7 @@ func handler() string {
 A token that begins with `/` is a line regex. Regex boundary lines are
 **included**, so both marker lines appear here.
 
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ ../testdata/snippets/worker.py python)
+<!-- codemd: (import /#codemd:worker-start/../#codemd:worker-end/ ../testdata/snippets/worker.py python) -->
 ```python
 #codemd:worker-start
 def work(x):
@@ -75,7 +75,7 @@ The blank line before the end marker is a *trailing* blank line once the marker
 line is stripped, so the leading/trailing trim removes it; interior blank lines
 are kept.
 
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ ../testdata/snippets/worker.py python strip)
+<!-- codemd: (import /#codemd:worker-start/../#codemd:worker-end/ ../testdata/snippets/worker.py python strip) -->
 ```python
 def work(x):
     return x * 2
@@ -85,7 +85,7 @@ def work(x):
 
 An empty end (`start..`) runs to the last line, including any trailing markers.
 
-[codemd]:# (import worker-start.. ../testdata/snippets/worker.py python)
+<!-- codemd: (import worker-start.. ../testdata/snippets/worker.py python) -->
 ```python
 def work(x):
     return x * 2
@@ -98,7 +98,7 @@ def work(x):
 An empty start (`..end`) begins at the first line. The named end marker is
 excluded.
 
-[codemd]:# (import ..handler-end ../testdata/snippets/server.go go)
+<!-- codemd: (import ..handler-end ../testdata/snippets/server.go go) -->
 ```go
 package server
 
@@ -115,7 +115,7 @@ One boundary may be a named point and the other a regex. This example keeps the
 named start (excluded) and ends on a regex that matches the Go marker line
 (included).
 
-[codemd]:# (import handler-start../codemd:handler-end/ ../testdata/snippets/server.go go)
+<!-- codemd: (import handler-start../codemd:handler-end/ ../testdata/snippets/server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -129,7 +129,7 @@ func handler() string {
 The `LANG` token after the path sets the fence. It may differ from the source's
 extension.
 
-[codemd]:# (import handler-start..handler-end ../testdata/snippets/server.go bash)
+<!-- codemd: (import handler-start..handler-end ../testdata/snippets/server.go bash) -->
 ```bash
 func handler() string {
 	return "ok"
@@ -144,13 +144,13 @@ A link resolves a single line. The default label is `path:line`.
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/link-named/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/link-named/transcript.console console) -->
 ```console
 $ codemd doc.md
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)
 ```
 
@@ -161,13 +161,13 @@ A regex link anchors the first matching line.
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (link /^func handler/ server.go go)
+<!-- codemd: (link /^func handler/ server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/link-regex/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/link-regex/transcript.console console) -->
 ```console
 $ codemd doc.md
-[codemd]:# (link /^func handler/ server.go go)
+<!-- codemd: (link /^func handler/ server.go go) -->
 [server.go:4](server.go#L4)
 ```
 
@@ -178,13 +178,13 @@ A quoted token after the path replaces the label.
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (link handler-start server.go go "Handler")
+<!-- codemd: (link handler-start server.go go "Handler") -->
 ```
 
-[codemd]:# (import .. ../testdata/console/link-custom-text/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/link-custom-text/transcript.console console) -->
 ```console
 $ codemd doc.md
-[codemd]:# (link handler-start server.go go "Handler")
+<!-- codemd: (link handler-start server.go go "Handler") -->
 [Handler](server.go#L3)
 ```
 
@@ -195,13 +195,13 @@ The label may contain spaces, and a backslash escapes the next character.
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (link handler-start server.go go "the \"handler\" entry")
+<!-- codemd: (link handler-start server.go go "the \"handler\" entry") -->
 ```
 
-[codemd]:# (import .. ../testdata/console/link-escaped-text/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/link-escaped-text/transcript.console console) -->
 ```console
 $ codemd doc.md
-[codemd]:# (link handler-start server.go go "the \"handler\" entry")
+<!-- codemd: (link handler-start server.go go "the \"handler\" entry") -->
 [the "handler" entry](server.go#L3)
 ```
 
@@ -213,12 +213,12 @@ library, pinned to commit `a10e42f` so the result is reproducible.
 
 Import from the URL:
 
-[codemd]:# (import .. ../testdata/console/http-import/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/http-import/transcript.console console) -->
 ````console
 $ cat doc.md
-[codemd]:# (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 $ codemd doc.md
-[codemd]:# (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 ```go
 func New(text string) error {
 	return &errorString{text}
@@ -228,12 +228,12 @@ func New(text string) error {
 
 Link from the URL; the label is `URL:line` and the target appends the anchor:
 
-[codemd]:# (import .. ../testdata/console/http-link/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/http-link/transcript.console console) -->
 ```console
 $ cat doc.md
-[codemd]:# (link /^func New/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (link /^func New/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 $ codemd doc.md
-[codemd]:# (link /^func New/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (link /^func New/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 [https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go:61](https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go#L61)
 ```
 
@@ -251,9 +251,9 @@ HTTP semantics:
 
   ```console-norun
   $ cat doc.md
-  [codemd]:# (link /^<!doctype/ https://example.com/ html)
+  <!-- codemd: (link /^<!doctype/ https://example.com/ html) -->
   $ codemd doc.md
-  [codemd]:# (link /^<!doctype/ https://example.com/ html)
+  <!-- codemd: (link /^<!doctype/ https://example.com/ html) -->
   [https://example.com/:1](https://example.com/#L1)
   ```
 
@@ -264,7 +264,7 @@ range, a default link, a custom-label link, and a regex link. Its input and full
 output are listed in [Reference syntax](reference-syntax.md#worked-example).
 Verify the whole document in one run:
 
-[codemd]:# (import .. ../testdata/console/multiple-refs/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/multiple-refs/transcript.console console) -->
 ```console
 $ diff <(codemd doc.md) want.md && echo FIXTURE_OK
 FIXTURE_OK
@@ -277,18 +277,18 @@ disk.
 
 Input `link.md`:
 
-[codemd]:# (import .. ../testdata/snippets/link.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/link.md markdown) -->
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/stdout/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/stdout/transcript.console console) -->
 ```console
 $ codemd link.md
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)
 $ cat link.md
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
 ## 15. Write in place
@@ -296,12 +296,12 @@ $ cat link.md
 `-w` rewrites each file whose resolved output differs and prints a summary to
 standard error. A second run changes nothing.
 
-[codemd]:# (import .. ../testdata/console/write-in-place/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/write-in-place/transcript.console console) -->
 ````console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
 $ cat doc.md
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -318,7 +318,7 @@ codemd: 1 file(s) checked, 0 updated
 and `b.md` are two further files in the scenario directory, so the second run
 reaches that check rather than failing to find them.
 
-[codemd]:# (import .. ../testdata/console/write-output/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/write-output/transcript.console console) -->
 ```console
 $ codemd -o out.md doc.md
 $ diff out.md want.md && echo MATCHES_WANT
@@ -339,18 +339,18 @@ headers, and writes nothing to disk.
 
 Input `link.md`:
 
-[codemd]:# (import .. ../testdata/snippets/link.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/link.md markdown) -->
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/diff-preview/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/diff-preview/transcript.console console) -->
 ```console
 $ codemd -d link.md
 --- a/link.md
 +++ b/link.md
 @@ -1,1 +1,2 @@
- [codemd]:# (link handler-start server.go go)
+ <!-- codemd: (link handler-start server.go go) -->
 +[server.go:3](server.go#L3)
 ```
 
@@ -361,7 +361,7 @@ Exit code is `0` even when the diff is non-empty; use `--check` to fail a build.
 `--check` reports each stale file and exits `1`; once the files are current it
 exits `0`.
 
-[codemd]:# (import .. ../testdata/console/ci-check/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/ci-check/transcript.console console) -->
 ```console
 $ codemd --check '**/*.md'
 codemd: doc.md is out of date
@@ -390,7 +390,7 @@ doc.md
 sub/nested.md
 ```
 
-[codemd]:# (import .. ../testdata/console/input-expansion/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/input-expansion/transcript.console console) -->
 ```console
 $ codemd --check doc.md
 codemd: doc.md is out of date
@@ -423,15 +423,15 @@ and errors are named `<stdin>`.
 
 Input `link.md`:
 
-[codemd]:# (import .. ../testdata/snippets/link.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/link.md markdown) -->
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/stdin/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/stdin/transcript.console console) -->
 ```console
 $ cat link.md | codemd
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)
 $ cat link.md | codemd --check
 codemd: <stdin> is out of date
@@ -451,14 +451,14 @@ does not suppress the error, and the exit code stays `1`.
 
 Input `broken.md`:
 
-[codemd]:# (import .. ../testdata/snippets/broken.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/broken.md markdown) -->
 ```markdown
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 
-[codemd]:# (import nope server.go go)
+<!-- codemd: (import nope server.go go) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/force-write/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/force-write/transcript.console console) -->
 ````console
 $ codemd -w broken.md
 codemd: broken.md: line 3: import range must contain '..': "nope"
@@ -470,7 +470,7 @@ codemd: broken.md: line 3: import range must contain '..': "nope"
 codemd: 1 file(s) checked, 1 updated
 codemd: 1 error(s)
 $ cat broken.md
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -478,7 +478,7 @@ func handler() string {
 
 ```
 
-[codemd]:# (import nope server.go go)
+<!-- codemd: (import nope server.go go) -->
 ````
 
 ## 22. Custom language via config
@@ -489,7 +489,7 @@ entry maps `#` comments and a `coffee` fence; see
 
 `.codemd.yaml`:
 
-[codemd]:# (import .. ../testdata/snippets/coffee/.codemd.yaml yaml)
+<!-- codemd: (import .. ../testdata/snippets/coffee/.codemd.yaml yaml) -->
 ```yaml
 languages:
   coffee:
@@ -499,7 +499,7 @@ languages:
 
 `src.coffee`:
 
-[codemd]:# (import .. ../testdata/snippets/coffee/src.coffee coffee)
+<!-- codemd: (import .. ../testdata/snippets/coffee/src.coffee coffee) -->
 ```coffee
 #codemd:s
 x = 1
@@ -509,20 +509,20 @@ x = 1
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (import s..e src.coffee)
+<!-- codemd: (import s..e src.coffee) -->
 
-[codemd]:# (link s src.coffee)
+<!-- codemd: (link s src.coffee) -->
 ```
 
-[codemd]:# (import .. ../testdata/console/config-coffee/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/config-coffee/transcript.console console) -->
 ````console
 $ codemd doc.md
-[codemd]:# (import s..e src.coffee)
+<!-- codemd: (import s..e src.coffee) -->
 ```coffee
 x = 1
 ```
 
-[codemd]:# (link s src.coffee)
+<!-- codemd: (link s src.coffee) -->
 [src.coffee:1](src.coffee#L1)
 ````
 
@@ -534,7 +534,7 @@ When the extension is unknown, codemd tries the generic comment forms (`//` with
 
 `src.txt`:
 
-[codemd]:# (import .. ../testdata/snippets/src.txt text)
+<!-- codemd: (import .. ../testdata/snippets/src.txt text) -->
 ```text
 //codemd:s
 line one
@@ -545,10 +545,10 @@ line two
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (import s..e src.txt)
+<!-- codemd: (import s..e src.txt) -->
 ```
 
-[codemd]:# (import s..e ../testdata/snippets/src.txt)
+<!-- codemd: (import s..e ../testdata/snippets/src.txt) -->
 ```text
 line one
 line two
@@ -561,7 +561,7 @@ A `.md` source uses the `<!-- -->` comment form, and the generated fence is
 
 `src.md`:
 
-[codemd]:# (import .. ../testdata/snippets/src.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/src.md markdown) -->
 ```markdown
 <!-- codemd:s -->
 # Title
@@ -573,12 +573,12 @@ Body text.
 Input `doc.md`:
 
 ```markdown
-[codemd]:# (import s..e src.md)
+<!-- codemd: (import s..e src.md) -->
 
-[codemd]:# (link s src.md)
+<!-- codemd: (link s src.md) -->
 ```
 
-[codemd]:# (import s..e ../testdata/snippets/src.md)
+<!-- codemd: (import s..e ../testdata/snippets/src.md) -->
 ```markdown
 # Title
 
@@ -598,7 +598,7 @@ A CRLF document importing from `src.go`:
 
 `src.go`:
 
-[codemd]:# (import .. ../testdata/snippets/src.go go)
+<!-- codemd: (import .. ../testdata/snippets/src.go go) -->
 ```go
 package p
 
@@ -609,7 +609,7 @@ var a = 1
 ```
 
 ```console-norun
-$ printf '[codemd]:# (import s..e src.go go)\r\n' > doc.md
+$ printf '<!-- codemd: (import s..e src.go go) -->\r\n' > doc.md
 $ codemd doc.md > out.md
 $ file out.md
 out.md: ASCII text, with CRLF line terminators
@@ -620,7 +620,7 @@ document is current, `-d` prints nothing: preserved CRLF endings are not
 reported as a change. A document with no trailing newline keeps that property:
 
 ```console-norun
-$ printf '[codemd]:# (import s..e src.go go)' > doc.md
+$ printf '<!-- codemd: (import s..e src.go go) -->' > doc.md
 $ codemd doc.md | od -An -c | tail -1
    `   `   `
 ```

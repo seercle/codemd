@@ -1,1 +1,1 @@
-[codemd]:# (import a..b src.go strip)
+<!-- codemd: (import a..b src.go strip) -->

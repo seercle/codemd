@@ -1,3 +1,3 @@
 # Nested
 
-[codemd]:# (import handler-start..handler-end ../server.go go)
+<!-- codemd: (import handler-start..handler-end ../server.go go) -->

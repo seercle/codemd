@@ -1,1 +1,1 @@
-[codemd]:# (link /^func handler/ server.go go)
+<!-- codemd: (link /^func handler/ server.go go) -->

@@ -1,7 +1,7 @@
 $ codemd doc.md
 # My docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"

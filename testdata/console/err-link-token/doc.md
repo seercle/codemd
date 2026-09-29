@@ -1,1 +1,1 @@
-[codemd]:# (link a..b src.go go)
+<!-- codemd: (link a..b src.go go) -->

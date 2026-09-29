@@ -1,7 +1,7 @@
 $ cat doc.md
-[codemd]:# (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 $ codemd doc.md
-[codemd]:# (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go)
+<!-- codemd: (import /^func New/../^}/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 ```go
 func New(text string) error {
 	return &errorString{text}

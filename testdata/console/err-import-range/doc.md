@@ -1,1 +1,1 @@
-[codemd]:# (import a src.go go)
+<!-- codemd: (import a src.go go) -->

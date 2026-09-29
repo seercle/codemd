@@ -8,23 +8,23 @@ the managed-region rules. It uses the terms defined in
 ## Grammar
 
 ```text
-[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
+<!-- codemd: (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"]) -->
 ```
 
-A reference is a Markdown link-reference definition. `[codemd]:#` declares a
-link label that nothing ever references, so renderers hide the line. The
-definition must sit on its own line; leading indentation is allowed. A
-reference inside a fenced code block is ignored by the scanner.
+A reference is an HTML comment. `<!-- codemd: (...) -->` is hidden by
+renderers, so the reference does not appear in the rendered document. It must
+sit on its own line; leading indentation is allowed. A reference inside a
+fenced code block is ignored by the scanner.
 
 ## MODE
 
 `MODE` is `import` or `link`. Any other value is an error:
 
-[codemd]:# (import .. ../testdata/console/err-unknown-mode/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/err-unknown-mode/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unknown mode "bogus"
-[codemd]:# (bogus a)
+<!-- codemd: (bogus a) -->
 codemd: 1 error(s)
 ```
 
@@ -33,21 +33,21 @@ codemd: 1 error(s)
 For `import`, `RANGE` is exactly two tokens joined by `..`. A single token
 without `..` is an error:
 
-[codemd]:# (import .. ../testdata/console/err-import-range/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/err-import-range/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: import range must contain '..': "a"
-[codemd]:# (import a src.go go)
+<!-- codemd: (import a src.go go) -->
 codemd: 1 error(s)
 ```
 
 For `link`, `RANGE` is exactly one token; a `..` range is rejected:
 
-[codemd]:# (import .. ../testdata/console/err-link-token/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/err-link-token/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: link takes a single token, got "a..b"
-[codemd]:# (link a..b src.go go)
+<!-- codemd: (link a..b src.go go) -->
 codemd: 1 error(s)
 ```
 
@@ -56,11 +56,11 @@ A token is a **named point** (`handler-start`) or a **line regex**
 ends at the first unescaped `/`, and a literal `/` is written `\/`. An
 unterminated regex is an error:
 
-[codemd]:# (import .. ../testdata/console/syn-unterminated-regex/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-unterminated-regex/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unterminated regex "/foo x.go"
-[codemd]:# (link /foo x.go)
+<!-- codemd: (link /foo x.go) -->
 codemd: 1 error(s)
 ```
 
@@ -90,11 +90,11 @@ removes the matched substring (Go's leftmost match) from the boundary lines; a
 boundary line that becomes empty (whitespace only) is dropped. `strip` with no
 regex token is an error:
 
-[codemd]:# (import .. ../testdata/console/syn-strip-regex/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-strip-regex/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: strip requires a regex token in "(import a..b x.go strip)"
-[codemd]:# (import a..b x.go strip)
+<!-- codemd: (import a..b x.go strip) -->
 codemd: 1 error(s)
 ```
 
@@ -110,51 +110,51 @@ Each of the following is an error.
 
 A quoted token in `import` mode:
 
-[codemd]:# (import .. ../testdata/console/syn-link-text-import/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-link-text-import/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b x.go \"Label\")"
-[codemd]:# (import a..b x.go "Label")
+<!-- codemd: (import a..b x.go "Label") -->
 codemd: 1 error(s)
 ```
 
 An empty or whitespace-only label:
 
-[codemd]:# (import .. ../testdata/console/syn-empty-link-text/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-empty-link-text/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: empty link text in "(link a x.go \"\")"
-[codemd]:# (link a x.go "")
+<!-- codemd: (link a x.go "") -->
 codemd: 1 error(s)
 ```
 
 More than one label:
 
-[codemd]:# (import .. ../testdata/console/syn-multiple-labels/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-multiple-labels/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: multiple link labels in "(link a x.go \"A\" \"B\")"
-[codemd]:# (link a x.go "A" "B")
+<!-- codemd: (link a x.go "A" "B") -->
 codemd: 1 error(s)
 ```
 
 An unterminated quote:
 
-[codemd]:# (import .. ../testdata/console/syn-unterminated-quote/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-unterminated-quote/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: unterminated quoted string in "(link a x.go \"A)"
-[codemd]:# (link a x.go "A)
+<!-- codemd: (link a x.go "A) -->
 codemd: 1 error(s)
 ```
 
 A quoted `PATH`, in either mode:
 
-[codemd]:# (import .. ../testdata/console/syn-quoted-path/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-quoted-path/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: path must not be quoted in "(link a \"x.go\")"
-[codemd]:# (link a "x.go")
+<!-- codemd: (link a "x.go") -->
 codemd: 1 error(s)
 ```
 
@@ -201,19 +201,19 @@ boundary lines are included. codemd locates the start first, then locates the
 end at or after the start. A token that matches nothing is an error for that
 reference:
 
-[codemd]:# (import .. ../testdata/console/syn-marker-missing/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-marker-missing/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: marker "nope" not found at or after line 1
-[codemd]:# (import nope..end x.go go)
+<!-- codemd: (import nope..end x.go go) -->
 codemd: 1 error(s)
 ```
 
-[codemd]:# (import .. ../testdata/console/syn-regex-no-match/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/syn-regex-no-match/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: regex "zzz" matched no line at or after 1
-[codemd]:# (link /zzz/ x.go go)
+<!-- codemd: (link /zzz/ x.go go) -->
 codemd: 1 error(s)
 ```
 
@@ -225,7 +225,7 @@ link, a custom link label, and a regex link.
 
 `server.go`:
 
-[codemd]:# (import .. ../testdata/snippets/server.go go)
+<!-- codemd: (import .. ../testdata/snippets/server.go go) -->
 ```go
 package server
 
@@ -239,7 +239,7 @@ func handler() string {
 
 `worker.py`:
 
-[codemd]:# (import .. ../testdata/snippets/worker.py python)
+<!-- codemd: (import .. ../testdata/snippets/worker.py python) -->
 ```python
 import os
 
@@ -252,25 +252,25 @@ def work(x):
 
 Input `doc.md`:
 
-[codemd]:# (import .. ../testdata/snippets/doc.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/doc.md markdown) -->
 ```markdown
 # Docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 
-[codemd]:# (import worker-start..worker-end worker.py)
+<!-- codemd: (import worker-start..worker-end worker.py) -->
 
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
+<!-- codemd: (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip) -->
 
-[codemd]:# (import worker-start.. worker.py)
+<!-- codemd: (import worker-start.. worker.py) -->
 
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 
-[codemd]:# (link handler-start server.go go "Handler")
+<!-- codemd: (link handler-start server.go go "Handler") -->
 
-[codemd]:# (link /^func handler/ server.go go)
+<!-- codemd: (link /^func handler/ server.go go) -->
 
-[codemd]:# (link worker-start worker.py)
+<!-- codemd: (link worker-start worker.py) -->
 ```
 
 The output is reproduced here for reading; the integration test
@@ -281,7 +281,7 @@ Output `want.md`, produced by `codemd doc.md`:
 ````markdown
 # Docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -289,20 +289,20 @@ func handler() string {
 
 ```
 
-[codemd]:# (import worker-start..worker-end worker.py)
+<!-- codemd: (import worker-start..worker-end worker.py) -->
 ```python
 def work(x):
     return x * 2
 
 ```
 
-[codemd]:# (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip)
+<!-- codemd: (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip) -->
 ```python
 def work(x):
     return x * 2
 ```
 
-[codemd]:# (import worker-start.. worker.py)
+<!-- codemd: (import worker-start.. worker.py) -->
 ```python
 def work(x):
     return x * 2
@@ -310,15 +310,15 @@ def work(x):
 #codemd:worker-end
 ```
 
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)
 
-[codemd]:# (link handler-start server.go go "Handler")
+<!-- codemd: (link handler-start server.go go "Handler") -->
 [Handler](server.go#L3)
 
-[codemd]:# (link /^func handler/ server.go go)
+<!-- codemd: (link /^func handler/ server.go go) -->
 [server.go:4](server.go#L4)
 
-[codemd]:# (link worker-start worker.py)
+<!-- codemd: (link worker-start worker.py) -->
 [worker.py:3](worker.py#L3)
 ````

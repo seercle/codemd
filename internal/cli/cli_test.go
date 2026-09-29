@@ -14,7 +14,7 @@ func TestRunStdout(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
 	md := filepath.Join(dir, "doc.md")
-	os.WriteFile(md, []byte("[codemd]:# (import a..b s.go go)\n"), 0o644)
+	os.WriteFile(md, []byte("<!-- codemd: (import a..b s.go go) -->\n"), 0o644)
 	var out, errb bytes.Buffer
 	code := Run([]string{md}, strings.NewReader(""), &out, &errb)
 	if code != 0 {
@@ -29,7 +29,7 @@ func TestRunWriteAndCheck(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
 	md := filepath.Join(dir, "doc.md")
-	os.WriteFile(md, []byte("[codemd]:# (import a..b s.go go)\n"), 0o644)
+	os.WriteFile(md, []byte("<!-- codemd: (import a..b s.go go) -->\n"), 0o644)
 	var out, errb bytes.Buffer
 	if code := Run([]string{"--check", md}, strings.NewReader(""), &out, &errb); code == 0 {
 		t.Fatal("check should fail when out of date")
@@ -45,7 +45,7 @@ func TestRunWriteAndCheck(t *testing.T) {
 func TestRunErrorExit(t *testing.T) {
 	dir := t.TempDir()
 	md := filepath.Join(dir, "doc.md")
-	os.WriteFile(md, []byte("[codemd]:# (import a..b missing.go go)\n"), 0o644)
+	os.WriteFile(md, []byte("<!-- codemd: (import a..b missing.go go) -->\n"), 0o644)
 	var out, errb bytes.Buffer
 	if code := Run([]string{md}, strings.NewReader(""), &out, &errb); code == 0 {
 		t.Fatal("expected non-zero exit")
@@ -58,7 +58,7 @@ func TestRunErrorExit(t *testing.T) {
 func TestRunErrorNamesFile(t *testing.T) {
 	dir := t.TempDir()
 	md := filepath.Join(dir, "doc.md")
-	os.WriteFile(md, []byte("[codemd]:# (import a..b missing.go go)\n"), 0o644)
+	os.WriteFile(md, []byte("<!-- codemd: (import a..b missing.go go) -->\n"), 0o644)
 	var out, errb bytes.Buffer
 	if code := Run([]string{md}, strings.NewReader(""), &out, &errb); code == 0 {
 		t.Fatal("expected non-zero exit")
@@ -69,7 +69,7 @@ func TestRunErrorNamesFile(t *testing.T) {
 }
 
 func TestRunErrorNamesStdin(t *testing.T) {
-	md := "[codemd]:# (import a..b missing.go go)\n"
+	md := "<!-- codemd: (import a..b missing.go go) -->\n"
 	var out, errb bytes.Buffer
 	if code := Run(nil, strings.NewReader(md), &out, &errb); code == 0 {
 		t.Fatal("expected non-zero exit")
@@ -83,7 +83,7 @@ func TestRunCheckStdin(t *testing.T) {
 	dir := t.TempDir()
 	src := filepath.Join(dir, "s.go")
 	os.WriteFile(src, []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
-	md := "[codemd]:# (import a..b " + src + " go)\n"
+	md := "<!-- codemd: (import a..b " + src + " go) -->\n"
 	var out, errb bytes.Buffer
 	if code := Run([]string{"--check"}, strings.NewReader(md), &out, &errb); code == 0 {
 		t.Fatal("check should fail when stdin is out of date")
@@ -109,7 +109,7 @@ func TestRunDiscoveredConfigError(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, ".codemd.yaml"), []byte("languages: [not a map]\n"), 0o644)
 	md := filepath.Join(dir, "doc.md")
-	os.WriteFile(md, []byte("[codemd]:# (import a..b s.go go)\n"), 0o644)
+	os.WriteFile(md, []byte("<!-- codemd: (import a..b s.go go) -->\n"), 0o644)
 	var out, errb bytes.Buffer
 	if code := Run([]string{md}, strings.NewReader(""), &out, &errb); code == 0 {
 		t.Fatal("expected non-zero exit for malformed discovered config")
@@ -172,7 +172,7 @@ func TestRunStdinDiscoversConfig(t *testing.T) {
 	}
 	defer os.Chdir(old)
 
-	md := "[codemd]:# (import a..b s.foo)\n"
+	md := "<!-- codemd: (import a..b s.foo) -->\n"
 	var out, errb bytes.Buffer
 	if code := Run(nil, strings.NewReader(md), &out, &errb); code != 0 {
 		t.Fatalf("code %d stderr %s", code, errb.String())
@@ -193,7 +193,7 @@ func TestRunHelpExitsZero(t *testing.T) {
 	if !strings.Contains(errb.String(), "read stdin") {
 		t.Fatalf("help should mention the stdin form:\n%s", errb.String())
 	}
-	if !strings.Contains(errb.String(), "[codemd]:#") {
+	if !strings.Contains(errb.String(), "<!-- codemd:") {
 		t.Fatalf("help should show the reference grammar:\n%s", errb.String())
 	}
 }
@@ -209,7 +209,7 @@ func TestRunWriteAllOrNothing(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
-		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+		"doc.md": "<!-- codemd: (import a..b s.go go) -->\n<!-- codemd: (import a..zzz s.go go) -->\n",
 	})
 	docPath := filepath.Join(dir, "doc.md")
 	before, err := os.ReadFile(docPath)
@@ -236,7 +236,7 @@ func TestRunWriteForce(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
-		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+		"doc.md": "<!-- codemd: (import a..b s.go go) -->\n<!-- codemd: (import a..zzz s.go go) -->\n",
 	})
 	docPath := filepath.Join(dir, "doc.md")
 	var out, errb bytes.Buffer
@@ -256,7 +256,7 @@ func TestRunWriteForceShorthand(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
-		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+		"doc.md": "<!-- codemd: (import a..b s.go go) -->\n<!-- codemd: (import a..zzz s.go go) -->\n",
 	})
 	docPath := filepath.Join(dir, "doc.md")
 	var out, errb bytes.Buffer
@@ -276,7 +276,7 @@ func TestRunOutputAllOrNothing(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
-		"doc.md": "[codemd]:# (import a..b s.go go)\n[codemd]:# (import a..zzz s.go go)\n",
+		"doc.md": "<!-- codemd: (import a..b s.go go) -->\n<!-- codemd: (import a..zzz s.go go) -->\n",
 	})
 	outPath := filepath.Join(dir, "out.md")
 	var out, errb bytes.Buffer
@@ -356,10 +356,10 @@ func TestUnifiedDiffNoChange(t *testing.T) {
 }
 
 func TestUnifiedDiffNoTrailingNewline(t *testing.T) {
-	old := "[codemd]:# (import a..b s.go go)"
-	new := "[codemd]:# (import a..b s.go go)\n\n```go\nfunc A() {}\n```"
+	old := "<!-- codemd: (import a..b s.go go) -->"
+	new := "<!-- codemd: (import a..b s.go go) -->\n\n```go\nfunc A() {}\n```"
 	d := unifiedDiff("doc.md", old, new)
-	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,1 +1,5 @@\n-[codemd]:# (import a..b s.go go)\n\\ No newline at end of file\n+[codemd]:# (import a..b s.go go)\n+\n+```go\n+func A() {}\n+```\n\\ No newline at end of file\n"
+	want := "--- a/doc.md\n+++ b/doc.md\n@@ -1,1 +1,5 @@\n-<!-- codemd: (import a..b s.go go) -->\n\\ No newline at end of file\n+<!-- codemd: (import a..b s.go go) -->\n+\n+```go\n+func A() {}\n+```\n\\ No newline at end of file\n"
 	if d != want {
 		t.Fatalf("got:\n%q\nwant:\n%q", d, want)
 	}
@@ -390,7 +390,7 @@ func TestRunCheckSummary(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go": "//codemd:a\nx\n//codemd:b\n",
-		"a.md": "[codemd]:# (import a..b s.go go)\n",
+		"a.md": "<!-- codemd: (import a..b s.go go) -->\n",
 	})
 	var out, errb bytes.Buffer
 	if code := Run([]string{"--check", dir}, strings.NewReader(""), &out, &errb); code == 0 {
@@ -405,7 +405,7 @@ func TestRunWriteSummary(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go": "//codemd:a\nx\n//codemd:b\n",
-		"a.md": "[codemd]:# (import a..b s.go go)\n",
+		"a.md": "<!-- codemd: (import a..b s.go go) -->\n",
 	})
 	var out, errb bytes.Buffer
 	if code := Run([]string{"-w", dir}, strings.NewReader(""), &out, &errb); code != 0 {
@@ -420,7 +420,7 @@ func TestRunLinkLabelEscaping(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n",
-		"doc.md": "[codemd]:# (link a s.go go \"a]b\")\n",
+		"doc.md": "<!-- codemd: (link a s.go go \"a]b\") -->\n",
 	})
 	docPath := filepath.Join(dir, "doc.md")
 	var out, errb bytes.Buffer
@@ -431,7 +431,7 @@ func TestRunLinkLabelEscaping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "[codemd]:# (link a s.go go \"a]b\")\n[a\\]b](s.go#L2)\n"
+	want := "<!-- codemd: (link a s.go go \"a]b\") -->\n[a\\]b](s.go#L2)\n"
 	if string(got) != want {
 		t.Fatalf("got:\n%q\nwant:\n%q", got, want)
 	}
@@ -445,7 +445,7 @@ func TestRunDiffNoTrailingNewline(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
 		"s.go":   "package x\n//codemd:a\nfunc A() {}\n//codemd:b\n",
-		"doc.md": "[codemd]:# (import a..b s.go go)",
+		"doc.md": "<!-- codemd: (import a..b s.go go) -->",
 	})
 	var out, errb bytes.Buffer
 	if code := Run([]string{"-d", filepath.Join(dir, "doc.md")}, strings.NewReader(""), &out, &errb); code != 0 {
@@ -455,7 +455,7 @@ func TestRunDiffNoTrailingNewline(t *testing.T) {
 	if strings.Count(got, "\\ No newline at end of file\n") != 2 {
 		t.Fatalf("expected two newline markers:\n%s", got)
 	}
-	if !strings.Contains(got, "-[codemd]:# (import a..b s.go go)\n\\ No newline at end of file\n") {
+	if !strings.Contains(got, "-<!-- codemd: (import a..b s.go go) -->\n\\ No newline at end of file\n") {
 		t.Fatalf("old last line should be marked:\n%s", got)
 	}
 	if !strings.HasSuffix(got, "+```\n\\ No newline at end of file\n") {

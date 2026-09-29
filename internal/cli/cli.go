@@ -41,7 +41,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		fmt.Fprint(stderr, "Usage:\n")
 		fmt.Fprint(stderr, "  codemd [flags] file.md...\n")
 		fmt.Fprint(stderr, "  codemd [flags]              (no files: read stdin, write stdout)\n\n")
-		fmt.Fprint(stderr, "Reference: [codemd]:# (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"])\n\n")
+		fmt.Fprint(stderr, "Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"]) -->\n\n")
 		fmt.Fprint(stderr, "Flags:\n")
 		fs.PrintDefaults()
 	}

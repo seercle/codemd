@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b x.go \"Label\")"
-[codemd]:# (import a..b x.go "Label")
+<!-- codemd: (import a..b x.go "Label") -->
 codemd: 1 error(s)

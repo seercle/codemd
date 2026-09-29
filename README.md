@@ -40,7 +40,7 @@ directories are skipped when a directory argument is recursed.
 ## Grammar
 
 ```
-[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
+<!-- codemd: (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"]) -->
 ```
 
 - **MODE**: `import` or `link`.

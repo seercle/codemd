@@ -1,2 +1,2 @@
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)

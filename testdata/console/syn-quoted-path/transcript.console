@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: path must not be quoted in "(link a \"x.go\")"
-[codemd]:# (link a "x.go")
+<!-- codemd: (link a "x.go") -->
 codemd: 1 error(s)

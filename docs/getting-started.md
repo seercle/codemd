@@ -3,7 +3,7 @@
 ## What codemd does
 
 codemd resolves code references embedded in Markdown. A **reference comment** is
-a line of the form `[codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])`.
+a line of the form `<!-- codemd: (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"]) -->`.
 A reference either **imports** a snippet from a source file or generates a
 **link** to a source line. The content generated directly below the comment is
 the **managed region**: codemd owns that block and rewrites it in place. The
@@ -21,7 +21,7 @@ Release builds set the version with
 `-ldflags "-X github.com/seercle/codemd/internal/cli.Version=vX.Y.Z"`; source
 builds report `dev`.
 
-[codemd]:# (import .. ../testdata/console/version/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/version/transcript.console console) -->
 ```console
 $ codemd --version
 codemd dev
@@ -31,7 +31,7 @@ codemd dev
 
 The canonical source file has a **source marker**:
 
-[codemd]:# (import .. ../testdata/snippets/server.go go)
+<!-- codemd: (import .. ../testdata/snippets/server.go go) -->
 ```go
 package server
 
@@ -47,21 +47,21 @@ The repository's canonical copy is `starter.md`; create your own `doc.md` with
 the same contents. It holds a reference comment that imports the region between
 the two markers:
 
-[codemd]:# (import .. ../testdata/snippets/starter.md markdown)
+<!-- codemd: (import .. ../testdata/snippets/starter.md markdown) -->
 ```markdown
 # My docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```
 
 Running `codemd doc.md` inserts the snippet below the comment:
 
-[codemd]:# (import .. ../testdata/console/first-import/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/first-import/transcript.console console) -->
 ````console
 $ codemd doc.md
 # My docs
 
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -72,7 +72,7 @@ func handler() string {
 
 Pass `-w` to write the result back to the file in place:
 
-[codemd]:# (import .. ../testdata/console/first-write/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/first-write/transcript.console console) -->
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
@@ -88,12 +88,12 @@ A `link` reference generates a Markdown link to a source line instead of a
 snippet. Add this line to `doc.md`:
 
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
 Run codemd to write the link:
 
-[codemd]:# (import .. ../testdata/console/first-write/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/first-write/transcript.console console) -->
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
@@ -129,7 +129,7 @@ Because the reference comment is preserved and the generated content is
 replaced in place, a second run changes nothing. Run codemd with `-w` again and
 the summary reports no updates:
 
-[codemd]:# (import .. ../testdata/console/idempotent-write/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/idempotent-write/transcript.console console) -->
 ```console
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 0 updated

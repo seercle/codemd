@@ -36,11 +36,11 @@ than one form (for example, C accepts both `//` and `/* */`); see
 
 Duplicate marker names within one source file are an error:
 
-[codemd]:# (import .. ../testdata/console/marker-duplicate/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/marker-duplicate/transcript.console console) -->
 ```console
 $ codemd doc.md
 codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
-[codemd]:# (import a..b src.txt)
+<!-- codemd: (import a..b src.txt) -->
 codemd: 1 error(s)
 ```
 
@@ -50,7 +50,7 @@ A marker line is excluded from an imported snippet but remains a valid link
 target. The whole line is excluded, including any trailing code on it. Given
 this source:
 
-[codemd]:# (import .. ../testdata/snippets/server.go go)
+<!-- codemd: (import .. ../testdata/snippets/server.go go) -->
 ```go
 package server
 
@@ -66,7 +66,7 @@ func handler() string {
 marker lines, while the link:
 
 ```markdown
-[codemd]:# (link handler-start server.go go)
+<!-- codemd: (link handler-start server.go go) -->
 ```
 
 resolves to the marker's own line:

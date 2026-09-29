@@ -1,6 +1,6 @@
 // Package mdref scans Markdown for codemd reference definitions and parses
 // them into structured references. References use the HTML-comment form
-// "<!-- codemd: (...) -->" or the legacy "[codemd]:# (...)" form.
+// "<!-- codemd: (...) -->".
 package mdref
 
 import (

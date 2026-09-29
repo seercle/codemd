@@ -5,7 +5,7 @@ Usage:
   codemd [flags] file.md...
   codemd [flags]              (no files: read stdin, write stdout)
 
-Reference: [codemd]:# (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"])
+Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"]) -->
 
 Flags:
   -check

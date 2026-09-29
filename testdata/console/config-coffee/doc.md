@@ -1,3 +1,3 @@
-[codemd]:# (import s..e src.coffee)
+<!-- codemd: (import s..e src.coffee) -->
 
-[codemd]:# (link s src.coffee)
+<!-- codemd: (link s src.coffee) -->

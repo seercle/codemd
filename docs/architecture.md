@@ -46,10 +46,10 @@ tildes (with at most three leading spaces or tabs). An opening fence is
 closed only by a fence of the same character whose run is at least as long;
 an unterminated fence runs to the end of the document.
 
-Outside fenced blocks, a reference is recognized only when the trimmed line
-starts with the `[codemd]:#` prefix and is followed by a parenthesized
-reference. Content outside managed regions is left untouched, except for the
-line-ending normalization described below.
+Outside fenced blocks, a reference is recognized only when the trimmed line is
+an HTML comment of the form `<!-- codemd: (...) -->`. Content outside managed
+regions is left untouched, except for the line-ending normalization described
+below.
 
 ## Managed regions
 

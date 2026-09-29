@@ -79,7 +79,7 @@ replays every scenario with the real built binary and rewrites the transcripts;
 transcript fails the gate. `scripts/update-docs.sh`
 runs the objective updater first, then resolves the pages. Import a transcript
 instead of hand-writing its output by putting
-`[codemd]:# (import .. ../testdata/console/<name>/transcript.console console)`
+`<!-- codemd: (import .. ../testdata/console/<name>/transcript.console console) -->`
 on the line before a `console` fence; `TestConsoleFencesAreImported` enforces
 this. Blocks that cannot be replayed (for example `scripts/build.sh`, which
 writes files) use `console-norun`.

@@ -1,4 +1,4 @@
 $ codemd doc.md
 codemd: doc.md: line 1: bad regex "[": error parsing regexp: missing closing ]: `[`
-[codemd]:# (link /[/ src.go go)
+<!-- codemd: (link /[/ src.go go) -->
 codemd: 1 error(s)

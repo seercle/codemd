@@ -92,7 +92,7 @@ Two mechanisms override the defaults:
 - **Explicit `LANG` token.** The token after the path in a reference comment
   sets the fence for that one reference. It changes only the emitted
   fence; codemd still finds markers with the source extension's comment form.
-  `[codemd]:# (import a..b s.c python)` emits a `python` fence while reading
+  `<!-- codemd: (import a..b s.c python) -->` emits a `python` fence while reading
   markers from `s.c` with the `c` comment form.
 - **A `.codemd.yaml` entry.** Add or replace an extension's language in the
   config file. The entry replaces the built-in for that extension and must
@@ -106,7 +106,7 @@ Two mechanisms override the defaults:
 is given, its entries are merged over the built-ins first. The table is sorted
 by extension; each line is `ext -> fence (form)`:
 
-[codemd]:# (import .. ../testdata/console/languages-list/transcript.console console)
+<!-- codemd: (import .. ../testdata/console/languages-list/transcript.console console) -->
 ```console
 $ codemd --languages
 bash -> bash (line "#")

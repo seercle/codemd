@@ -8,7 +8,7 @@ codemd: broken.md: line 3: import range must contain '..': "nope"
 codemd: 1 file(s) checked, 1 updated
 codemd: 1 error(s)
 $ cat broken.md
-[codemd]:# (import handler-start..handler-end server.go go)
+<!-- codemd: (import handler-start..handler-end server.go go) -->
 ```go
 func handler() string {
 	return "ok"
@@ -16,4 +16,4 @@ func handler() string {
 
 ```
 
-[codemd]:# (import nope server.go go)
+<!-- codemd: (import nope server.go go) -->

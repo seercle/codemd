@@ -1,1 +1,1 @@
-[codemd]:# (link /foo x.go)
+<!-- codemd: (link /foo x.go) -->
