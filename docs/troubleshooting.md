@@ -304,6 +304,17 @@ codemd: 1 error(s)
 
 Fix the Go regular expression.
 
+**`empty range a..b`.** The two bounds select no lines: named markers with
+nothing between them, or the same marker on both ends:
+
+<!-- codemd: (import .. ../testdata/console/err-empty-range/transcript.console console) -->
+```console
+$ codemd doc.md
+codemd: doc.md: line 1: empty range a..b
+<!-- codemd: (import a..b src.go go) -->
+codemd: 1 error(s)
+```
+
 **`open <path>: no such file or directory`.** The reference's source file does
 not exist relative to the Markdown file's directory:
 

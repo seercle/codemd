@@ -1,0 +1,4 @@
+$ codemd doc.md
+codemd: doc.md: line 1: empty range a..b
+<!-- codemd: (import a..b src.go go) -->
+codemd: 1 error(s)

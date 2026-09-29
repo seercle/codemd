@@ -30,11 +30,11 @@ func TestResolveNamedRange(t *testing.T) {
 }
 
 func TestResolveOpenRanges(t *testing.T) {
-	res, err := Resolve(goSrc, markers(t), Range{Start: Bound{Name: "b"}, End: Bound{Open: true}}, false)
+	res, err := Resolve(goSrc, markers(t), Range{Start: Bound{Name: "a"}, End: Bound{Open: true}}, false)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.StartLine != 7 || res.EndLine != 6 || len(res.Lines) != 0 {
+	if res.StartLine != 4 || res.EndLine != 6 || len(res.Lines) != 3 {
 		t.Fatalf("got %+v", res)
 	}
 	res2, err := Resolve(goSrc, markers(t), Range{Start: Bound{Open: true}, End: Bound{Name: "a"}}, false)
@@ -102,6 +102,19 @@ func TestResolveEndBeforeStartIsError(t *testing.T) {
 	src := "func g() {}\nfunc f() {}\n"
 	if _, err := Resolve(src, nil, Range{Start: Bound{Regex: "func f"}, End: Bound{Regex: "func g"}}, false); err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+func TestResolveEmptyRangeIsError(t *testing.T) {
+	src := "//codemd:a\n//codemd:b\nx\n"
+	ms := srcfile.ExtractMarkers(src, mustGo()).Markers
+	_, err := Resolve(src, ms, Range{Start: Bound{Name: "a"}, End: Bound{Name: "b"}}, false)
+	if err == nil {
+		t.Fatal("expected an error for a range with no lines between the markers")
+	}
+	_, err = Resolve(src, ms, Range{Start: Bound{Name: "a"}, End: Bound{Name: "a"}}, false)
+	if err == nil {
+		t.Fatal("expected an error for a self range")
 	}
 }
 

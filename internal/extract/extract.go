@@ -64,7 +64,8 @@ func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int,
 // open bound extends to the start or end of the file. When strip is true the
 // regex matched by a boundary is removed from that boundary line, and blank
 // lines at the edges of the result are dropped. It returns an error when a
-// bound cannot be found or a regex fails to compile.
+// bound cannot be found, a regex fails to compile, or the range selects no
+// lines.
 func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Result, error) {
 	lines := lineutil.Split(content)
 	start, err := findLine(content, markers, r.Start, 1)
@@ -91,7 +92,7 @@ func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Res
 		last = end - 1
 	}
 	if first > last {
-		return Result{StartLine: first, EndLine: last}, nil
+		return Result{}, fmt.Errorf("empty range %s..%s", describeBound(r.Start), describeBound(r.End))
 	}
 	out := make([]string, 0, last-first+1)
 	for i := first; i <= last; i++ {
@@ -131,6 +132,17 @@ func dropEmptyBoundaries(lines []string) []string {
 		lines = lines[:len(lines)-1]
 	}
 	return lines
+}
+
+func describeBound(b Bound) string {
+	switch {
+	case b.Open:
+		return ""
+	case b.Regex != "":
+		return "/" + b.Regex + "/"
+	default:
+		return b.Name
+	}
 }
 
 // ResolveLink returns the 1-based line number in content matched by bound b,
