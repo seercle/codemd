@@ -386,6 +386,22 @@ func TestUnifiedDiffNoTrailingNewlineContext(t *testing.T) {
 	}
 }
 
+func TestFlagsAfterPositionalArgs(t *testing.T) {
+	dir := writeSource(t, "doc.md", "<!-- codemd: (link a src.go) -->\n")
+	src := "// a comment\nline\n//codemd:a\n"
+	if err := os.WriteFile(filepath.Join(dir, "src.go"), []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	code := Run([]string{filepath.Join(dir, "doc.md"), "--check"}, strings.NewReader(""), &out, &errb)
+	if code != 1 || strings.Contains(errb.String(), "no such file") {
+		t.Fatalf("--check after a path must be parsed as a flag: code=%d stderr=%s", code, errb.String())
+	}
+	if !strings.Contains(errb.String(), "out of date") {
+		t.Fatalf("expected an out-of-date report, got: %s", errb.String())
+	}
+}
+
 func TestRunCheckSummary(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{

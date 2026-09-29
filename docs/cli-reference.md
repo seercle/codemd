@@ -81,6 +81,8 @@ before the mode checks.
 
 ## Inputs
 
+Flags may appear before or after positional arguments; `--` ends flag parsing.
+
 Positional arguments may be files, directories, or globs.
 
 - **Files** are used as given.

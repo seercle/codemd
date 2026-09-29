@@ -442,18 +442,6 @@ fences, or remove the surrounding fence.
 and a quoted path is rejected (`path must not be quoted`). Rename the file or
 directory to remove the spaces.
 
-**Why are my flags treated as a path?** Go's flag parser stops at the first
-non-flag argument, so any flag after a positional file is read as another input
-path:
-
-<!-- codemd: (import .. ../testdata/console/err-flag-after-file/transcript.console console) -->
-```console
-$ codemd doc.md --check
-codemd: --check: stat --check: no such file or directory
-```
-
-Put all flags before the positional arguments: `codemd --check doc.md`.
-
 **Does codemd change my line endings or add a newline?** No. codemd detects the
 document's line ending (LF or CRLF) and reuses it, and it preserves a trailing
 newline exactly: a file without a final newline stays without one.

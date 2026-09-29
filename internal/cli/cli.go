@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/seercle/codemd/internal/lang"
 	"github.com/seercle/codemd/internal/srcfile"
@@ -55,6 +56,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opt.Force, "force", false, "write even if some references failed")
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	version := fs.Bool("version", false, "print version and exit")
+	args = reorderFlags(fs, args)
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
@@ -238,6 +240,45 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "codemd: %d error(s)\n", errCount)
 	}
 	return exit
+}
+
+// reorderFlags moves flag arguments (and, for non-boolean flags, their values)
+// ahead of positional arguments so a flag may appear after a file path. An
+// explicit "--" ends flag parsing; everything after it is positional.
+func reorderFlags(fs *flag.FlagSet, args []string) []string {
+	isBool := func(name string) bool {
+		f := fs.Lookup(name)
+		if f == nil {
+			return false
+		}
+		bf, ok := f.Value.(interface{ IsBoolFlag() bool })
+		return ok && bf.IsBoolFlag()
+	}
+	var flags, positionals []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if a == "--" {
+			positionals = append(positionals, args[i+1:]...)
+			break
+		}
+		if len(a) < 2 || a[0] != '-' {
+			positionals = append(positionals, a)
+			continue
+		}
+		flags = append(flags, a)
+		name := strings.TrimLeft(a, "-")
+		if eq := strings.IndexByte(name, '='); eq >= 0 {
+			continue
+		}
+		if name == "h" || name == "help" || isBool(name) {
+			continue
+		}
+		if i+1 < len(args) {
+			i++
+			flags = append(flags, args[i])
+		}
+	}
+	return append(flags, positionals...)
 }
 
 // resolveTable returns the language table for baseDir. When explicit is
