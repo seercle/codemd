@@ -1,2 +1,0 @@
-$ codemd --config config.yaml doc.md
-codemd: config.yaml: language "coffee" defines both line and block

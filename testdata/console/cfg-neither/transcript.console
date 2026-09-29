@@ -1,2 +1,2 @@
 $ codemd --config config.yaml doc.md
-codemd: config.yaml: language "coffee" must define exactly one of line or block
+codemd: config.yaml: language "coffee" must define at least one of line or block

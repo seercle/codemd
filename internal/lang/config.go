@@ -39,7 +39,8 @@ func configDecodeError(path string, err error) error {
 
 // LoadConfig reads the YAML config at path and converts its language entries
 // into a Config. It returns an error when the file cannot be read or parsed, or
-// when an entry defines neither or both of line and block.
+// when an entry defines neither line nor block, or a block that is not exactly
+// two elements.
 func LoadConfig(path string) (Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -56,15 +57,15 @@ func LoadConfig(path string) (Config, error) {
 	cfg := Config{Languages: map[string]Language{}}
 	for ext, y := range raw.Languages {
 		var form CommentForm
-		switch {
-		case y.Line != "" && len(y.Block) > 0:
-			return Config{}, fmt.Errorf("%s: language %q defines both line and block", path, ext)
-		case y.Line != "":
-			form.Line = y.Line
-		case len(y.Block) == 2:
+		if y.Line == "" && len(y.Block) == 0 {
+			return Config{}, fmt.Errorf("%s: language %q must define at least one of line or block", path, ext)
+		}
+		if len(y.Block) != 0 && len(y.Block) != 2 {
+			return Config{}, fmt.Errorf("%s: language %q block must have exactly two elements", path, ext)
+		}
+		form.Line = y.Line
+		if len(y.Block) == 2 {
 			form.Block = [2]string{y.Block[0], y.Block[1]}
-		default:
-			return Config{}, fmt.Errorf("%s: language %q must define exactly one of line or block", path, ext)
 		}
 		cfg.Languages[ext] = Language{Fence: y.Fence, Form: form}
 	}
@@ -93,7 +94,7 @@ func DiscoverConfig(startDir string) (string, error) {
 }
 
 // Merge returns a copy of base with cfg's language entries overlaid. Each
-// configured entry must define exactly one comment form; an entry without an
+// configured entry must define at least one comment form; an entry without an
 // explicit fence defaults to its extension. It returns an error for an invalid
 // entry.
 func Merge(base map[string]Language, cfg Config) (map[string]Language, error) {
@@ -103,10 +104,7 @@ func Merge(base map[string]Language, cfg Config) (map[string]Language, error) {
 	}
 	for ext, l := range cfg.Languages {
 		if l.Form.Line == "" && l.Form.Block == [2]string{} {
-			return nil, fmt.Errorf("language %q must define exactly one of line or block", ext)
-		}
-		if l.Form.Line != "" && l.Form.Block != [2]string{} {
-			return nil, fmt.Errorf("language %q defines both line and block", ext)
+			return nil, fmt.Errorf("language %q must define at least one of line or block", ext)
 		}
 		if l.Fence == "" {
 			l.Fence = ext

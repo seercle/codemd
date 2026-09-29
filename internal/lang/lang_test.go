@@ -101,12 +101,25 @@ func TestLoadConfigUnknownKeyMessage(t *testing.T) {
 	}
 }
 
-func TestMergeRejectsBadEntry(t *testing.T) {
-	_, err := Merge(Builtins(), Config{Languages: map[string]Language{
-		"bad": {Fence: "bad"},
-	}})
-	if err == nil {
-		t.Fatal("expected error for entry with neither line nor block")
+func TestDualFormConfigEntry(t *testing.T) {
+	cfg := Config{Languages: map[string]Language{
+		"coffee": {Fence: "coffee", Form: CommentForm{
+			Line:  "#",
+			Block: [2]string{"/*", "*/"},
+		}},
+	}}
+	table, err := Merge(Builtins(), cfg)
+	if err != nil {
+		t.Fatalf("both forms must be accepted: %v", err)
+	}
+	got := table["coffee"].Form
+	if got.Line != "#" || got.Block != [2]string{"/*", "*/"} {
+		t.Fatalf("dual form not preserved: %+v", got)
+	}
+	if _, err := Merge(Builtins(), Config{Languages: map[string]Language{
+		"bad": {Form: CommentForm{}},
+	}}); err == nil {
+		t.Fatal("an entry with neither form must still be rejected")
 	}
 }
 

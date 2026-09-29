@@ -34,11 +34,14 @@ languages:
     block: ["OPEN", "CLOSE"]
 ```
 
-Each entry defines **exactly one** of:
+Each entry defines **at least one** of the following; both may be given:
 
 - `line` — a single-line comment prefix, for example `"//"` or `"#"`.
 - `block` — a two-element list of the opening and closing delimiters, for
   example `["<!--", "-->"]`.
+
+When an entry defines both, source markers in that language may use either
+comment form.
 
 `fence` is optional. It is the language tag codemd writes on a generated code
 block. When omitted, it defaults to the extension name. A config entry replaces
@@ -68,10 +71,25 @@ Config entries are merged onto the built-in table (see the
 - A key that already exists as a built-in **overrides** that entry.
 - A key that does not exist **adds** a new extension.
 - An entry with no `fence` inherits the extension name as its fence.
+- An entry may define both `line` and `block`; both forms are kept, so a marker
+  resolves with whichever form it uses.
 
 The result is the effective table codemd uses. A table supplied with `--config`
 is merged the same way, and `codemd --languages --config path` prints that merged
 table.
+
+For example, this config gives `coffee` both comment forms:
+
+<!-- codemd: (import .. ../testdata/console/config-dual/transcript.console console) -->
+````console
+$ codemd --config config.yaml doc.md
+<!-- codemd: (import s..e src.coffee) -->
+```coffee
+x = 1
+```
+````
+
+The `#` marker opens the range and the `/* */` marker closes it.
 
 ## Errors
 
@@ -79,22 +97,15 @@ A malformed config is an error: codemd prints a message to stderr and exits `1`.
 The message names the config file. Keys are validated strictly: an unknown
 top-level key, or an unrecognized field in a language entry, is an error.
 
-An entry that defines both `line` and `block`:
-
-<!-- codemd: (import .. ../testdata/console/cfg-both/transcript.console console) -->
-```console
-$ codemd --config config.yaml doc.md
-codemd: config.yaml: language "coffee" defines both line and block
-```
-
-An entry that defines neither, or whose `block` does not have exactly two
-elements:
+An entry that defines neither `line` nor `block`:
 
 <!-- codemd: (import .. ../testdata/console/cfg-neither/transcript.console console) -->
 ```console
 $ codemd --config config.yaml doc.md
-codemd: config.yaml: language "coffee" must define exactly one of line or block
+codemd: config.yaml: language "coffee" must define at least one of line or block
 ```
+
+An entry whose `block` does not have exactly two elements is also an error.
 
 A file that is not valid YAML:
 

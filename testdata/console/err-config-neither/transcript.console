@@ -1,2 +1,2 @@
 $ codemd --config neither.yaml doc.md
-codemd: neither.yaml: language "foo" must define exactly one of line or block
+codemd: neither.yaml: language "foo" must define at least one of line or block

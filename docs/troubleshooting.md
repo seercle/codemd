@@ -394,27 +394,17 @@ codemd: bad.yaml: yaml: did not find expected key
 
 Fix the YAML syntax.
 
-**`<path>: language %q defines both line and block`.** A language entry sets
-both `line` and a non-empty `block`:
-
-<!-- codemd: (import .. ../testdata/console/err-config-both/transcript.console console) -->
-```console
-$ codemd --config both.yaml doc.md
-codemd: both.yaml: language "foo" defines both line and block
-```
-
-Keep exactly one comment form.
-
-**`<path>: language %q must define exactly one of line or block`.** A language
-entry sets neither `line` nor a two-element `block`:
+**`<path>: language %q must define at least one of line or block`.** A language
+entry sets neither `line` nor `block`:
 
 <!-- codemd: (import .. ../testdata/console/err-config-neither/transcript.console console) -->
 ```console
 $ codemd --config neither.yaml doc.md
-codemd: neither.yaml: language "foo" must define exactly one of line or block
+codemd: neither.yaml: language "foo" must define at least one of line or block
 ```
 
-Add a `line` or a `block` with exactly two strings.
+Add a `line` or a `block` with exactly two strings. A `block` with any other
+length is an error too.
 
 **`<path>: line <n>: unknown key "<key>"`.** The config contains a key codemd
 does not recognize. Only `languages` is valid at the top level, and each
