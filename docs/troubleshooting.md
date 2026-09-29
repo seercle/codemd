@@ -416,9 +416,9 @@ codemd: neither.yaml: language "foo" must define exactly one of line or block
 
 Add a `line` or a `block` with exactly two strings.
 
-**`<path>: yaml: unmarshal errors:`.** The config contains a key codemd does
-not recognize. Only `languages` is valid at the top level, and each language
-entry accepts only `line`, `block`, and `fence`:
+**`<path>: line <n>: unknown key "<key>"`.** The config contains a key codemd
+does not recognize. Only `languages` is valid at the top level, and each
+language entry accepts only `line`, `block`, and `fence`:
 
 <!-- codemd: (import .. ../testdata/console/err-config-unknown-key/transcript.console console) -->
 ```console
