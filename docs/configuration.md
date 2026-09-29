@@ -76,7 +76,8 @@ table.
 ## Errors
 
 A malformed config is an error: codemd prints a message to stderr and exits `1`.
-The message names the config file.
+The message names the config file. Keys are validated strictly: an unknown
+top-level key, or an unrecognized field in a language entry, is an error.
 
 An entry that defines both `line` and `block`:
 

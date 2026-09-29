@@ -1,7 +1,10 @@
 package lang
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -25,7 +28,9 @@ func LoadConfig(path string) (Config, error) {
 	var raw struct {
 		Languages map[string]yamlLanguage `yaml:"languages"`
 	}
-	if err := yaml.Unmarshal(data, &raw); err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(data))
+	dec.KnownFields(true)
+	if err := dec.Decode(&raw); err != nil && !errors.Is(err, io.EOF) {
 		return Config{}, fmt.Errorf("%s: %w", path, err)
 	}
 	cfg := Config{Languages: map[string]Language{}}

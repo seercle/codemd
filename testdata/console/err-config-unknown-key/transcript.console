@@ -1,0 +1,3 @@
+$ codemd --config config.yaml doc.md
+codemd: config.yaml: yaml: unmarshal errors:
+  line 1: field languagez not found in type struct { Languages map[string]lang.yamlLanguage "yaml:\"languages\"" }

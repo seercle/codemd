@@ -46,6 +46,25 @@ func TestLoadMergeAndDiscover(t *testing.T) {
 	}
 }
 
+func TestLoadConfigRejectsUnknownKeys(t *testing.T) {
+	dir := t.TempDir()
+	cases := map[string]string{
+		"toplevel": "languagez:\n  foo:\n    line: \"//\"\n",
+		"entry":    "languages:\n  foo:\n    line: \"//\"\n    fencee: foo\n",
+	}
+	for name, body := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(dir, name+".yaml")
+			if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := LoadConfig(path); err == nil {
+				t.Fatalf("expected an error for unknown key in %q", body)
+			}
+		})
+	}
+}
+
 func TestMergeRejectsBadEntry(t *testing.T) {
 	_, err := Merge(Builtins(), Config{Languages: map[string]Language{
 		"bad": {Fence: "bad"},

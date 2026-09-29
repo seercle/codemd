@@ -416,6 +416,19 @@ codemd: neither.yaml: language "foo" must define exactly one of line or block
 
 Add a `line` or a `block` with exactly two strings.
 
+**`<path>: yaml: unmarshal errors:`.** The config contains a key codemd does
+not recognize. Only `languages` is valid at the top level, and each language
+entry accepts only `line`, `block`, and `fence`:
+
+<!-- codemd: (import .. ../testdata/console/err-config-unknown-key/transcript.console console) -->
+```console
+$ codemd --config config.yaml doc.md
+codemd: config.yaml: yaml: unmarshal errors:
+  line 1: field languagez not found in type struct { Languages map[string]lang.yamlLanguage "yaml:\"languages\"" }
+```
+
+Remove the key or correct its spelling.
+
 **`open <path>: no such file or directory`.** The `--config` path does not
 exist. Correct the path, or omit `--config` to use discovery.
 
