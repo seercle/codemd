@@ -59,6 +59,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	version := fs.Bool("version", false, "print version and exit")
 	args = reorderFlags(fs, args)
 	for _, a := range args {
+		if a == "--" {
+			break
+		}
 		if a == "-h" || a == "--help" || a == "-help" {
 			fs.SetOutput(stdout)
 			printUsage(stdout)

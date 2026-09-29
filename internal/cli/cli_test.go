@@ -196,6 +196,17 @@ func TestRunHelpExitsZero(t *testing.T) {
 	}
 }
 
+func TestRunHelpAfterDoubleDashIsPositional(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := Run([]string{"--", "-h"}, strings.NewReader(""), &out, &errb)
+	if code == 0 {
+		t.Fatalf("-h after -- must not be parsed as a help flag: stdout=%q", out.String())
+	}
+	if strings.Contains(out.String(), "Usage:") {
+		t.Fatalf("help must not print usage to stdout after --: %q", out.String())
+	}
+}
+
 func TestRunUnknownFlagExitsTwo(t *testing.T) {
 	var out, errb bytes.Buffer
 	if code := Run([]string{"--bogus"}, strings.NewReader(""), &out, &errb); code != 2 {
