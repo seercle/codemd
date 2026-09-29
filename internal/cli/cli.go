@@ -37,15 +37,16 @@ type Options struct {
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("codemd", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	fs.Usage = func() {
-		fmt.Fprint(stderr, "codemd resolves code references embedded in Markdown.\n\n")
-		fmt.Fprint(stderr, "Usage:\n")
-		fmt.Fprint(stderr, "  codemd [flags] file.md...\n")
-		fmt.Fprint(stderr, "  codemd [flags]              (no files: read stdin, write stdout)\n\n")
-		fmt.Fprint(stderr, "Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"]) -->\n\n")
-		fmt.Fprint(stderr, "Flags:\n")
+	printUsage := func(w io.Writer) {
+		fmt.Fprint(w, "codemd resolves code references embedded in Markdown.\n\n")
+		fmt.Fprint(w, "Usage:\n")
+		fmt.Fprint(w, "  codemd [flags] file.md...\n")
+		fmt.Fprint(w, "  codemd [flags]              (no files: read stdin, write stdout)\n\n")
+		fmt.Fprint(w, "Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"]) -->\n\n")
+		fmt.Fprint(w, "Flags:\n")
 		fs.PrintDefaults()
 	}
+	fs.Usage = func() { printUsage(stderr) }
 	var opt Options
 	fs.BoolVar(&opt.Write, "w", false, "write result in place")
 	fs.StringVar(&opt.Output, "o", "", "write result to a new file")
@@ -57,6 +58,13 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	version := fs.Bool("version", false, "print version and exit")
 	args = reorderFlags(fs, args)
+	for _, a := range args {
+		if a == "-h" || a == "--help" || a == "-help" {
+			fs.SetOutput(stdout)
+			printUsage(stdout)
+			return 0
+		}
+	}
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0

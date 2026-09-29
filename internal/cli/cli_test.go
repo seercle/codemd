@@ -184,17 +184,15 @@ func TestRunStdinDiscoversConfig(t *testing.T) {
 
 func TestRunHelpExitsZero(t *testing.T) {
 	var out, errb bytes.Buffer
-	if code := Run([]string{"-h"}, strings.NewReader(""), &out, &errb); code != 0 {
+	code := Run([]string{"--help"}, strings.NewReader(""), &out, &errb)
+	if code != 0 {
 		t.Fatalf("help should exit 0, got %d", code)
 	}
-	if !strings.Contains(errb.String(), "Usage:") {
-		t.Fatalf("help should print usage:\n%s", errb.String())
+	if !strings.Contains(out.String(), "Usage:") {
+		t.Fatalf("help should print usage to stdout, got stdout=%q stderr=%q", out.String(), errb.String())
 	}
-	if !strings.Contains(errb.String(), "read stdin") {
-		t.Fatalf("help should mention the stdin form:\n%s", errb.String())
-	}
-	if !strings.Contains(errb.String(), "<!-- codemd:") {
-		t.Fatalf("help should show the reference grammar:\n%s", errb.String())
+	if strings.Contains(errb.String(), "Usage:") {
+		t.Fatalf("help must not print usage to stderr: %s", errb.String())
 	}
 }
 

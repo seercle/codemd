@@ -16,7 +16,7 @@ With one or more file arguments, codemd resolves each input and reports on it.
 With no file arguments, it reads all of standard input and writes the result to
 standard output.
 
-Run `codemd --help` to print usage to standard error and exit `0`:
+Run `codemd --help` to print usage to standard output and exit `0`:
 
 <!-- codemd: (import .. ../testdata/console/help/transcript.console console) -->
 ```console
@@ -64,7 +64,8 @@ single-dash form.
 | `--languages` | List supported languages and exit. |
 | `--version` | Print the version and exit. |
 
-An unknown flag is a usage error (exit `2`).
+An unknown flag is a usage error (exit `2`). Unlike `--help`, an unknown flag
+prints its usage message to standard error.
 
 ## Mutually exclusive flags
 

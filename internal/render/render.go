@@ -52,9 +52,8 @@ func LinkLabel(path string, line int) string {
 }
 
 // LinkTarget returns the Markdown link target "path#Lline" for a source
-// location. isRemote notes that path is a remote URL; the target format is the
-// same for local and remote paths.
-func LinkTarget(path string, line int, isRemote bool) string {
+// location.
+func LinkTarget(path string, line int) string {
 	return fmt.Sprintf("%s#L%d", path, line)
 }
 

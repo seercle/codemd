@@ -62,7 +62,7 @@ func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError) 
 }
 
 func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, error) {
-	content, isRemote, err := r.Loader.Load(ref.Ref.Path, baseDir)
+	content, _, err := r.Loader.Load(ref.Ref.Path, baseDir)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 			label = render.LinkLabel(ref.Ref.Path, line)
 		}
 		label = render.EscapeLabel(label)
-		return []string{fmt.Sprintf("[%s](%s)", label, render.LinkTarget(ref.Ref.Path, line, isRemote))}, nil
+		return []string{fmt.Sprintf("[%s](%s)", label, render.LinkTarget(ref.Ref.Path, line))}, nil
 	}
 	res, err := extract.Resolve(content, markers, ref.Ref.Range, ref.Ref.Strip)
 	if err != nil {
