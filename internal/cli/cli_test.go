@@ -402,6 +402,20 @@ func TestFlagsAfterPositionalArgs(t *testing.T) {
 	}
 }
 
+func TestDoubleDashEndsFlagParsing(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := Run([]string{"--", "--version"}, strings.NewReader(""), &out, &errb)
+	if code == 0 {
+		t.Fatalf("--version after -- must not be parsed as a flag: stdout=%q", out.String())
+	}
+	if strings.Contains(out.String(), "codemd "+Version) {
+		t.Fatalf("version banner must not be printed: %q", out.String())
+	}
+	if !strings.Contains(errb.String(), "no such file") {
+		t.Fatalf("expected --version to be treated as an input path, got: %s", errb.String())
+	}
+}
+
 func TestRunCheckSummary(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{

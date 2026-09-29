@@ -258,6 +258,7 @@ func reorderFlags(fs *flag.FlagSet, args []string) []string {
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		if a == "--" {
+			positionals = append(positionals, a)
 			positionals = append(positionals, args[i+1:]...)
 			break
 		}
