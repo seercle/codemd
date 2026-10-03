@@ -46,6 +46,7 @@ Flags:
     	print version and exit
   -w	write result in place
 ```
+<!-- codemd:generated -->
 
 Go's flag syntax accepts a single or double dash, so `-w` and `--w`,
 `-check` and `--check`, and so on are equivalent. The help listing prints the
@@ -104,6 +105,7 @@ matches nothing is a usage error (exit `2`):
 $ codemd 'no-such-*.md'
 codemd: no files match "no-such-*.md"
 ```
+<!-- codemd:generated -->
 
 The same applies to a directory that contains no Markdown files
 (`codemd: no Markdown files in "dir"`) and to an explicit path that does not
@@ -126,6 +128,7 @@ codemd: in-place flags require an input file
 $ printf 'x\n' | codemd -o out.md
 codemd: -o requires exactly one input file
 ```
+<!-- codemd:generated -->
 
 `--check` is valid with stdin for CI pipes; see below.
 
@@ -167,6 +170,7 @@ codemd: 1 file(s) checked, 1 updated
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 0 updated
 ```
+<!-- codemd:generated -->
 
 The file-count summary is not printed for stdin. A stdin `--check` that differs
 prints the per-input line `codemd: <stdin> is out of date`, counts it as an
@@ -178,6 +182,7 @@ $ codemd --check < doc.md
 codemd: <stdin> is out of date
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 When a file `--check` finds changes, it prints `codemd: <file> is out of date`
 before the summary, counts it as an error, and exits `1`.
@@ -196,6 +201,7 @@ codemd: mixed.md: not written due to errors (use --force to write anyway)
 codemd: 1 file(s) checked, 0 updated
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 `--force` (or `-f`) bypasses this guard and writes the partial result when the
 document still changed; it does not suppress the error or change the exit code,
@@ -224,6 +230,7 @@ report `dev`; release builds set the version at link time.
 $ codemd --version
 codemd dev
 ```
+<!-- codemd:generated -->
 
 ## `--languages`
 

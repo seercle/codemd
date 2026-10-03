@@ -87,7 +87,9 @@ $ codemd --config config.yaml doc.md
 ```coffee
 x = 1
 ```
+<!-- codemd:generated -->
 ````
+<!-- codemd:generated -->
 
 The `#` marker opens the range and the `/* */` marker closes it.
 
@@ -104,6 +106,7 @@ An entry that defines neither `line` nor `block`:
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: language "coffee" must define at least one of line or block
 ```
+<!-- codemd:generated -->
 
 An entry whose `block` does not have exactly two elements is also an error.
 
@@ -114,6 +117,7 @@ A file that is not valid YAML:
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: yaml: line 4: did not find expected node content
 ```
+<!-- codemd:generated -->
 
 An unreadable `--config` path:
 
@@ -122,6 +126,7 @@ An unreadable `--config` path:
 $ codemd --config missing.yaml doc.md
 codemd: open missing.yaml: no such file or directory
 ```
+<!-- codemd:generated -->
 
 When the config is given with `--config`, it is loaded once and a failure is
 reported on its own, as above. When the config is discovered, a failure is
@@ -143,6 +148,7 @@ languages:
     line: "#"
     fence: coffee
 ```
+<!-- codemd:generated -->
 
 `src.coffee`:
 
@@ -152,6 +158,7 @@ languages:
 x = 1
 #codemd:e
 ```
+<!-- codemd:generated -->
 
 `doc.md`:
 

@@ -591,7 +591,30 @@ func TestRunDiffNoTrailingNewline(t *testing.T) {
 	if !strings.Contains(got, "-<!-- codemd: (import a..b s.go go) -->\n\\ No newline at end of file\n") {
 		t.Fatalf("old last line should be marked:\n%s", got)
 	}
-	if !strings.HasSuffix(got, "+```\n\\ No newline at end of file\n") {
+	if !strings.HasSuffix(got, "+<!-- codemd:generated -->\n\\ No newline at end of file\n") {
 		t.Fatalf("new last line should be marked:\n%s", got)
+	}
+}
+
+func TestRunWarnsButDoesNotClobber(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	doc := "<!-- codemd: (import a..b s.go go) -->\n\n```python\nprint(\"keep\")\n```\n"
+	path := filepath.Join(dir, "doc.md")
+	if err := os.WriteFile(path, []byte(doc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out, errBuf bytes.Buffer
+	code := Run([]string{path}, strings.NewReader(""), &out, &errBuf)
+	if code != 0 {
+		t.Fatalf("exit %d: %s", code, errBuf.String())
+	}
+	if !strings.Contains(errBuf.String(), "unmanaged fenced block") {
+		t.Fatalf("missing warning: %q", errBuf.String())
+	}
+	if !strings.Contains(out.String(), `print("keep")`) || !strings.Contains(out.String(), "<!-- codemd:generated -->") {
+		t.Fatalf("bad output:\n%s", out.String())
 	}
 }

@@ -27,7 +27,7 @@ func writeSource(t *testing.T, name, content string) string {
 
 func TestSpliceInsertsBelowComment(t *testing.T) {
 	lines := []string{"<!-- codemd: (link a s.go) -->", "", "keep me"}
-	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
+	got, _ := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
 	want := []string{"<!-- codemd: (link a s.go) -->", "[s.go:2](s.go#L2)", "", "keep me"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
@@ -36,7 +36,7 @@ func TestSpliceInsertsBelowComment(t *testing.T) {
 
 func TestSpliceReplacesGeneratedLink(t *testing.T) {
 	lines := []string{"<!-- codemd: (link a s.go) -->", "", "[s.go:9](s.go#L9)"}
-	got := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
+	got, _ := splice(lines, 1, mdref.Link, []string{"[s.go:2](s.go#L2)"})
 	want := []string{"<!-- codemd: (link a s.go) -->", "", "[s.go:2](s.go#L2)"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
@@ -45,8 +45,15 @@ func TestSpliceReplacesGeneratedLink(t *testing.T) {
 
 func TestSpliceBackToBackComments(t *testing.T) {
 	lines := []string{"<!-- codemd: (import a..b s.go go) -->", "<!-- codemd: (link a s.go) -->"}
-	got := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
-	want := []string{"<!-- codemd: (import a..b s.go go) -->", "```go", "x", "```", "<!-- codemd: (link a s.go) -->"}
+	got, _ := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"```go",
+		"x",
+		"```",
+		"<!-- codemd:generated -->",
+		"<!-- codemd: (link a s.go) -->",
+	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %#v", got)
 	}
@@ -55,7 +62,7 @@ func TestSpliceBackToBackComments(t *testing.T) {
 func TestResolveDocumentImportAndLink(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n//codemd:b\n"), 0o644)
-	md := "<!-- codemd: (import a..b server.go go) -->\n\n```go\nstale\n```\n\n<!-- codemd: (link a server.go) -->\n\n[server.go:9](server.go#L9)\n"
+	md := "<!-- codemd: (import a..b server.go go) -->\n\n```go\nstale\n```\n<!-- codemd:generated -->\n\n<!-- codemd: (link a server.go) -->\n\n[server.go:9](server.go#L9)\n"
 	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
@@ -171,7 +178,7 @@ func TestResolveIndentedReferenceIndentsOutput(t *testing.T) {
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
-	want := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n  ```go\n  x\n  ```\n"
+	want := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n  ```go\n  x\n  ```\n  <!-- codemd:generated -->\n"
 	if out != want {
 		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
 	}
@@ -245,5 +252,134 @@ func TestResolveDocumentReturnsNoWarningsForCleanInput(t *testing.T) {
 	_, errs, warns := r.ResolveDocument("<!-- codemd: (import a..b s.go go) -->\n", dir)
 	if len(errs) != 0 || len(warns) != 0 {
 		t.Fatalf("errs=%v warns=%v", errs, warns)
+	}
+}
+
+func TestSplicePreservesUnmanagedFenceBelowImport(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```python",
+		"print('keep')",
+		"```",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```go",
+		"x",
+		"```",
+		"<!-- codemd:generated -->",
+		"```python",
+		"print('keep')",
+		"```",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn == "" {
+		t.Fatal("expected a warning")
+	}
+}
+
+func TestSpliceAdoptsIdenticalUnmanagedFence(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```go",
+		"x",
+		"```",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```go",
+		"x",
+		"```",
+		"<!-- codemd:generated -->",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
+func TestSpliceReplacesMarkedRegion(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```go",
+		"stale",
+		"```",
+		"<!-- codemd:generated -->",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "fresh", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"",
+		"```go",
+		"fresh",
+		"```",
+		"<!-- codemd:generated -->",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
+func TestSpliceReplacesMarkerBeforeFence(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"<!-- codemd:generated -->",
+		"```go",
+		"stale",
+		"```",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "fresh", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"```go",
+		"fresh",
+		"```",
+		"<!-- codemd:generated -->",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
+func TestResolvePreservesUnmanagedFence(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	in := "<!-- codemd: (import a..b s.go go) -->\n\n```python\nprint(\"keep\")\n```\n"
+	out, errs, warns := r.ResolveDocument(in, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %v", errs)
+	}
+	if len(warns) != 1 {
+		t.Fatalf("want one warning, got %v", warns)
+	}
+	if !strings.Contains(out, `print("keep")`) {
+		t.Fatalf("hand-written block lost:\n%s", out)
+	}
+	if !strings.Contains(out, mdref.GeneratedMarker) {
+		t.Fatalf("missing marker:\n%s", out)
+	}
+	twice, errs2, warns2 := r.ResolveDocument(out, dir)
+	if len(errs2) != 0 || len(warns2) != 0 {
+		t.Fatalf("re-run errs=%v warns=%v", errs2, warns2)
+	}
+	if twice != out {
+		t.Fatalf("not idempotent:\nonce:\n%s\ntwice:\n%s", out, twice)
 	}
 }

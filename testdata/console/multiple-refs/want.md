@@ -7,6 +7,7 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import worker-start..worker-end worker.py) -->
 ```python
@@ -14,12 +15,14 @@ def work(x):
     return x * 2
 
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import /#codemd:worker-start/../#codemd:worker-end/ worker.py python strip) -->
 ```python
 def work(x):
     return x * 2
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import worker-start.. worker.py) -->
 ```python
@@ -28,6 +31,7 @@ def work(x):
 
 #codemd:worker-end
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)

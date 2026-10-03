@@ -21,6 +21,7 @@ func handler() string {
 
 //codemd:handler-end
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/snippets/worker.py python) -->
 ```python
@@ -32,6 +33,7 @@ def work(x):
 
 #codemd:worker-end
 ```
+<!-- codemd:generated -->
 
 See [Getting started](getting-started.md) for the concepts,
 [Reference syntax](reference-syntax.md) for the grammar, [Source
@@ -50,6 +52,7 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 ## 2. Import by regex
 
@@ -64,6 +67,7 @@ def work(x):
 
 #codemd:worker-end
 ```
+<!-- codemd:generated -->
 
 ## 3. Import with `strip`
 
@@ -80,6 +84,7 @@ are kept.
 def work(x):
     return x * 2
 ```
+<!-- codemd:generated -->
 
 ## 4. Open range to end of file
 
@@ -92,6 +97,7 @@ def work(x):
 
 #codemd:worker-end
 ```
+<!-- codemd:generated -->
 
 ## 5. Open range from start of file
 
@@ -108,6 +114,7 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 ## 6. Mixed named and regex range
 
@@ -123,6 +130,7 @@ func handler() string {
 
 //codemd:handler-end
 ```
+<!-- codemd:generated -->
 
 ## 7. Per-reference fence override
 
@@ -136,6 +144,7 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 ## 8. Link by named point
 
@@ -153,6 +162,7 @@ $ codemd doc.md
 <!-- codemd: (link handler-start server.go go) -->
 [server.go:3](server.go#L3)
 ```
+<!-- codemd:generated -->
 
 ## 9. Link by regex
 
@@ -170,6 +180,7 @@ $ codemd doc.md
 <!-- codemd: (link /^func handler/ server.go go) -->
 [server.go:4](server.go#L4)
 ```
+<!-- codemd:generated -->
 
 ## 10. Link with custom text
 
@@ -187,6 +198,7 @@ $ codemd doc.md
 <!-- codemd: (link handler-start server.go go "Handler") -->
 [Handler](server.go#L3)
 ```
+<!-- codemd:generated -->
 
 ## 11. Link text with spaces and escapes
 
@@ -204,6 +216,7 @@ $ codemd doc.md
 <!-- codemd: (link handler-start server.go go "the \"handler\" entry") -->
 [the "handler" entry](server.go#L3)
 ```
+<!-- codemd:generated -->
 
 ## 12. HTTP and HTTPS sources
 
@@ -224,7 +237,9 @@ func New(text string) error {
 	return &errorString{text}
 }
 ```
+<!-- codemd:generated -->
 ````
+<!-- codemd:generated -->
 
 Link from the URL; the label is `URL:line` and the target appends the anchor:
 
@@ -236,6 +251,7 @@ $ codemd doc.md
 <!-- codemd: (link /^func New/ https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go go) -->
 [https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go:61](https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/errors.go#L61)
 ```
+<!-- codemd:generated -->
 
 HTTP semantics:
 
@@ -269,6 +285,7 @@ Verify the whole document in one run:
 $ diff <(codemd doc.md) want.md && echo FIXTURE_OK
 FIXTURE_OK
 ```
+<!-- codemd:generated -->
 
 ## 14. Resolve a file to stdout
 
@@ -281,6 +298,7 @@ Input `link.md`:
 ```markdown
 <!-- codemd: (link handler-start server.go go) -->
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/console/stdout/transcript.console console) -->
 ```console
@@ -290,6 +308,7 @@ $ codemd link.md
 $ cat link.md
 <!-- codemd: (link handler-start server.go go) -->
 ```
+<!-- codemd:generated -->
 
 ## 15. Write in place
 
@@ -308,9 +327,11 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 0 updated
 ````
+<!-- codemd:generated -->
 
 ## 16. Write to a new file
 
@@ -328,6 +349,7 @@ codemd: -o requires exactly one input file
 $ echo $?
 2
 ```
+<!-- codemd:generated -->
 
 The `-o` and `-w` forms are equivalent in content: `-o out.md doc.md` produces
 the same bytes as `-w` writes back.
@@ -343,6 +365,7 @@ Input `link.md`:
 ```markdown
 <!-- codemd: (link handler-start server.go go) -->
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/console/diff-preview/transcript.console console) -->
 ```console
@@ -353,6 +376,7 @@ $ codemd -d link.md
  <!-- codemd: (link handler-start server.go go) -->
 +[server.go:3](server.go#L3)
 ```
+<!-- codemd:generated -->
 
 Exit code is `0` even when the diff is non-empty; use `--check` to fail a build.
 
@@ -376,6 +400,7 @@ codemd: 1 file(s) checked, 0 out of date
 $ echo $?
 0
 ```
+<!-- codemd:generated -->
 
 ## 19. Input expansion
 
@@ -411,6 +436,7 @@ codemd: sub/nested.md is out of date
 codemd: 2 file(s) checked, 2 out of date
 codemd: 2 error(s)
 ```
+<!-- codemd:generated -->
 
 Each command exits `1`. See the [Command-line reference](cli-reference.md#inputs)
 for de-duplication and hidden-directory rules.
@@ -427,6 +453,7 @@ Input `link.md`:
 ```markdown
 <!-- codemd: (link handler-start server.go go) -->
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/console/stdin/transcript.console console) -->
 ```console
@@ -439,6 +466,7 @@ codemd: 1 error(s)
 $ echo $?
 1
 ```
+<!-- codemd:generated -->
 
 The stdin form of `--check` prints no file-count summary, and in-place flags are
 rejected with no file input.
@@ -457,6 +485,7 @@ Input `broken.md`:
 
 <!-- codemd: (import nope server.go go) -->
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/console/force-write/transcript.console console) -->
 ````console
@@ -477,9 +506,11 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import nope server.go go) -->
 ````
+<!-- codemd:generated -->
 
 ## 22. Custom language via config
 
@@ -496,6 +527,7 @@ languages:
     line: "#"
     fence: coffee
 ```
+<!-- codemd:generated -->
 
 `src.coffee`:
 
@@ -505,6 +537,7 @@ languages:
 x = 1
 #codemd:e
 ```
+<!-- codemd:generated -->
 
 Input `doc.md`:
 
@@ -521,10 +554,12 @@ $ codemd doc.md
 ```coffee
 x = 1
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (link s src.coffee) -->
 [src.coffee:1](src.coffee#L1)
 ````
+<!-- codemd:generated -->
 
 ## 23. Unknown-extension source
 
@@ -541,6 +576,7 @@ line one
 line two
 //codemd:e
 ```
+<!-- codemd:generated -->
 
 Input `doc.md`:
 
@@ -553,6 +589,7 @@ Input `doc.md`:
 line one
 line two
 ```
+<!-- codemd:generated -->
 
 ## 24. Markdown-in-Markdown
 
@@ -569,6 +606,7 @@ A `.md` source uses the `<!-- -->` comment form, and the generated fence is
 Body text.
 <!-- codemd:e -->
 ```
+<!-- codemd:generated -->
 
 Input `doc.md`:
 
@@ -584,6 +622,7 @@ Input `doc.md`:
 
 Body text.
 ```
+<!-- codemd:generated -->
 
 The `link` reference resolves to `[src.md:1](src.md#L1)`.
 
@@ -607,6 +646,7 @@ var a = 1
 
 //codemd:e
 ```
+<!-- codemd:generated -->
 
 ```console-norun
 $ printf '<!-- codemd: (import s..e src.go go) -->\r\n' > doc.md

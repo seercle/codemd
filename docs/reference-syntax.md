@@ -27,6 +27,7 @@ codemd: doc.md: line 1: unknown mode "bogus"
 <!-- codemd: (bogus a) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 ## RANGE
 
@@ -40,6 +41,7 @@ codemd: doc.md: line 1: import range must contain '..': "a"
 <!-- codemd: (import a src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 For `link`, `RANGE` is exactly one token; a `..` range is rejected:
 
@@ -50,6 +52,7 @@ codemd: doc.md: line 1: link takes a single token, got "a..b"
 <!-- codemd: (link a..b src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 A token is a **named point** (`handler-start`) or a **line regex**
 (`/^func handler/`). A token is a regex if and only if it begins with `/`; it
@@ -63,6 +66,7 @@ codemd: doc.md: line 1: unterminated regex "/foo x.go"
 <!-- codemd: (link /foo x.go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Ranges may be open: `a..` runs to the end of the file, and `..b` starts at the
 beginning of the file. Named points and regexes may be mixed (`func1../end/`,
@@ -97,6 +101,7 @@ codemd: doc.md: line 1: strip requires a regex token in "(import a..b x.go strip
 <!-- codemd: (import a..b x.go strip) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 ## LINK-TEXT
 
@@ -117,6 +122,7 @@ codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b x
 <!-- codemd: (import a..b x.go "Label") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 An empty or whitespace-only label:
 
@@ -127,6 +133,7 @@ codemd: doc.md: line 1: empty link text in "(link a x.go \"\")"
 <!-- codemd: (link a x.go "") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 More than one label:
 
@@ -137,6 +144,7 @@ codemd: doc.md: line 1: multiple link labels in "(link a x.go \"A\" \"B\")"
 <!-- codemd: (link a x.go "A" "B") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 An unterminated quote:
 
@@ -147,6 +155,7 @@ codemd: doc.md: line 1: unterminated quoted string in "(link a x.go \"A)"
 <!-- codemd: (link a x.go "A) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 A quoted `PATH`, in either mode:
 
@@ -157,6 +166,7 @@ codemd: doc.md: line 1: path must not be quoted in "(link a \"x.go\")"
 <!-- codemd: (link a "x.go") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 ## Managed region
 
@@ -221,6 +231,7 @@ codemd: doc.md: line 1: marker "nope" not found at or after line 1
 <!-- codemd: (import nope..end x.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import .. ../testdata/console/syn-regex-no-match/transcript.console console) -->
 ```console
@@ -229,6 +240,7 @@ codemd: doc.md: line 1: regex "zzz" matched no line at or after 1
 <!-- codemd: (link /zzz/ x.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 ## Worked example
 
@@ -249,6 +261,7 @@ func handler() string {
 
 //codemd:handler-end
 ```
+<!-- codemd:generated -->
 
 `worker.py`:
 
@@ -262,6 +275,7 @@ def work(x):
 
 #codemd:worker-end
 ```
+<!-- codemd:generated -->
 
 Input `doc.md`:
 
@@ -285,6 +299,7 @@ Input `doc.md`:
 
 <!-- codemd: (link worker-start worker.py) -->
 ```
+<!-- codemd:generated -->
 
 The output is reproduced here for reading; the integration test
 `TestIntegrationGolden` verifies it byte-for-byte against `codemd doc.md`.

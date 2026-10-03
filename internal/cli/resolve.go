@@ -63,7 +63,11 @@ func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError, 
 			errs = append(errs, RefError{Line: ref.Line, Err: err})
 			continue
 		}
-		lines.Content = splice(lines.Content, ref.Line, ref.Ref.Mode, replacement)
+		updated, warn := splice(lines.Content, ref.Line, ref.Ref.Mode, replacement)
+		lines.Content = updated
+		if warn != "" {
+			warns = append(warns, Warning{Line: ref.Line, Msg: warn})
+		}
 	}
 	sort.SliceStable(errs, func(i, j int) bool { return errs[i].Line < errs[j].Line })
 	sort.SliceStable(warns, func(i, j int) bool { return warns[i].Line < warns[j].Line })
@@ -139,14 +143,27 @@ func isGeneratedLink(line string) bool {
 }
 
 // splice updates the managed region for the reference on line refLine
-// (1-based). It skips blank lines after the comment to find the first
-// non-blank line. If that line is the corresponding generated artifact (a
-// fenced block for import, a generated link for link) it is replaced in place;
-// otherwise the replacement is inserted directly below the comment, leaving
-// any existing line untouched.
-func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) []string {
+// (1-based) and returns a warning when an unmanaged block was preserved. For
+// Import the managed region is the generated fence followed by the hidden
+// marker; for Link it is the generated link line. It skips blank lines after
+// the reference to find the first non-blank line:
+//
+//   - a marked region (marker after the fence, or a marker immediately before
+//     it) is replaced in place;
+//   - an unmarked fenced block whose bytes equal the generated fence is
+//     adopted by appending the marker;
+//   - any other unmarked fenced block is left untouched, the marked generated
+//     region is inserted above it, and a warning is returned.
+//
+// When no block is present the region is inserted directly below the
+// reference.
+func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) ([]string, string) {
 	indent := leadingIndent(lines[refLine-1])
 	replacement = indentLines(replacement, indent)
+	region := replacement
+	if mode == mdref.Import {
+		region = append(append([]string{}, replacement...), indent+mdref.GeneratedMarker)
+	}
 	insertAt := refLine // 0-based index of the line directly below the comment
 	idx := insertAt
 	for idx < len(lines) && strings.TrimSpace(lines[idx]) == "" {
@@ -157,17 +174,60 @@ func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) 
 			if isGeneratedLink(lines[idx]) {
 				out := append([]string{}, lines[:idx]...)
 				out = append(out, replacement...)
-				return append(out, lines[idx+1:]...)
+				return append(out, lines[idx+1:]...), ""
 			}
-		} else if end, ok := mdref.FenceBlockEnd(lines, idx); ok {
-			out := append([]string{}, lines[:idx]...)
-			out = append(out, replacement...)
-			return append(out, lines[end:]...)
+		} else {
+			if mdref.IsGeneratedMarker(lines[idx]) {
+				regionEnd := idx + 1
+				k := idx + 1
+				for k < len(lines) && strings.TrimSpace(lines[k]) == "" {
+					k++
+				}
+				if end, ok := mdref.FenceBlockEnd(lines, k); ok {
+					regionEnd = end
+				}
+				out := append([]string{}, lines[:idx]...)
+				out = append(out, region...)
+				return append(out, lines[regionEnd:]...), ""
+			}
+			if end, ok := mdref.FenceBlockEnd(lines, idx); ok {
+				j := end
+				for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
+					j++
+				}
+				if j < len(lines) && mdref.IsGeneratedMarker(lines[j]) {
+					out := append([]string{}, lines[:idx]...)
+					out = append(out, region...)
+					return append(out, lines[j+1:]...), ""
+				}
+				if equalLines(lines[idx:end], replacement) {
+					out := append([]string{}, lines[:end]...)
+					out = append(out, indent+mdref.GeneratedMarker)
+					return append(out, lines[end:]...), ""
+				}
+				out := append([]string{}, lines[:idx]...)
+				out = append(out, region...)
+				out = append(out, lines[idx:]...)
+				return out, "unmanaged fenced block below reference; inserted generated snippet above it"
+			}
 		}
 	}
 	out := append([]string{}, lines[:insertAt]...)
-	out = append(out, replacement...)
-	return append(out, lines[insertAt:]...)
+	out = append(out, region...)
+	return append(out, lines[insertAt:]...), ""
+}
+
+// equalLines reports whether a and b have the same length and contents.
+func equalLines(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func leadingIndent(line string) string {

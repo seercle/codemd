@@ -26,6 +26,7 @@ builds report `dev`.
 $ codemd --version
 codemd dev
 ```
+<!-- codemd:generated -->
 
 ## Your first import
 
@@ -42,6 +43,7 @@ func handler() string {
 
 //codemd:handler-end
 ```
+<!-- codemd:generated -->
 
 The repository's canonical copy is `starter.md`; create your own `doc.md` with
 the same contents. It holds a reference comment that imports the region between
@@ -53,6 +55,7 @@ the two markers:
 
 <!-- codemd: (import handler-start..handler-end server.go go) -->
 ```
+<!-- codemd:generated -->
 
 Running `codemd doc.md` inserts the snippet below the comment:
 
@@ -68,7 +71,9 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 ````
+<!-- codemd:generated -->
 
 Pass `-w` to write the result back to the file in place:
 
@@ -77,6 +82,7 @@ Pass `-w` to write the result back to the file in place:
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
 ```
+<!-- codemd:generated -->
 
 The reference comment is kept, and the generated fence is inserted directly
 below it. The `go` token after the path sets the fence language; without it,
@@ -98,6 +104,7 @@ Run codemd to write the link:
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 1 updated
 ```
+<!-- codemd:generated -->
 
 Below the reference comment the file now contains:
 
@@ -134,6 +141,7 @@ the summary reports no updates:
 $ codemd -w doc.md
 codemd: 1 file(s) checked, 0 updated
 ```
+<!-- codemd:generated -->
 
 Only a run that has something to generate reports `1 updated`. Once the
 document is current, no further changes are written, which makes `codemd
