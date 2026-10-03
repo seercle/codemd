@@ -32,7 +32,7 @@ Full documentation lives in [`docs/`](docs/README.md):
 
 ## Usage
 
-`codemd [flags] file.md...` — with no files, reads stdin and writes stdout.
+`codemd [flags] [file|dir|glob]...` — with no files, reads stdin and writes stdout.
 Arguments may be files, directories (recursed for `*.md` and `*.markdown`),
 or globs (including `**`); an argument matching nothing is an error. Hidden
 directories are skipped when a directory argument is recursed.

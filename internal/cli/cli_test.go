@@ -193,6 +193,9 @@ func TestRunHelpExitsZero(t *testing.T) {
 	if !strings.Contains(out.String(), "Usage:") {
 		t.Fatalf("help should print usage to stdout, got stdout=%q stderr=%q", out.String(), errb.String())
 	}
+	if !strings.Contains(out.String(), "directories") || !strings.Contains(out.String(), "globs") {
+		t.Fatalf("help should mention directory recursion and globs, got stdout=%q", out.String())
+	}
 	if strings.Contains(errb.String(), "Usage:") {
 		t.Fatalf("help must not print usage to stderr: %s", errb.String())
 	}

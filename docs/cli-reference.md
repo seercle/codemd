@@ -8,7 +8,7 @@ modes, and exit codes. It uses the terms defined in
 ## Synopsis
 
 ```console-norun
-codemd [flags] file.md...
+codemd [flags] [file|dir|glob]...
 codemd [flags]              (no files: read stdin, write stdout)
 ```
 
@@ -24,8 +24,11 @@ $ codemd --help
 codemd resolves code references embedded in Markdown.
 
 Usage:
-  codemd [flags] file.md...
+  codemd [flags] [file|dir|glob]...
   codemd [flags]              (no files: read stdin, write stdout)
+
+Inputs may be files, directories (searched recursively for .md and
+.markdown), or globs (* ? [ with ** support).
 
 Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] ["LINK-TEXT"]) -->
 

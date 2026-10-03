@@ -40,8 +40,10 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	printUsage := func(w io.Writer) {
 		fmt.Fprint(w, "codemd resolves code references embedded in Markdown.\n\n")
 		fmt.Fprint(w, "Usage:\n")
-		fmt.Fprint(w, "  codemd [flags] file.md...\n")
+		fmt.Fprint(w, "  codemd [flags] [file|dir|glob]...\n")
 		fmt.Fprint(w, "  codemd [flags]              (no files: read stdin, write stdout)\n\n")
+		fmt.Fprint(w, "Inputs may be files, directories (searched recursively for .md and\n")
+		fmt.Fprint(w, ".markdown), or globs (* ? [ with ** support).\n\n")
 		fmt.Fprint(w, "Reference: <!-- codemd: (MODE RANGE PATH [LANG] [strip] [\"LINK-TEXT\"]) -->\n\n")
 		fmt.Fprint(w, "Flags:\n")
 		fs.PrintDefaults()
