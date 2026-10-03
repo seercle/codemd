@@ -1,3 +1,6 @@
+package p
+
 //codemd:a
-x
+var x = 1
+
 //codemd:b

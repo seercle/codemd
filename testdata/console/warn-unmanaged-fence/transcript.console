@@ -3,7 +3,8 @@ codemd: doc.md: line 1: unmanaged fenced block below reference; inserted generat
 <!-- codemd: (import a..b s.go go) -->
 
 ```go
-x
+var x = 1
+
 ```
 <!-- codemd:generated -->
 ```python
