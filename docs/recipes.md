@@ -148,7 +148,8 @@ func handler() string {
 
 ## 8. Link by named point
 
-A link resolves a single line. The default label is `path:line`.
+A link resolves a single line. The default label is `path:line` (see
+[section 26](#26-link-a-range) for range links).
 
 Input `doc.md`:
 
@@ -668,3 +669,22 @@ $ codemd doc.md | od -An -c | tail -1
 The last three bytes are the closing fence, with no trailing newline. A
 document whose lines mix LF and CRLF is normalized to CRLF, because any CRLF
 line selects CRLF for the whole document.
+
+## 26. Link a range
+
+A `link` range uses the same `START..END` bounds as `import` and emits a
+GitHub-style range anchor.
+
+Input `doc.md`:
+
+```markdown
+<!-- codemd: (link handler-start..handler-end server.go go) -->
+```
+
+<!-- codemd: (import .. ../testdata/console/link-range/transcript.console console) -->
+```console
+$ codemd doc.md
+<!-- codemd: (link handler-start..handler-end server.go go) -->
+[server.go:4-7](server.go#L4-L7)
+```
+<!-- codemd:generated -->
