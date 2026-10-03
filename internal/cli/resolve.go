@@ -96,16 +96,35 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 	}
 	markers := set.Markers
 	if ref.Ref.Mode == mdref.Link {
-		line, err := extract.ResolveLink(content, markers, ref.Ref.Range.Start)
-		if err != nil {
-			return nil, err
+		start, end := 0, 0
+		if ref.Ref.IsRange {
+			res, err := extract.Resolve(content, markers, ref.Ref.Range, false)
+			if err != nil {
+				return nil, err
+			}
+			start, end = res.StartLine, res.EndLine
+		} else {
+			line, err := extract.ResolveLink(content, markers, ref.Ref.Range.Start)
+			if err != nil {
+				return nil, err
+			}
+			start, end = line, line
 		}
+		single := start == end
 		label := ref.Ref.Label
 		if label == "" {
-			label = render.LinkLabel(ref.Ref.Path, line)
+			if single {
+				label = render.LinkLabel(ref.Ref.Path, start)
+			} else {
+				label = render.LinkLabelRange(ref.Ref.Path, start, end)
+			}
 		}
 		label = render.EscapeLabel(label)
-		return []string{fmt.Sprintf("[%s](%s)", label, render.LinkTarget(ref.Ref.Path, line))}, nil
+		target := render.LinkTarget(ref.Ref.Path, start)
+		if !single {
+			target = render.LinkTargetRange(ref.Ref.Path, start, end)
+		}
+		return []string{fmt.Sprintf("[%s](%s)", label, target)}, nil
 	}
 	res, err := extract.Resolve(content, markers, ref.Ref.Range, ref.Ref.Strip)
 	if err != nil {
@@ -136,7 +155,7 @@ func checkDuplicate(set srcfile.MarkerSet, b extract.Bound) error {
 	return fmt.Errorf("duplicate marker %q on lines %s", b.Name, strings.Join(parts, ", "))
 }
 
-var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+\)$`)
+var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+(?:-L\d+)?\)$`)
 
 func isGeneratedLink(line string) bool {
 	return generatedLink.MatchString(strings.TrimSpace(line))
