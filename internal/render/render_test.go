@@ -73,4 +73,16 @@ func TestLinkRanges(t *testing.T) {
 	if got := LinkTargetRange("https://x/y.go", 10, 20); got != "https://x/y.go#L10-L20" {
 		t.Fatalf("remote target %q", got)
 	}
+	if got := LinkLabelRange("src/server.go", 5, 5); got != "src/server.go:5-5" {
+		t.Fatalf("equal-range label %q", got)
+	}
+	if got := LinkTargetRange("src/server.go", 5, 5); got != "src/server.go#L5-L5" {
+		t.Fatalf("equal-range target %q", got)
+	}
+	if got := LinkLabelRange("src/server.go", 20, 10); got != "src/server.go:20-10" {
+		t.Fatalf("inverted-range label %q", got)
+	}
+	if got := LinkTargetRange("src/server.go", 20, 10); got != "src/server.go#L20-L10" {
+		t.Fatalf("inverted-range target %q", got)
+	}
 }

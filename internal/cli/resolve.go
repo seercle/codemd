@@ -155,6 +155,10 @@ func checkDuplicate(set srcfile.MarkerSet, b extract.Bound) error {
 	return fmt.Errorf("duplicate marker %q on lines %s", b.Name, strings.Join(parts, ", "))
 }
 
+// generatedLink matches a link line codemd previously emitted, either a
+// single-line anchor (#Lline) or a range anchor (#Lstart-Lend). A matching
+// line directly below a link reference is replaced in place, so a
+// user-authored link in that position is adopted as if generated.
 var generatedLink = regexp.MustCompile(`^\[(?:\\.|[^\]\\])*\]\([^)]*#L\d+(?:-L\d+)?\)$`)
 
 func isGeneratedLink(line string) bool {

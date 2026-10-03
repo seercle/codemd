@@ -173,6 +173,19 @@ func TestResolveDocumentLinkRangeOpenBound(t *testing.T) {
 	}
 }
 
+func TestResolveDocumentLinkRangeRegexBound(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link /func A/../func B/ s.go go) -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link /func A/../func B/ s.go go) -->\n[s.go:3-4](s.go#L3-L4)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
 func TestResolveDocumentLinkRangeCollapsesSingleLine(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\nfunc A() {}\n//codemd:b\n")
 	md := "<!-- codemd: (link a..b s.go go) -->\n"
@@ -202,9 +215,12 @@ func TestResolveDocumentLinkRangeCustomLabel(t *testing.T) {
 func TestResolveDocumentLinkRangeEmptyIsError(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:b\n")
 	md := "<!-- codemd: (link a..b s.go go) -->\n"
-	_, errs, _ := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 1 {
 		t.Fatalf("want 1 error for an empty link range, got %+v", errs)
+	}
+	if out != md {
+		t.Fatalf("failed reference must leave the document unchanged:\ngot  %q\nwant %q", out, md)
 	}
 }
 

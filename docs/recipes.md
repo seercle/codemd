@@ -148,8 +148,8 @@ func handler() string {
 
 ## 8. Link by named point
 
-A link resolves a single line. The default label is `path:line` (see
-[section 26](#26-link-a-range) for range links).
+A link resolves a single line or a range. The default label is `path:line`, or
+`path:start-end` for a range (see [section 26](#26-link-a-range)).
 
 Input `doc.md`:
 
