@@ -148,8 +148,10 @@ func isGeneratedLink(line string) bool {
 // marker; for Link it is the generated link line. It skips blank lines after
 // the reference to find the first non-blank line:
 //
-//   - a marked region (marker after the fence, or a marker immediately before
-//     it) is replaced in place;
+//   - a marked region (marker after the fence) is replaced in place;
+//   - a marker immediately before a fence whose bytes equal the generated
+//     fence is normalized in place; a marker before a differing fence keeps
+//     that fence, inserts the generated region above it, and warns;
 //   - an unmarked fenced block whose bytes equal the generated fence is
 //     adopted by appending the marker;
 //   - any other unmarked fenced block is left untouched, the marked generated
@@ -178,15 +180,23 @@ func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) 
 			}
 		} else {
 			if mdref.IsGeneratedMarker(lines[idx]) {
-				regionEnd := idx + 1
 				k := idx + 1
 				for k < len(lines) && strings.TrimSpace(lines[k]) == "" {
 					k++
 				}
+				end, hasFence := 0, false
 				if k < len(lines) {
-					if end, ok := mdref.FenceBlockEnd(lines, k); ok {
-						regionEnd = end
-					}
+					end, hasFence = mdref.FenceBlockEnd(lines, k)
+				}
+				if hasFence && !equalLines(lines[k:end], replacement) {
+					out := append([]string{}, lines[:idx]...)
+					out = append(out, region...)
+					out = append(out, lines[idx+1:]...)
+					return out, "unmanaged fenced block below reference; inserted generated snippet above it"
+				}
+				regionEnd := idx + 1
+				if hasFence {
+					regionEnd = end
 				}
 				out := append([]string{}, lines[:idx]...)
 				out = append(out, region...)

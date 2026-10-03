@@ -339,7 +339,7 @@ func TestSpliceReplacesMarkerBeforeFence(t *testing.T) {
 		"<!-- codemd: (import a..b s.go go) -->",
 		"<!-- codemd:generated -->",
 		"```go",
-		"stale",
+		"fresh",
 		"```",
 	}
 	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "fresh", "```"})
@@ -355,6 +355,40 @@ func TestSpliceReplacesMarkerBeforeFence(t *testing.T) {
 	}
 	if warn != "" {
 		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
+func TestSpliceMarkerBeforeFenceDiffersPreserves(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"<!-- codemd:generated -->",
+		"```go",
+		"stale",
+		"```",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "fresh", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"```go",
+		"fresh",
+		"```",
+		"<!-- codemd:generated -->",
+		"```go",
+		"stale",
+		"```",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn == "" {
+		t.Fatal("expected a warning")
+	}
+	twice, warn2 := splice(got, 1, mdref.Import, []string{"```go", "fresh", "```"})
+	if warn2 != "" {
+		t.Fatalf("unexpected second warning: %s", warn2)
+	}
+	if !reflect.DeepEqual(twice, got) {
+		t.Fatalf("not idempotent: %#v", twice)
 	}
 }
 
