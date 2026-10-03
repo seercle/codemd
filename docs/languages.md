@@ -136,6 +136,7 @@ xml -> xml (block "<!--" "-->")
 yaml -> yaml (line "#")
 yml -> yaml (line "#")
 ```
+<!-- codemd:generated -->
 
 This output is the authoritative list of supported extensions.
 

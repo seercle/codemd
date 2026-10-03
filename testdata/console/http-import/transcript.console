@@ -7,3 +7,4 @@ func New(text string) error {
 	return &errorString{text}
 }
 ```
+<!-- codemd:generated -->

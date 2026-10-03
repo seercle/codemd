@@ -35,6 +35,7 @@ combined:
 $ codemd -w -d doc.md
 codemd: -w, -o, -d and --check are mutually exclusive
 ```
+<!-- codemd:generated -->
 
 Pick one output mode.
 
@@ -46,6 +47,7 @@ with zero inputs (stdin) or with more than one:
 $ printf 'x\n' | codemd -o out.md
 codemd: -o requires exactly one input file
 ```
+<!-- codemd:generated -->
 
 Pass exactly one file.
 
@@ -57,6 +59,7 @@ read; with no file arguments codemd reads stdin and cannot write in place:
 $ printf 'x\n' | codemd -w
 codemd: in-place flags require an input file
 ```
+<!-- codemd:generated -->
 
 Supply a file argument, or drop the in-place flag and capture stdout instead.
 
@@ -67,6 +70,7 @@ Supply a file argument, or drop the in-place flag and capture stdout instead.
 $ codemd 'no-such-*.md'
 codemd: no files match "no-such-*.md"
 ```
+<!-- codemd:generated -->
 
 Check the pattern, or quote it so your shell passes it through unchanged.
 
@@ -80,6 +84,7 @@ no Markdown files at any visited depth:
 $ codemd docs
 codemd: no Markdown files in "docs"
 ```
+<!-- codemd:generated -->
 
 Point codemd at a directory that contains Markdown files.
 
@@ -91,6 +96,7 @@ does not exist:
 $ codemd missing.md
 codemd: missing.md: stat missing.md: no such file or directory
 ```
+<!-- codemd:generated -->
 
 Correct the path.
 
@@ -109,6 +115,7 @@ codemd: doc.md: line 1: reference too short: "()"
 <!-- codemd: () -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Supply a mode and a range.
 
@@ -121,6 +128,7 @@ codemd: doc.md: line 1: unknown mode "bogus"
 <!-- codemd: (bogus a) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Use `import` or `link`.
 
@@ -134,6 +142,7 @@ codemd: doc.md: line 1: import range must contain '..': "a"
 <!-- codemd: (import a src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Write two bounds joined by `..`, such as `a..b`.
 
@@ -146,6 +155,7 @@ codemd: doc.md: line 1: link takes a single token, got "a..b"
 <!-- codemd: (link a..b src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 A link targets one line; pass a single named point or regex.
 
@@ -158,6 +168,7 @@ codemd: doc.md: line 1: missing path in "(import a..b)"
 <!-- codemd: (import a..b) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Add a source path or URL after the range.
 
@@ -170,6 +181,7 @@ codemd: doc.md: line 1: path must not be quoted in "(import a..b \"src.go\")"
 <!-- codemd: (import a..b "src.go") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Drop the quotes. See also [the FAQ on paths with spaces](#faq).
 
@@ -183,6 +195,7 @@ codemd: doc.md: line 1: unterminated regex "/foo src.go"
 <!-- codemd: (link /foo src.go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Close the regex, and escape a literal slash as `\/`.
 
@@ -196,6 +209,7 @@ codemd: doc.md: line 1: strip requires a regex token in "(import a..b src.go str
 <!-- codemd: (import a..b src.go strip) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Give at least one bound as a `/regex/`, or remove `strip`.
 
@@ -209,6 +223,7 @@ codemd: doc.md: line 1: link text is only valid for link mode in "(import a..b s
 <!-- codemd: (import a..b src.go "x") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Use `link` mode for a custom label, or remove the label.
 
@@ -221,6 +236,7 @@ codemd: doc.md: line 1: empty link text in "(link a src.go \"\")"
 <!-- codemd: (link a src.go "") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Put non-blank text in the quotes, or omit the label.
 
@@ -233,6 +249,7 @@ codemd: doc.md: line 1: multiple link labels in "(link a src.go \"x\" \"y\")"
 <!-- codemd: (link a src.go "x" "y") -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Keep a single label.
 
@@ -246,6 +263,7 @@ codemd: doc.md: line 1: unexpected token "extra" in "(import a..b src.go go extr
 <!-- codemd: (import a..b src.go go extra) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Remove the extra token, or fold it into a valid position.
 
@@ -258,6 +276,7 @@ codemd: doc.md: line 1: unterminated quoted string in "(import a..b src.go \"x)"
 <!-- codemd: (import a..b src.go "x) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Close the quote.
 
@@ -277,6 +296,7 @@ codemd: doc.md: line 1: marker "foo" not found at or after line 1
 <!-- codemd: (import foo..bar src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Check the marker name and spelling (see
 [Source markers](source-markers.md)), or widen the range.
@@ -290,6 +310,7 @@ codemd: doc.md: line 1: regex "nomatch" matched no line at or after 1
 <!-- codemd: (link /nomatch/ src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Adjust the regex, remembering it matches a whole line.
 
@@ -302,6 +323,7 @@ codemd: doc.md: line 1: bad regex "[": error parsing regexp: missing closing ]: 
 <!-- codemd: (link /[/ src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Fix the Go regular expression.
 
@@ -315,6 +337,7 @@ codemd: doc.md: line 1: empty range a..b
 <!-- codemd: (import a..b src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 **`open <path>: no such file or directory`.** The reference's source file does
 not exist relative to the Markdown file's directory:
@@ -326,6 +349,7 @@ codemd: doc.md: line 1: open no-such.go: no such file or directory
 <!-- codemd: (import a..b no-such.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Fix the path or add the file.
 
@@ -338,6 +362,7 @@ codemd: doc.md: line 1: https://raw.githubusercontent.com/golang/go/a10e42f219ab
 <!-- codemd: (link a https://raw.githubusercontent.com/golang/go/a10e42f219abb9c5bc4e7d86d9464700a42c7d57/src/errors/does-not-exist.txt go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 Check the URL and that the file is reachable. Network failures surface the
 underlying error instead, for example
@@ -355,6 +380,7 @@ codemd: doc.md: line 1: duplicate marker "a" on lines 3 and 6
 <!-- codemd: (import a..b src.go go) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 A marker name used by a reference must be unique; an unreferenced duplicate
 does not fail the file. Rename one of them.
@@ -393,6 +419,7 @@ with the discovered path. The message is prefixed with `codemd: `.
 $ codemd --config bad.yaml doc.md
 codemd: bad.yaml: yaml: did not find expected key
 ```
+<!-- codemd:generated -->
 
 Fix the YAML syntax.
 
@@ -404,6 +431,7 @@ entry sets neither `line` nor `block`:
 $ codemd --config neither.yaml doc.md
 codemd: neither.yaml: language "foo" must define at least one of line or block
 ```
+<!-- codemd:generated -->
 
 Add a `line` or a `block` with exactly two strings. A `block` with any other
 length is an error too.
@@ -417,6 +445,7 @@ language entry accepts only `line`, `block`, and `fence`:
 $ codemd --config config.yaml doc.md
 codemd: config.yaml: line 1: unknown key "languagez"
 ```
+<!-- codemd:generated -->
 
 Remove the key or correct its spelling.
 
@@ -426,6 +455,19 @@ exist. Correct the path, or omit `--config` to use discovery.
 See [Configuration](configuration.md) for the config format.
 
 ## FAQ
+
+### Why did codemd insert a second code block and print a warning?
+
+An `import` reference found a fenced block directly below it that codemd did
+not generate. codemd marks every `import` region it generates with a hidden
+`<!-- codemd:generated -->` comment and only rewrites marked regions, so it
+left the unmarked block untouched and inserted its own marked snippet above it.
+Move the hand-written block below a line of prose (or remove it) and re-run. A
+`link` reference is narrower: it replaces only a line matching its generated
+shape. This also happens once after upgrading codemd, when a block generated by
+an older version no longer matches the current output: delete the stale block
+and re-run. If the generated bytes are unchanged, codemd adopts the older block
+in place instead.
 
 **Why does re-running codemd produce no changes?** Resolution is idempotent:
 each run re-derives the managed region from the reference comment, so once a
@@ -439,11 +481,6 @@ resulting file. `--check` exits `1` when any input differs.
 **Why is my reference ignored?** A reference inside a fenced code block is not
 scanned, so it is treated as literal text. Place the reference outside the
 fences, or remove the surrounding fence.
-
-**Why was my hand-written code block replaced?** An `import` reference owns the
-first fenced block below it, whatever its origin. Move the block away from the
-reference, or precede it with a non-blank line. A `link` reference is narrower:
-it replaces only a line matching its generated shape.
 
 **Why can't I reference a path with spaces?** Tokens are whitespace-separated,
 and a quoted path is rejected (`path must not be quoted`). Rename the file or

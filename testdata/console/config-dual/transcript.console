@@ -3,3 +3,4 @@ $ codemd --config config.yaml doc.md
 ```coffee
 x = 1
 ```
+<!-- codemd:generated -->

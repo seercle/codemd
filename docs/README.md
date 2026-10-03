@@ -44,7 +44,9 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 ````
+<!-- codemd:generated -->
 
 The reference comment is preserved and the generated fence is inserted directly
 below it. Pass `-w` to write the result to the file in place.

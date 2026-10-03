@@ -3,6 +3,7 @@ $ codemd doc.md
 ```coffee
 x = 1
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (link s src.coffee) -->
 [src.coffee:1](src.coffee#L1)

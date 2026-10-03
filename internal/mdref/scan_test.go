@@ -85,3 +85,15 @@ func TestScanTreatsIndentedFenceAsBlock(t *testing.T) {
 		t.Fatalf("indented fence must hide the reference inside it: %+v", refs)
 	}
 }
+
+func TestGeneratedMarkerIsNotAReference(t *testing.T) {
+	if _, ok := ExtractComment(GeneratedMarker); ok {
+		t.Fatal("marker must not parse as a reference")
+	}
+	if !IsGeneratedMarker("  " + GeneratedMarker + "  ") {
+		t.Fatal("marker should match despite surrounding whitespace")
+	}
+	if IsGeneratedMarker("<!-- codemd: (import a..b s.go go) -->") {
+		t.Fatal("a reference must not match the marker")
+	}
+}

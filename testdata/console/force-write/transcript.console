@@ -15,5 +15,6 @@ func handler() string {
 }
 
 ```
+<!-- codemd:generated -->
 
 <!-- codemd: (import nope server.go go) -->

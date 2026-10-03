@@ -44,6 +44,7 @@ codemd: doc.md: line 1: duplicate marker "a" on lines 1 and 2
 <!-- codemd: (import a..b src.txt) -->
 codemd: 1 error(s)
 ```
+<!-- codemd:generated -->
 
 ## Imports and links
 
@@ -62,6 +63,7 @@ func handler() string {
 
 //codemd:handler-end
 ```
+<!-- codemd:generated -->
 
 `import handler-start..handler-end` begins on the `func` line and drops both
 marker lines, while the link:
