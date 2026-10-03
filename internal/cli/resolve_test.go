@@ -358,6 +358,50 @@ func TestSpliceReplacesMarkerBeforeFence(t *testing.T) {
 	}
 }
 
+func TestSpliceMarkerBeforeFenceNoFenceAfter(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"<!-- codemd:generated -->",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"```go",
+		"x",
+		"```",
+		"<!-- codemd:generated -->",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
+func TestSpliceMarkerBeforeFenceTrailingBlanks(t *testing.T) {
+	lines := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"<!-- codemd:generated -->",
+		"",
+	}
+	got, warn := splice(lines, 1, mdref.Import, []string{"```go", "x", "```"})
+	want := []string{
+		"<!-- codemd: (import a..b s.go go) -->",
+		"```go",
+		"x",
+		"```",
+		"<!-- codemd:generated -->",
+		"",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %#v", got)
+	}
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+}
+
 func TestResolvePreservesUnmanagedFence(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
 	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}

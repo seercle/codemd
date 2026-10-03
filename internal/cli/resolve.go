@@ -183,8 +183,10 @@ func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) 
 				for k < len(lines) && strings.TrimSpace(lines[k]) == "" {
 					k++
 				}
-				if end, ok := mdref.FenceBlockEnd(lines, k); ok {
-					regionEnd = end
+				if k < len(lines) {
+					if end, ok := mdref.FenceBlockEnd(lines, k); ok {
+						regionEnd = end
+					}
 				}
 				out := append([]string{}, lines[:idx]...)
 				out = append(out, region...)
