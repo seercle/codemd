@@ -59,3 +59,15 @@ func TestLegacyReferenceRendersVisibly(t *testing.T) {
 		t.Fatalf("expected the legacy form to render visibly, got: %s", out.String())
 	}
 }
+
+// TestGeneratedMarkerIsHiddenByMarkdown locks that the managed-region marker
+// renders to nothing, so marking a region adds no visible output.
+func TestGeneratedMarkerIsHiddenByMarkdown(t *testing.T) {
+	var out strings.Builder
+	if err := goldmark.Convert([]byte(GeneratedMarker+"\n"), &out); err != nil {
+		t.Fatal(err)
+	}
+	if got := out.String(); got != "<!-- raw HTML omitted -->\n" {
+		t.Errorf("marker rendered visibly: %q", got)
+	}
+}

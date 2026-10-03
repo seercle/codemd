@@ -35,6 +35,16 @@ func ExtractComment(line string) (string, bool) {
 	return "", false
 }
 
+// GeneratedMarker is the HTML comment codemd writes next to a generated
+// fenced block to mark that region as managed. Markdown renderers hide it, and
+// Scan ignores it because its body is not a parenthesized reference.
+const GeneratedMarker = "<!-- codemd:generated -->"
+
+// IsGeneratedMarker reports whether line is the managed-region marker.
+func IsGeneratedMarker(line string) bool {
+	return strings.TrimSpace(line) == GeneratedMarker
+}
+
 // ScanError pairs a reference parse error with the 1-based line it occurred on.
 type ScanError struct {
 	Line int
