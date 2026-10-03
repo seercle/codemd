@@ -43,16 +43,9 @@ codemd: 1 error(s)
 ```
 <!-- codemd:generated -->
 
-For `link`, `RANGE` is exactly one token; a `..` range is rejected:
-
-<!-- codemd: (import .. ../testdata/console/err-link-token/transcript.console console) -->
-```console
-$ codemd doc.md
-codemd: doc.md: line 1: link takes a single token, got "a..b"
-<!-- codemd: (link a..b src.go go) -->
-codemd: 1 error(s)
-```
-<!-- codemd:generated -->
+For `link`, `RANGE` is either a single token (a single-line link) or two tokens
+joined by `..` (a range link), with the same bounds and boundary semantics as
+`import`.
 
 A token is a **named point** (`handler-start`) or a **line regex**
 (`/^func handler/`). A token is a regex if and only if it begins with `/`; it

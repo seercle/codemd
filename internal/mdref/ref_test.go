@@ -37,6 +37,42 @@ func TestParseLink(t *testing.T) {
 	if r.Mode != Link || r.Range.Start.Name != "a" || !r.Range.End.Open {
 		t.Fatalf("got %+v", r)
 	}
+	if r.IsRange {
+		t.Fatalf("single-token link must not set IsRange: %+v", r)
+	}
+}
+
+func TestParseLinkNamedRange(t *testing.T) {
+	r, err := ParseRef("(link a..b src/x.go go)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Mode != Link || !r.IsRange {
+		t.Fatalf("expected a link range, got %+v", r)
+	}
+	if r.Range.Start.Name != "a" || r.Range.End.Name != "b" || r.Path != "src/x.go" || r.Lang != "go" {
+		t.Fatalf("got %+v", r)
+	}
+}
+
+func TestParseLinkOpenRange(t *testing.T) {
+	r, err := ParseRef("(link a.. src/x.go)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !r.IsRange || !r.Range.End.Open || r.Range.Start.Name != "a" {
+		t.Fatalf("got %+v", r)
+	}
+}
+
+func TestParseLinkRegexRange(t *testing.T) {
+	r, err := ParseRef(`(link /func main/../^}/ x.go go)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !r.IsRange || r.Range.Start.Regex != "func main" || r.Range.End.Regex != "^}" {
+		t.Fatalf("got %+v", r)
+	}
 }
 
 func TestParseLinkCustomLabel(t *testing.T) {
@@ -86,7 +122,6 @@ func TestParseLinkNoLabel(t *testing.T) {
 func TestParseErrors(t *testing.T) {
 	bad := []string{
 		"(import a src/x.go)",             // import needs range
-		"(link a..b src/x.go)",            // link takes one token
 		"(import a..b src/x.go go strip)", // strip without regex
 		"(nope a..b src/x.go)",            // bad mode
 		"(import a..b)",                   // missing path
