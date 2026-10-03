@@ -462,7 +462,9 @@ An `import` reference found a fenced block directly below it that codemd did
 not generate. codemd marks every region it generates with a hidden
 `<!-- codemd:generated -->` comment and only rewrites marked regions, so it
 left the unmarked block untouched and inserted its own marked snippet above it.
-Move the hand-written block below a line of prose (or remove it) and re-run.
+Move the hand-written block below a line of prose (or remove it) and re-run. A
+`link` reference is narrower: it replaces only a line matching its generated
+shape.
 
 **Why does re-running codemd produce no changes?** Resolution is idempotent:
 each run re-derives the managed region from the reference comment, so once a
@@ -476,11 +478,6 @@ resulting file. `--check` exits `1` when any input differs.
 **Why is my reference ignored?** A reference inside a fenced code block is not
 scanned, so it is treated as literal text. Place the reference outside the
 fences, or remove the surrounding fence.
-
-**Why was my hand-written code block replaced?** An `import` reference owns the
-first fenced block below it, whatever its origin. Move the block away from the
-reference, or precede it with a non-blank line. A `link` reference is narrower:
-it replaces only a line matching its generated shape.
 
 **Why can't I reference a path with spaces?** Tokens are whitespace-separated,
 and a quoted path is rejected (`path must not be quoted`). Rename the file or
