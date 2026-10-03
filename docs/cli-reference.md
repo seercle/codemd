@@ -237,9 +237,10 @@ codemd dev
 
 ## `--languages`
 
-Prints the effective language table and exits `0`. When `--config` is given, its
-entries are merged over the built-ins first. The table is sorted by extension and
-each line is `ext -> fence (form)`:
+Prints the effective language table and exits `0`. The table starts from the
+built-ins; a `.codemd.yaml` discovered from the current working directory (as for
+stdin), or the file named by `--config`, is merged over them first. The table is
+sorted by extension and each line is `ext -> fence (form)`:
 
 ```console-norun
 $ codemd --languages

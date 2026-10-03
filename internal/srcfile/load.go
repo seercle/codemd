@@ -48,8 +48,9 @@ func (l *Loader) Load(path, baseDir string) (string, bool, error) {
 		if err != nil {
 			return "", true, err
 		}
-		l.cache[path] = string(data)
-		return string(data), true, nil
+		content := string(data)
+		l.cache[path] = content
+		return content, true, nil
 	}
 	resolved := path
 	if !filepath.IsAbs(resolved) {
@@ -62,6 +63,7 @@ func (l *Loader) Load(path, baseDir string) (string, bool, error) {
 	if err != nil {
 		return "", false, err
 	}
-	l.cache[resolved] = string(data)
-	return string(data), false, nil
+	content := string(data)
+	l.cache[resolved] = content
+	return content, false, nil
 }

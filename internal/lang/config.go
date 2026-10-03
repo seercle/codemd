@@ -61,20 +61,29 @@ func LoadConfig(path string) (Config, error) {
 	}
 	cfg := Config{Languages: map[string]Language{}}
 	for ext, y := range raw.Languages {
-		var form CommentForm
-		if y.Line == "" && len(y.Block) == 0 {
-			return Config{}, fmt.Errorf("%s: language %q must define at least one of line or block", path, ext)
-		}
 		if len(y.Block) != 0 && len(y.Block) != 2 {
 			return Config{}, fmt.Errorf("%s: language %q block must have exactly two elements", path, ext)
 		}
+		var form CommentForm
 		form.Line = y.Line
 		if len(y.Block) == 2 {
 			form.Block = [2]string{y.Block[0], y.Block[1]}
 		}
+		if err := validateForm(ext, form); err != nil {
+			return Config{}, fmt.Errorf("%s: %w", path, err)
+		}
 		cfg.Languages[ext] = Language{Fence: y.Fence, Form: form}
 	}
 	return cfg, nil
+}
+
+// validateForm reports whether a language entry defines at least one comment
+// form.
+func validateForm(ext string, form CommentForm) error {
+	if form.Line == "" && form.Block == [2]string{} {
+		return fmt.Errorf("language %q must define at least one of line or block", ext)
+	}
+	return nil
 }
 
 // DiscoverConfig walks up from startDir looking for a .codemd.yaml file. It
@@ -108,8 +117,8 @@ func Merge(base map[string]Language, cfg Config) (map[string]Language, error) {
 		out[k] = v
 	}
 	for ext, l := range cfg.Languages {
-		if l.Form.Line == "" && l.Form.Block == [2]string{} {
-			return nil, fmt.Errorf("language %q must define at least one of line or block", ext)
+		if err := validateForm(ext, l.Form); err != nil {
+			return nil, err
 		}
 		if l.Fence == "" {
 			l.Fence = ext

@@ -5,6 +5,8 @@ package render
 import (
 	"fmt"
 	"strings"
+
+	"github.com/seercle/codemd/internal/lineutil"
 )
 
 // Snippet wraps lines in a Markdown fenced code block, using lang as the fence
@@ -29,12 +31,7 @@ func Snippet(lang string, lines []string) []string {
 func fenceFor(lines []string) string {
 	longest := 0
 	for _, line := range lines {
-		trimmed := strings.TrimLeft(line, " \t")
-		n := 0
-		for n < len(trimmed) && trimmed[n] == '`' {
-			n++
-		}
-		if n > longest {
+		if n := lineutil.LeadingRun(line, '`'); n > longest {
 			longest = n
 		}
 	}

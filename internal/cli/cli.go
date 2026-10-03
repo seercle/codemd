@@ -59,23 +59,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.BoolVar(&opt.Force, "force", false, "write even if some references failed")
 	languages := fs.Bool("languages", false, "list supported languages and exit")
 	version := fs.Bool("version", false, "print version and exit")
-	args = reorderFlags(fs, args)
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		if a == "--" {
-			break
-		}
-		if a == "-h" || a == "--help" || a == "-help" {
-			fs.SetOutput(stdout)
-			printUsage(stdout)
-			return 0
-		}
-		if len(a) >= 2 && a[0] == '-' && !strings.Contains(a, "=") {
-			name := flagName(a)
-			if name != "h" && name != "help" && !isBoolFlag(fs, name) {
-				i++
-			}
-		}
+	var help bool
+	args, help = reorderFlags(fs, args)
+	if help {
+		fs.SetOutput(stdout)
+		printUsage(stdout)
+		return 0
 	}
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -87,19 +76,21 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stdout, "codemd %s\n", Version)
 		return 0
 	}
+	// --config is global: load and merge it once, then reuse for every file.
+	var configTable map[string]lang.Language
+	if opt.Config != "" {
+		var err error
+		configTable, err = tableFromConfig(opt.Config)
+		if err != nil {
+			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			return 1
+		}
+	}
 	if *languages {
-		table := lang.Builtins()
-		if opt.Config != "" {
-			cfg, err := lang.LoadConfig(opt.Config)
-			if err != nil {
-				fmt.Fprintf(stderr, "codemd: %v\n", err)
-				return 1
-			}
-			table, err = lang.Merge(lang.Builtins(), cfg)
-			if err != nil {
-				fmt.Fprintf(stderr, "codemd: %v\n", err)
-				return 1
-			}
+		table, err := resolveTable(".", configTable)
+		if err != nil {
+			fmt.Fprintf(stderr, "codemd: %v\n", err)
+			return 1
 		}
 		for _, line := range lang.Describe(table) {
 			fmt.Fprintln(stdout, line)
@@ -132,21 +123,6 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(files) == 0 && (opt.Write || opt.Output != "" || opt.Diff) {
 		fmt.Fprintln(stderr, "codemd: in-place flags require an input file")
 		return 2
-	}
-
-	// --config is global: load and merge it once, then reuse for every file.
-	var configTable map[string]lang.Language
-	if opt.Config != "" {
-		cfg, err := lang.LoadConfig(opt.Config)
-		if err != nil {
-			fmt.Fprintf(stderr, "codemd: %v\n", err)
-			return 1
-		}
-		configTable, err = lang.Merge(lang.Builtins(), cfg)
-		if err != nil {
-			fmt.Fprintf(stderr, "codemd: %v\n", err)
-			return 1
-		}
 	}
 
 	resolver := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
@@ -182,6 +158,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	return runFiles(&resolver, configTable, opt, files, stdout, stderr)
+}
+
+// runFiles resolves every file and applies the selected output mode, returning
+// the process exit code.
+func runFiles(resolver *Resolver, configTable map[string]lang.Language, opt Options, files []string, stdout, stderr io.Writer) int {
 	exit := 0
 	errCount := 0
 	checked := 0
@@ -207,9 +189,9 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		}
 		out, errs, warns := resolver.ResolveDocument(string(data), baseDir)
 		reportWarnings(file, warns, stderr)
-		fileErrs := len(errs)
-		if n := reportErrors(file, errs, stderr); n > 0 {
-			errCount += n
+		fileErrs := reportErrors(file, errs, stderr)
+		if fileErrs > 0 {
+			errCount += fileErrs
 			exit = 1
 		}
 		changed := out != string(data)
@@ -229,9 +211,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 				io.WriteString(stdout, unifiedDiff(file, string(data), out))
 			}
 		case opt.Write:
-			if fileErrs > 0 && !opt.Force {
-				fmt.Fprintf(stderr, "codemd: %s: not written due to errors (use --force to write anyway)\n", file)
-			} else if changed {
+			if !writeBlocked(stderr, file, fileErrs, opt.Force) && changed {
 				if err := os.WriteFile(file, []byte(out), 0o644); err != nil {
 					fmt.Fprintf(stderr, "codemd: %v\n", err)
 					errCount++
@@ -241,12 +221,12 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 				}
 			}
 		case opt.Output != "":
-			if fileErrs > 0 && !opt.Force {
-				fmt.Fprintf(stderr, "codemd: %s: not written due to errors (use --force to write anyway)\n", file)
-			} else if err := os.WriteFile(opt.Output, []byte(out), 0o644); err != nil {
-				fmt.Fprintf(stderr, "codemd: %v\n", err)
-				errCount++
-				exit = 1
+			if !writeBlocked(stderr, file, fileErrs, opt.Force) {
+				if err := os.WriteFile(opt.Output, []byte(out), 0o644); err != nil {
+					fmt.Fprintf(stderr, "codemd: %v\n", err)
+					errCount++
+					exit = 1
+				}
 			}
 		default:
 			io.WriteString(stdout, out)
@@ -286,8 +266,9 @@ func isBoolFlag(fs *flag.FlagSet, name string) bool {
 // explicit "--" ends flag parsing. The result is always flags, then a single
 // "--" boundary if one was present, then every positional in original order;
 // flag.FlagSet.Parse stops at the boundary, so fs.Args() holds the positionals
-// with no "--" among them.
-func reorderFlags(fs *flag.FlagSet, args []string) []string {
+// with no "--" among them. help reports whether a -h/-help/--help flag was
+// seen among the flag arguments.
+func reorderFlags(fs *flag.FlagSet, args []string) (reordered []string, help bool) {
 	var flags, positionals []string
 	terminated := false
 	for i := 0; i < len(args); i++ {
@@ -306,7 +287,11 @@ func reorderFlags(fs *flag.FlagSet, args []string) []string {
 		if eq := strings.IndexByte(name, '='); eq >= 0 {
 			continue
 		}
-		if name == "h" || name == "help" || isBoolFlag(fs, name) {
+		if name == "h" || name == "help" {
+			help = true
+			continue
+		}
+		if isBoolFlag(fs, name) {
 			continue
 		}
 		if i+1 < len(args) {
@@ -315,9 +300,11 @@ func reorderFlags(fs *flag.FlagSet, args []string) []string {
 		}
 	}
 	if terminated {
-		return append(flags, append([]string{"--"}, positionals...)...)
+		flags = append(flags, append([]string{"--"}, positionals...)...)
+	} else {
+		flags = append(flags, positionals...)
 	}
-	return append(flags, positionals...)
+	return flags, help
 }
 
 // resolveTable returns the language table for baseDir. When explicit is
@@ -334,11 +321,27 @@ func resolveTable(baseDir string, explicit map[string]lang.Language) (map[string
 	if cfgPath == "" {
 		return lang.Builtins(), nil
 	}
-	cfg, err := lang.LoadConfig(cfgPath)
+	return tableFromConfig(cfgPath)
+}
+
+// tableFromConfig loads the config at path and merges it over the built-in
+// language table.
+func tableFromConfig(path string) (map[string]lang.Language, error) {
+	cfg, err := lang.LoadConfig(path)
 	if err != nil {
 		return nil, err
 	}
 	return lang.Merge(lang.Builtins(), cfg)
+}
+
+// writeBlocked reports whether a write should be skipped because the file had
+// reference errors and --force was not given, printing the --force hint.
+func writeBlocked(stderr io.Writer, name string, fileErrs int, force bool) bool {
+	if fileErrs > 0 && !force {
+		fmt.Fprintf(stderr, "codemd: %s: not written due to errors (use --force to write anyway)\n", name)
+		return true
+	}
+	return false
 }
 
 // reportWarnings prints non-fatal resolution warnings. They do not affect the
@@ -359,8 +362,5 @@ func reportErrors(name string, errs []RefError, stderr io.Writer) int {
 			fmt.Fprintf(stderr, "codemd: %s: %v\n", name, e.Err)
 		}
 	}
-	if len(errs) > 0 {
-		return len(errs)
-	}
-	return 0
+	return len(errs)
 }

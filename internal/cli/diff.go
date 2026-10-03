@@ -39,6 +39,10 @@ func unifiedDiff(name, old, new string) string {
 	return b.String()
 }
 
+// splitDiffLines splits on "\n" only and keeps any "\r" with its line, unlike
+// lineutil.Split, which normalizes CRLF and records the trailing newline. A
+// diff must preserve the bytes it compares, so the two are deliberately
+// separate.
 func splitDiffLines(s string) []string {
 	if s == "" {
 		return nil

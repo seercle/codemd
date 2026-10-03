@@ -102,9 +102,10 @@ Two mechanisms override the defaults:
 
 ## `--languages`
 
-`codemd --languages` prints the effective table and exits `0`. When `--config`
-is given, its entries are merged over the built-ins first. The table is sorted
-by extension; each line is `ext -> fence (form)`:
+`codemd --languages` prints the effective table and exits `0`. The table starts
+from the built-ins and a config is merged over them first: the `.codemd.yaml`
+discovered from the current working directory, or the file named by `--config`.
+The table is sorted by extension; each line is `ext -> fence (form)`:
 
 <!-- codemd: (import .. ../testdata/console/languages-list/transcript.console console) -->
 ```console

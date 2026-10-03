@@ -36,6 +36,23 @@ func Split(s string) Lines {
 	return l
 }
 
+// LeadingSpace returns the run of spaces and tabs at the start of s.
+func LeadingSpace(s string) string {
+	trimmed := strings.TrimLeft(s, " \t")
+	return s[:len(s)-len(trimmed)]
+}
+
+// LeadingRun returns the length of the run of ch bytes at the start of s,
+// ignoring any leading spaces or tabs.
+func LeadingRun(s string, ch byte) int {
+	trimmed := strings.TrimLeft(s, " \t")
+	n := 0
+	for n < len(trimmed) && trimmed[n] == ch {
+		n++
+	}
+	return n
+}
+
 // Join reassembles the lines using the recorded line ending and restores the
 // trailing newline, if any.
 func (l Lines) Join() string {

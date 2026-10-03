@@ -159,6 +159,30 @@ func TestRunLanguagesWithConfig(t *testing.T) {
 	}
 }
 
+func TestRunLanguagesDiscoversConfig(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".codemd.yaml"),
+		[]byte("languages:\n  foo:\n    line: \";;\"\n    fence: foofence\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(old)
+
+	var out, errb bytes.Buffer
+	if code := Run([]string{"--languages"}, strings.NewReader(""), &out, &errb); code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if !strings.Contains(out.String(), `foo -> foofence (line ";;")`) {
+		t.Fatalf("--languages should discover .codemd.yaml:\n%s", out.String())
+	}
+}
+
 func TestRunStdinDiscoversConfig(t *testing.T) {
 	dir := t.TempDir()
 	writeTree(t, dir, map[string]string{
@@ -497,7 +521,8 @@ func TestDoubleDashAfterFlagLeavesPositionals(t *testing.T) {
 func TestDoubleDashAfterFileLeavesPositionals(t *testing.T) {
 	fs := flag.NewFlagSet("codemd", flag.ContinueOnError)
 	fs.Bool("check", false, "")
-	if err := fs.Parse(reorderFlags(fs, []string{"FILE.md", "--", "--version"})); err != nil {
+	args, _ := reorderFlags(fs, []string{"FILE.md", "--", "--version"})
+	if err := fs.Parse(args); err != nil {
 		t.Fatal(err)
 	}
 	got := fs.Args()

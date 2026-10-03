@@ -72,20 +72,22 @@ func ParseRef(comment string) (Ref, error) {
 	default:
 		return Ref{}, fmt.Errorf("unknown mode %q", mode)
 	}
-	if r.Mode == Import {
-		start, end, err := parseRange(rangeTok)
+	left, right, isRange := splitRange(rangeTok)
+	switch {
+	case isRange:
+		start, err := parseToken(left)
+		if err != nil {
+			return Ref{}, err
+		}
+		end, err := parseToken(right)
 		if err != nil {
 			return Ref{}, err
 		}
 		r.Range = extract.Range{Start: start, End: end}
-	} else if _, _, ok := splitRange(rangeTok); ok {
-		start, end, err := parseRange(rangeTok)
-		if err != nil {
-			return Ref{}, err
-		}
-		r.Range = extract.Range{Start: start, End: end}
-		r.IsRange = true
-	} else {
+		r.IsRange = r.Mode == Link
+	case r.Mode == Import:
+		return Ref{}, fmt.Errorf("import range must contain '..': %q", rangeTok)
+	default:
 		b, err := parseToken(rangeTok)
 		if err != nil {
 			return Ref{}, err
@@ -144,22 +146,12 @@ func splitTokens(s string) ([]string, error) {
 			break
 		}
 		if s[i] == '"' {
-			j := i + 1
-			for j < len(s) {
-				if s[j] == '\\' && j+1 < len(s) {
-					j += 2
-					continue
-				}
-				if s[j] == '"' {
-					break
-				}
-				j++
-			}
-			if j >= len(s) {
+			end, ok := scanQuote(s, i)
+			if !ok {
 				return nil, fmt.Errorf("unterminated quoted string")
 			}
-			toks = append(toks, s[i:j+1])
-			i = j + 1
+			toks = append(toks, s[i:end])
+			i = end
 			continue
 		}
 		start := i
@@ -186,6 +178,23 @@ func unquote(tok string) (string, error) {
 		b.WriteByte(body[i])
 	}
 	return b.String(), nil
+}
+
+// scanQuote returns the index just past the closing '"' of the quoted token
+// starting at s[i] (which must be '"'), and whether it was terminated. A
+// backslash escapes the next byte, so an escaped '"' does not close the token.
+func scanQuote(s string, i int) (end int, ok bool) {
+	for j := i + 1; j < len(s); j++ {
+		switch s[j] {
+		case '\\':
+			if j+1 < len(s) {
+				j++
+			}
+		case '"':
+			return j + 1, true
+		}
+	}
+	return len(s), false
 }
 
 func isSpace(c byte) bool {
@@ -218,23 +227,8 @@ func scanBound(s string, i int, left bool) int {
 		return i
 	}
 	if s[i] == '/' {
-		i++
-		for i < len(s) {
-			if s[i] == '\\' {
-				if i+1 < len(s) {
-					i += 2
-				} else {
-					i++
-				}
-				continue
-			}
-			if s[i] == '/' {
-				i++
-				break
-			}
-			i++
-		}
-		return i
+		end, _ := scanRegex(s, i)
+		return end
 	}
 	for i < len(s) && !isSpace(s[i]) {
 		if left && i+1 < len(s) && s[i] == '.' && s[i+1] == '.' {
@@ -245,20 +239,19 @@ func scanBound(s string, i int, left bool) int {
 	return i
 }
 
-func parseRange(tok string) (extract.Bound, extract.Bound, error) {
-	left, right, ok := splitRange(tok)
-	if !ok {
-		return extract.Bound{}, extract.Bound{}, fmt.Errorf("import range must contain '..': %q", tok)
+// scanRegex returns the index just past the closing '/' of the regex token
+// starting at s[i] (which must be '/'), and whether it was terminated. A
+// backslash escapes the next byte, so an escaped '/' does not close the token.
+func scanRegex(s string, i int) (end int, ok bool) {
+	for j := i + 1; j < len(s); j++ {
+		switch s[j] {
+		case '\\':
+			j++
+		case '/':
+			return j + 1, true
+		}
 	}
-	start, err := parseToken(left)
-	if err != nil {
-		return extract.Bound{}, extract.Bound{}, err
-	}
-	end, err := parseToken(right)
-	if err != nil {
-		return extract.Bound{}, extract.Bound{}, err
-	}
-	return start, end, nil
+	return len(s), false
 }
 
 // splitRange splits on the first ".." that is not inside a regex token.
@@ -266,21 +259,11 @@ func splitRange(tok string) (string, string, bool) {
 	i := 0
 	for i < len(tok) {
 		if tok[i] == '/' {
-			j := i + 1
-			for j < len(tok) {
-				if tok[j] == '\\' {
-					j += 2
-					continue
-				}
-				if tok[j] == '/' {
-					break
-				}
-				j++
-			}
-			if j >= len(tok) {
+			end, ok := scanRegex(tok, i)
+			if !ok {
 				return "", "", false
 			}
-			i = j + 1
+			i = end
 			continue
 		}
 		if strings.HasPrefix(tok[i:], "..") {

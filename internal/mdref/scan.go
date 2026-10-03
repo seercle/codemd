@@ -54,14 +54,12 @@ type ScanError struct {
 // fenceInfo reports the fence character and run length if line is a fence
 // (``` or ~~~ after any leading whitespace and a run of at least 3).
 func fenceInfo(line string) (ch byte, n int, ok bool) {
-	trimmed := strings.TrimLeft(line, " \t")
+	trimmed := line[len(lineutil.LeadingSpace(line)):]
 	if len(trimmed) == 0 || (trimmed[0] != '`' && trimmed[0] != '~') {
 		return 0, 0, false
 	}
 	ch = trimmed[0]
-	for n < len(trimmed) && trimmed[n] == ch {
-		n++
-	}
+	n = lineutil.LeadingRun(line, ch)
 	if n < 3 {
 		return 0, 0, false
 	}

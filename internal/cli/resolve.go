@@ -88,11 +88,10 @@ func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, err
 		forms = genericForms
 	}
 	set := srcfile.ExtractMarkersMulti(content, forms)
-	if err := checkDuplicate(set, ref.Ref.Range.Start); err != nil {
-		return nil, err
-	}
-	if err := checkDuplicate(set, ref.Ref.Range.End); err != nil {
-		return nil, err
+	for _, b := range []extract.Bound{ref.Ref.Range.Start, ref.Ref.Range.End} {
+		if err := checkDuplicate(set, b); err != nil {
+			return nil, err
+		}
 	}
 	markers := set.Markers
 	if ref.Ref.Mode == mdref.Link {
@@ -183,7 +182,7 @@ func isGeneratedLink(line string) bool {
 // When no block is present the region is inserted directly below the
 // reference.
 func splice(lines []string, refLine int, mode mdref.Mode, replacement []string) ([]string, string) {
-	indent := leadingIndent(lines[refLine-1])
+	indent := lineutil.LeadingSpace(lines[refLine-1])
 	replacement = indentLines(replacement, indent)
 	region := replacement
 	if mode == mdref.Import {
@@ -263,11 +262,6 @@ func equalLines(a, b []string) bool {
 		}
 	}
 	return true
-}
-
-func leadingIndent(line string) string {
-	trimmed := strings.TrimLeft(line, " \t")
-	return line[:len(line)-len(trimmed)]
 }
 
 func indentLines(lines []string, indent string) []string {

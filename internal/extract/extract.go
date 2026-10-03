@@ -34,7 +34,7 @@ type Result struct {
 	Lines     []string
 }
 
-func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int, error) {
+func findLine(lines []string, markers []srcfile.Marker, b Bound, from int) (int, error) {
 	if b.Open {
 		return 0, nil
 	}
@@ -50,9 +50,8 @@ func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int,
 	if err != nil {
 		return 0, fmt.Errorf("bad regex %q: %w", b.Regex, err)
 	}
-	lines := lineutil.Split(content)
-	for i := from - 1; i < len(lines.Content); i++ {
-		if re.MatchString(lines.Content[i]) {
+	for i := from - 1; i < len(lines); i++ {
+		if re.MatchString(lines[i]) {
 			return i + 1, nil
 		}
 	}
@@ -68,14 +67,14 @@ func findLine(content string, markers []srcfile.Marker, b Bound, from int) (int,
 // lines.
 func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Result, error) {
 	lines := lineutil.Split(content)
-	start, err := findLine(content, markers, r.Start, 1)
+	start, err := findLine(lines.Content, markers, r.Start, 1)
 	if err != nil {
 		return Result{}, err
 	}
 	if r.Start.Open {
 		start = 1
 	}
-	end, err := findLine(content, markers, r.End, start)
+	end, err := findLine(lines.Content, markers, r.End, start)
 	if err != nil {
 		return Result{}, err
 	}
@@ -94,12 +93,16 @@ func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Res
 	if first > last {
 		return Result{}, fmt.Errorf("empty range %s..%s", describeBound(r.Start), describeBound(r.End))
 	}
+	var startRe, endRe *regexp.Regexp
+	if strip {
+		startRe, endRe = compileBound(r.Start), compileBound(r.End)
+	}
 	out := make([]string, 0, last-first+1)
 	for i := first; i <= last; i++ {
 		line := lines.Content[i-1]
 		if strip {
-			line = stripBound(line, r.Start, i == start)
-			line = stripBound(line, r.End, i == end)
+			line = stripBound(line, startRe, i == start)
+			line = stripBound(line, endRe, i == end)
 		}
 		out = append(out, line)
 	}
@@ -109,12 +112,22 @@ func Resolve(content string, markers []srcfile.Marker, r Range, strip bool) (Res
 	return Result{StartLine: first, EndLine: last, Lines: out}, nil
 }
 
-func stripBound(line string, b Bound, isBound bool) string {
-	if !isBound || b.Regex == "" {
-		return line
+// compileBound compiles b's regex, or returns nil when b has none. A bound
+// that reaches stripping has already been compiled by findLine, so a
+// compilation error here cannot occur and yields no stripping.
+func compileBound(b Bound) *regexp.Regexp {
+	if b.Regex == "" {
+		return nil
 	}
 	re, err := regexp.Compile(b.Regex)
 	if err != nil {
+		return nil
+	}
+	return re
+}
+
+func stripBound(line string, re *regexp.Regexp, isBound bool) string {
+	if !isBound || re == nil {
 		return line
 	}
 	loc := re.FindStringIndex(line)
@@ -149,5 +162,5 @@ func describeBound(b Bound) string {
 // used to build a link to a single source location. It returns an error when
 // the bound cannot be found.
 func ResolveLink(content string, markers []srcfile.Marker, b Bound) (int, error) {
-	return findLine(content, markers, b, 1)
+	return findLine(lineutil.Split(content).Content, markers, b, 1)
 }

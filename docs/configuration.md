@@ -76,7 +76,8 @@ Config entries are merged onto the built-in table (see the
 
 The result is the effective table codemd uses. A table supplied with `--config`
 is merged the same way, and `codemd --languages --config path` prints that merged
-table.
+table. Without `--config`, `codemd --languages` discovers a `.codemd.yaml` from
+the current working directory, as stdin resolution does.
 
 For example, this config gives `coffee` both comment forms:
 
