@@ -56,7 +56,7 @@ func TestResolveDocumentImportAndLink(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n//codemd:b\n"), 0o644)
 	md := "<!-- codemd: (import a..b server.go go) -->\n\n```go\nstale\n```\n\n<!-- codemd: (link a server.go) -->\n\n[server.go:9](server.go#L9)\n"
-	out, errs := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
 	}
@@ -75,7 +75,7 @@ func TestResolveDocumentLinkInsertsUnderNormalLine(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "server.go"), []byte("package x\n//codemd:a\nfunc f() {}\n"), 0o644)
 	md := "<!-- codemd: (link a server.go) -->\n\nkeep me\n"
-	out, errs := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
 	}
@@ -89,8 +89,8 @@ func TestResolveDocumentIsIdempotent(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
 	md := "<!-- codemd: (import a..b s.go go) -->\n"
-	once, _ := resolver().ResolveDocument(md, dir)
-	twice, _ := resolver().ResolveDocument(once, dir)
+	once, _, _ := resolver().ResolveDocument(md, dir)
+	twice, _, _ := resolver().ResolveDocument(once, dir)
 	if once != twice {
 		t.Fatalf("not idempotent:\n%s\n---\n%s", once, twice)
 	}
@@ -100,7 +100,7 @@ func TestResolveDocumentUnknownExtensionFallback(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "notes.txt"), []byte("#codemd:a\nhello\n#codemd:b\n"), 0o644)
 	md := "<!-- codemd: (import a..b notes.txt) -->\n"
-	out, errs := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
 	}
@@ -113,7 +113,7 @@ func TestResolveDocumentContinuesPastBadRef(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "s.go"), []byte("//codemd:a\nx\n//codemd:b\n"), 0o644)
 	md := "<!-- codemd: (bogus ref) -->\n<!-- codemd: (import a..b s.go go) -->\n"
-	out, errs := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 1 {
 		t.Fatalf("want 1 error, got %+v", errs)
 	}
@@ -127,14 +127,14 @@ func TestResolveDocumentIdempotentNestedTildeFence(t *testing.T) {
 	src := "<!--codemd:a-->\nhello\n~~~\nworld\n<!--codemd:b-->\n"
 	os.WriteFile(filepath.Join(dir, "doc.md"), []byte(src), 0o644)
 	md := "<!-- codemd: (import a..b doc.md) -->\n"
-	once, errs := resolver().ResolveDocument(md, dir)
+	once, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 0 {
 		t.Fatalf("errs %+v", errs)
 	}
 	if !strings.Contains(once, "~~~") {
 		t.Fatalf("tilde fence body lost:\n%s", once)
 	}
-	twice, _ := resolver().ResolveDocument(once, dir)
+	twice, _, _ := resolver().ResolveDocument(once, dir)
 	if once != twice {
 		t.Fatalf("not idempotent:\n--- once ---\n%s\n--- twice ---\n%s", once, twice)
 	}
@@ -167,7 +167,7 @@ func TestResolveIndentedReferenceIndentsOutput(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
 	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 	in := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n"
-	out, errs := r.ResolveDocument(in, dir)
+	out, errs, _ := r.ResolveDocument(in, dir)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -181,7 +181,7 @@ func TestDuplicateMarkerDoesNotBlockOtherReferences(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:a\nx\n//codemd:b\ny\n//codemd:c\n")
 	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 	doc := "<!-- codemd: (import b..c s.go go) -->\n"
-	out, errs := r.ResolveDocument(doc, dir)
+	out, errs, _ := r.ResolveDocument(doc, dir)
 	if len(errs) != 0 {
 		t.Fatalf("unrelated reference failed: %v", errs)
 	}
@@ -190,12 +190,12 @@ func TestDuplicateMarkerDoesNotBlockOtherReferences(t *testing.T) {
 	}
 
 	bad := "<!-- codemd: (import a..c s.go go) -->\n"
-	if _, errs := r.ResolveDocument(bad, dir); len(errs) != 1 {
+	if _, errs, _ := r.ResolveDocument(bad, dir); len(errs) != 1 {
 		t.Fatalf("expected one duplicate-marker error, got: %v", errs)
 	}
 
 	badEnd := "<!-- codemd: (import c..a s.go go) -->\n"
-	if _, errs := r.ResolveDocument(badEnd, dir); len(errs) != 1 {
+	if _, errs, _ := r.ResolveDocument(badEnd, dir); len(errs) != 1 {
 		t.Fatalf("expected one duplicate-marker error on the End bound, got: %v", errs)
 	}
 }
@@ -204,7 +204,7 @@ func TestDuplicateMarkerMessageListsEveryLine(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:a\n//codemd:a\nx\n")
 	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 	doc := "<!-- codemd: (import a.. s.go go) -->\n"
-	_, errs := r.ResolveDocument(doc, dir)
+	_, errs, _ := r.ResolveDocument(doc, dir)
 	if len(errs) != 1 {
 		t.Fatalf("expected one error, got: %v", errs)
 	}
@@ -217,11 +217,11 @@ func TestResolveIndentedReferenceIsIdempotent(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
 	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
 	in := "- docs:\n\n  <!-- codemd: (import a..b s.go go) -->\n"
-	once, errs := r.ResolveDocument(in, dir)
+	once, errs, _ := r.ResolveDocument(in, dir)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
-	twice, errs := r.ResolveDocument(once, dir)
+	twice, errs, _ := r.ResolveDocument(once, dir)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors on re-run: %v", errs)
 	}
@@ -233,8 +233,17 @@ func TestResolveIndentedReferenceIsIdempotent(t *testing.T) {
 func TestResolveDocumentCollectsErrors(t *testing.T) {
 	dir := t.TempDir()
 	md := "<!-- codemd: (import a..b missing.go go) -->\n"
-	out, errs := resolver().ResolveDocument(md, dir)
+	out, errs, _ := resolver().ResolveDocument(md, dir)
 	if len(errs) != 1 || out != md {
 		t.Fatalf("out=%q errs=%+v", out, errs)
+	}
+}
+
+func TestResolveDocumentReturnsNoWarningsForCleanInput(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\nx\n//codemd:b\n")
+	r := Resolver{Loader: srcfile.NewLoader(), Table: lang.Builtins()}
+	_, errs, warns := r.ResolveDocument("<!-- codemd: (import a..b s.go go) -->\n", dir)
+	if len(errs) != 0 || len(warns) != 0 {
+		t.Fatalf("errs=%v warns=%v", errs, warns)
 	}
 }

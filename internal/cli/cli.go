@@ -161,7 +161,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			fmt.Fprintf(stderr, "codemd: %v\n", err)
 			return 1
 		}
-		out, errs := resolver.ResolveDocument(string(data), ".")
+		out, errs, warns := resolver.ResolveDocument(string(data), ".")
+		reportWarnings("<stdin>", warns, stderr)
 		errCount := reportErrors("<stdin>", errs, stderr)
 		if opt.Check {
 			// --check is not an in-place flag: it is valid with stdin for CI piping.
@@ -202,7 +203,8 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			exit = 1
 			continue
 		}
-		out, errs := resolver.ResolveDocument(string(data), baseDir)
+		out, errs, warns := resolver.ResolveDocument(string(data), baseDir)
+		reportWarnings(file, warns, stderr)
 		fileErrs := len(errs)
 		if n := reportErrors(file, errs, stderr); n > 0 {
 			errCount += n
@@ -335,6 +337,14 @@ func resolveTable(baseDir string, explicit map[string]lang.Language) (map[string
 		return nil, err
 	}
 	return lang.Merge(lang.Builtins(), cfg)
+}
+
+// reportWarnings prints non-fatal resolution warnings. They do not affect the
+// exit code.
+func reportWarnings(name string, warns []Warning, stderr io.Writer) {
+	for _, w := range warns {
+		fmt.Fprintf(stderr, "codemd: %s: line %d: %s\n", name, w.Line, w.Msg)
+	}
 }
 
 func reportErrors(name string, errs []RefError, stderr io.Writer) int {

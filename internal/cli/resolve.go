@@ -35,18 +35,26 @@ type RefError struct {
 	Err  error
 }
 
+// Warning is a non-fatal condition encountered while resolving, such as an
+// unmanaged fenced block left in place below an import reference.
+type Warning struct {
+	Line int
+	Msg  string
+}
+
 // ResolveDocument resolves every codemd reference in the Markdown content,
 // reading referenced files relative to baseDir. It returns the rewritten
-// document and the reference errors encountered, ordered by line. References
-// that fail are left unchanged so the rest of the document can still be
-// processed.
-func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError) {
+// document, the reference errors encountered, and any non-fatal warnings,
+// each ordered by line. References that fail are left unchanged so the rest of
+// the document can still be processed.
+func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError, []Warning) {
 	lines := lineutil.Split(content)
 	refs, scanErrs := mdref.Scan(content)
 	var errs []RefError
 	for _, se := range scanErrs {
 		errs = append(errs, RefError{Line: se.Line, Err: se.Err})
 	}
+	var warns []Warning
 	// Apply from the bottom up so earlier line numbers stay valid.
 	for i := len(refs) - 1; i >= 0; i-- {
 		ref := refs[i]
@@ -58,7 +66,8 @@ func (r Resolver) ResolveDocument(content, baseDir string) (string, []RefError) 
 		lines.Content = splice(lines.Content, ref.Line, ref.Ref.Mode, replacement)
 	}
 	sort.SliceStable(errs, func(i, j int) bool { return errs[i].Line < errs[j].Line })
-	return lines.Join(), errs
+	sort.SliceStable(warns, func(i, j int) bool { return warns[i].Line < warns[j].Line })
+	return lines.Join(), errs, warns
 }
 
 func (r Resolver) resolveOne(ref mdref.Reference, baseDir string) ([]string, error) {
