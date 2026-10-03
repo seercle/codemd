@@ -146,19 +146,6 @@ codemd: 1 error(s)
 
 Write two bounds joined by `..`, such as `a..b`.
 
-**`link takes a single token, got %q`.** A `link` range contains `..`:
-
-<!-- codemd: (import .. ../testdata/console/err-link-token/transcript.console console) -->
-```console
-$ codemd doc.md
-codemd: doc.md: line 1: link takes a single token, got "a..b"
-<!-- codemd: (link a..b src.go go) -->
-codemd: 1 error(s)
-```
-<!-- codemd:generated -->
-
-A link targets one line; pass a single named point or regex.
-
 **`missing path in %q`.** The reference has a mode and range but no path:
 
 <!-- codemd: (import .. ../testdata/console/err-missing-path/transcript.console console) -->

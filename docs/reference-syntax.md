@@ -43,16 +43,9 @@ codemd: 1 error(s)
 ```
 <!-- codemd:generated -->
 
-For `link`, `RANGE` is exactly one token; a `..` range is rejected:
-
-<!-- codemd: (import .. ../testdata/console/err-link-token/transcript.console console) -->
-```console
-$ codemd doc.md
-codemd: doc.md: line 1: link takes a single token, got "a..b"
-<!-- codemd: (link a..b src.go go) -->
-codemd: 1 error(s)
-```
-<!-- codemd:generated -->
+For `link`, `RANGE` is either a single token (a single-line link) or two tokens
+joined by `..` (a range link), with the same bounds and boundary semantics as
+`import`.
 
 A token is a **named point** (`handler-start`) or a **line regex**
 (`/^func handler/`). A token is a regex if and only if it begins with `/`; it
@@ -223,20 +216,21 @@ document that mixes the two is normalized as described in
 
 ## Links rendering
 
-A `link` reference resolves a single line. The anchor is `#L<line>`, and lines
-are 1-based.
+A `link` reference resolves a single line or a range. Lines are 1-based.
+codemd loads a local `PATH` relative to the Markdown file's directory and emits
+it as written.
 
-- **Local source**: the label is `PATH:LINE` and the target is `PATH#LLINE`.
-  codemd loads `PATH` relative to the Markdown file's directory and emits it as
-  written.
-- **HTTP source**: the label is `PATH:LINE` and the target is the URL with
-  `#LLINE` appended.
+- **Single line**: the label is `PATH:LINE` and the target is `PATH#LLINE`.
+- **Range** (`START..END`): the label is `PATH:START-END` and the target is
+  `PATH#LSTART-LEND`. A range that resolves to a single line collapses to the
+  single-line form.
+- **HTTP source**: the same labels and targets, with the URL in place of `PATH`.
 
 `LINK-TEXT` replaces the label when present.
 
 ## Boundary semantics
 
-Named-point marker lines are excluded from imported content; regex-matched
+Named-point marker lines are excluded from resolved content; regex-matched
 boundary lines are included. codemd locates the start first, then locates the
 end at or after the start. A token that matches nothing is an error for that
 reference:

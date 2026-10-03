@@ -134,7 +134,6 @@ regression check on the tool.
 These are deliberate design boundaries, not gaps:
 
 - SSH sources. The loader supports local paths and `http(s)://` only.
-- Range links. `link` mode resolves a single point, not a range.
 - GitHub commit-SHA permalinks. Link targets are `PATH#L<line>`, with no
   pinned revision.
 - Multi-line markers in block-comment languages. Block comment markers must

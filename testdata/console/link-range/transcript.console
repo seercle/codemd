@@ -1,0 +1,3 @@
+$ codemd doc.md
+<!-- codemd: (link handler-start..handler-end server.go go) -->
+[server.go:4-7](server.go#L4-L7)

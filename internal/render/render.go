@@ -57,6 +57,18 @@ func LinkTarget(path string, line int) string {
 	return fmt.Sprintf("%s#L%d", path, line)
 }
 
+// LinkLabelRange returns the default link label for a source range, formatted as
+// "path:start-end".
+func LinkLabelRange(path string, start, end int) string {
+	return fmt.Sprintf("%s:%d-%d", path, start, end)
+}
+
+// LinkTargetRange returns the Markdown link target "path#Lstart-Lend" for a
+// source range.
+func LinkTargetRange(path string, start, end int) string {
+	return fmt.Sprintf("%s#L%d-L%d", path, start, end)
+}
+
 // EscapeLabel escapes a link label for use inside Markdown link brackets.
 // Backslashes and closing brackets are backslash-escaped.
 func EscapeLabel(label string) string {

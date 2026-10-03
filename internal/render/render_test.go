@@ -62,3 +62,15 @@ func TestLinks(t *testing.T) {
 		t.Fatalf("remote target %q", got)
 	}
 }
+
+func TestLinkRanges(t *testing.T) {
+	if got := LinkLabelRange("src/server.go", 10, 20); got != "src/server.go:10-20" {
+		t.Fatalf("label %q", got)
+	}
+	if got := LinkTargetRange("src/server.go", 10, 20); got != "src/server.go#L10-L20" {
+		t.Fatalf("local target %q", got)
+	}
+	if got := LinkTargetRange("https://x/y.go", 10, 20); got != "https://x/y.go#L10-L20" {
+		t.Fatalf("remote target %q", got)
+	}
+}

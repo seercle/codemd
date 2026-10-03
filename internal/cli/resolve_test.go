@@ -147,6 +147,67 @@ func TestResolveDocumentIdempotentNestedTildeFence(t *testing.T) {
 	}
 }
 
+func TestResolveDocumentLinkRange(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a..b s.go go) -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a..b s.go go) -->\n[s.go:3-4](s.go#L3-L4)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
+func TestResolveDocumentLinkRangeOpenBound(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a.. s.go go) -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a.. s.go go) -->\n[s.go:3-5](s.go#L3-L5)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
+func TestResolveDocumentLinkRangeCollapsesSingleLine(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\nfunc A() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a..b s.go go) -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a..b s.go go) -->\n[s.go:2](s.go#L2)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
+func TestResolveDocumentLinkRangeCustomLabel(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a..b s.go go \"Range\") -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a..b s.go go \"Range\") -->\n[Range](s.go#L3-L4)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
+func TestResolveDocumentLinkRangeEmptyIsError(t *testing.T) {
+	dir := writeSource(t, "s.go", "//codemd:a\n//codemd:b\n")
+	md := "<!-- codemd: (link a..b s.go go) -->\n"
+	_, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 1 {
+		t.Fatalf("want 1 error for an empty link range, got %+v", errs)
+	}
+}
+
 func TestIsGeneratedLink(t *testing.T) {
 	cases := []struct {
 		name string
@@ -160,6 +221,10 @@ func TestIsGeneratedLink(t *testing.T) {
 		{"surrounding whitespace", "  [s.go:2](s.go#L2)  ", true},
 		{"non-link line", "text", false},
 		{"reference comment", "<!-- codemd: (link a s.go) -->", false},
+		{"generated range link", "[s.go:3-4](s.go#L3-L4)", true},
+		{"range label single anchor", "[s.go:3](s.go#L3-L4)", true},
+		{"single anchor range label", "[s.go:3-4](s.go#L3)", true},
+		{"malformed anchor", "[s.go](s.go#L)", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

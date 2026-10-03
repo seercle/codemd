@@ -22,14 +22,16 @@ const (
 )
 
 // Ref is a parsed reference: its resolution Mode, the source Range it selects,
-// the target Path, an optional fence Lang, a Strip flag, and a link Label.
+// the target Path, an optional fence Lang, a Strip flag, a link Label, and
+// whether the reference token was a ".." range (IsRange).
 type Ref struct {
-	Mode  Mode
-	Range extract.Range
-	Path  string
-	Lang  string
-	Strip bool
-	Label string
+	Mode    Mode
+	Range   extract.Range
+	Path    string
+	Lang    string
+	Strip   bool
+	Label   string
+	IsRange bool
 }
 
 // ParseRef parses a reference argument list (the text inside the parentheses
@@ -76,10 +78,14 @@ func ParseRef(comment string) (Ref, error) {
 			return Ref{}, err
 		}
 		r.Range = extract.Range{Start: start, End: end}
-	} else {
-		if _, _, ok := splitRange(rangeTok); ok {
-			return Ref{}, fmt.Errorf("link takes a single token, got %q", rangeTok)
+	} else if _, _, ok := splitRange(rangeTok); ok {
+		start, end, err := parseRange(rangeTok)
+		if err != nil {
+			return Ref{}, err
 		}
+		r.Range = extract.Range{Start: start, End: end}
+		r.IsRange = true
+	} else {
 		b, err := parseToken(rangeTok)
 		if err != nil {
 			return Ref{}, err
