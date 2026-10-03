@@ -1,0 +1,13 @@
+$ codemd doc.md
+codemd: doc.md: line 1: unmanaged fenced block below reference; inserted generated snippet above it
+<!-- codemd: (import a..b s.go go) -->
+
+```go
+x
+```
+<!-- codemd:generated -->
+```python
+print("keep")
+```
+$ echo $?
+0
