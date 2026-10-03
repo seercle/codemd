@@ -22,7 +22,8 @@ const (
 )
 
 // Ref is a parsed reference: its resolution Mode, the source Range it selects,
-// the target Path, an optional fence Lang, a Strip flag, and a link Label.
+// the target Path, an optional fence Lang, a Strip flag, a link Label, and
+// whether the reference token was a ".." range (IsRange).
 type Ref struct {
 	Mode    Mode
 	Range   extract.Range

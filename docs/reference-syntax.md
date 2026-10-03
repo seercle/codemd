@@ -217,20 +217,20 @@ document that mixes the two is normalized as described in
 ## Links rendering
 
 A `link` reference resolves a single line or a range. Lines are 1-based.
+codemd loads a local `PATH` relative to the Markdown file's directory and emits
+it as written.
 
 - **Single line**: the label is `PATH:LINE` and the target is `PATH#LLINE`.
 - **Range** (`START..END`): the label is `PATH:START-END` and the target is
   `PATH#LSTART-LEND`. A range that resolves to a single line collapses to the
   single-line form.
 - **HTTP source**: the same labels and targets, with the URL in place of `PATH`.
-  codemd loads a local `PATH` relative to the Markdown file's directory and
-  emits it as written.
 
 `LINK-TEXT` replaces the label when present.
 
 ## Boundary semantics
 
-Named-point marker lines are excluded from imported content; regex-matched
+Named-point marker lines are excluded from resolved content; regex-matched
 boundary lines are included. codemd locates the start first, then locates the
 end at or after the start. A token that matches nothing is an error for that
 reference:

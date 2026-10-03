@@ -160,6 +160,19 @@ func TestResolveDocumentLinkRange(t *testing.T) {
 	}
 }
 
+func TestResolveDocumentLinkRangeOpenBound(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a.. s.go go) -->\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a.. s.go go) -->\n[s.go:3-5](s.go#L3-L5)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
 func TestResolveDocumentLinkRangeCollapsesSingleLine(t *testing.T) {
 	dir := writeSource(t, "s.go", "//codemd:a\nfunc A() {}\n//codemd:b\n")
 	md := "<!-- codemd: (link a..b s.go go) -->\n"
