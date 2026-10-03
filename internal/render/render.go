@@ -70,9 +70,11 @@ func LinkTargetRange(path string, start, end int) string {
 }
 
 // EscapeLabel escapes a link label for use inside Markdown link brackets.
-// Backslashes and closing brackets are backslash-escaped.
+// Backslashes and both brackets are backslash-escaped, so the label never
+// closes the link text early or opens a nested one.
 func EscapeLabel(label string) string {
 	label = strings.ReplaceAll(label, `\`, `\\`)
+	label = strings.ReplaceAll(label, `[`, `\[`)
 	label = strings.ReplaceAll(label, `]`, `\]`)
 	return label
 }

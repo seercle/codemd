@@ -203,7 +203,8 @@ $ codemd doc.md
 
 ## 11. Link text with spaces and escapes
 
-The label may contain spaces, and a backslash escapes the next character.
+The label may contain spaces, and a backslash escapes the next character; only
+`"` and `\` need escaping.
 
 Input `doc.md`:
 

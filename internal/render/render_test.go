@@ -40,6 +40,8 @@ func TestEscapeLabel(t *testing.T) {
 	cases := map[string]string{
 		"plain":     "plain",
 		"a]b":       `a\]b`,
+		"a[b":       `a\[b`,
+		"a[0]":      `a\[0\]`,
 		`a\b`:       `a\\b`,
 		`a\]b`:      `a\\\]b`,
 		"f(x) #L9)": "f(x) #L9)",

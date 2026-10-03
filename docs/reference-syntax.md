@@ -99,10 +99,9 @@ codemd: 1 error(s)
 ## LINK-TEXT
 
 `LINK-TEXT` is valid in `link` mode only. A double-quoted token after `PATH`
-sets the rendered link label and may contain spaces. Inside the quotes a
-backslash escapes the next character: `\\` becomes `\`, `\"` becomes `"`, `\]`
-becomes `]`, and `\c` becomes `c` for any other character `c`. A bare `]` is
-also accepted. codemd escapes `\` and `]` in the generated label.
+sets the rendered link label and may contain spaces. A backslash escapes the
+next character, but only `"` and `\` need escaping: write `\"` for a literal
+quote and `\\` for a literal backslash.
 
 Each of the following is an error.
 
@@ -226,7 +225,8 @@ it as written.
   single-line form.
 - **HTTP source**: the same labels and targets, with the URL in place of `PATH`.
 
-`LINK-TEXT` replaces the label when present.
+`LINK-TEXT` replaces the label when present. The generated label escapes `\`,
+`[`, and `]` so it renders correctly inside the Markdown link brackets.
 
 ## Boundary semantics
 

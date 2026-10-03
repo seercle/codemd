@@ -54,10 +54,9 @@ directories are skipped when a directory argument is recursed.
 - **LANG**: optional fence language; otherwise resolved from the extension.
 - **strip**: optional; removes the regex match from the boundary line.
 - **LINK-TEXT**: `link` only; a quoted token after PATH sets the link label. It
-  may contain spaces. Inside the quotes, a backslash escapes the next character
-  (`\\`, `\"`, `\]`, or `\c` yielding `c`); a bare `]` is also accepted.
-  Generated labels escape `\` and `]`. An empty or whitespace-only label is an
-  error.
+  may contain spaces. A backslash escapes the next character, but only `"` and
+  `\` need escaping: write `\"` for a literal quote and `\\` for a literal
+  backslash. An empty or whitespace-only label is an error.
 
 The reference manages the content directly below it. Blank lines are skipped to
 find the first non-blank line: an existing fence (for `import`) or generated
