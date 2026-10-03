@@ -22,11 +22,12 @@ func writeTree(t *testing.T, dir string, files map[string]string) {
 }
 
 type matrixCase struct {
-	name    string
-	files   map[string]string // extra files written into the temp dir
-	doc     string            // doc.md content
-	want    string            // expected doc.md after -w
-	wantErr bool
+	name     string
+	files    map[string]string // extra files written into the temp dir
+	doc      string            // doc.md content
+	want     string            // expected doc.md after -w
+	wantWarn string            // substring expected on stderr ("" to skip)
+	wantErr  bool
 }
 
 func runMatrixCase(t *testing.T, tc matrixCase) {
@@ -46,6 +47,9 @@ func runMatrixCase(t *testing.T, tc matrixCase) {
 		}
 	} else if code != 0 {
 		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	if tc.wantWarn != "" && !strings.Contains(errb.String(), tc.wantWarn) {
+		t.Fatalf("stderr %q does not contain %q", errb.String(), tc.wantWarn)
 	}
 	got, err := os.ReadFile(filepath.Join(dir, "doc.md"))
 	if err != nil {
@@ -160,6 +164,13 @@ func TestIntegrationMatrixRegions(t *testing.T) {
 			files: src,
 			doc:   "<!-- codemd: (import a..b s.go go) -->\n\n```go\nstale\n```\n<!-- codemd:generated -->\n",
 			want:  "<!-- codemd: (import a..b s.go go) -->\n\n```go\nfunc A() {}\n```\n<!-- codemd:generated -->\n",
+		},
+		{
+			name:     "preserve unmanaged fence below reference",
+			files:    src,
+			doc:      "<!-- codemd: (import a..b s.go go) -->\n\n```python\nprint(\"keep\")\n```\n",
+			want:     "<!-- codemd: (import a..b s.go go) -->\n\n```go\nfunc A() {}\n```\n<!-- codemd:generated -->\n```python\nprint(\"keep\")\n```\n",
+			wantWarn: "unmanaged fenced block below reference",
 		},
 		{
 			name:  "insert below comment before normal line",

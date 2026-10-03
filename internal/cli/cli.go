@@ -347,6 +347,8 @@ func reportWarnings(name string, warns []Warning, stderr io.Writer) {
 	}
 }
 
+// reportErrors prints each resolution error and returns how many were
+// reported, so callers can fold it into the exit code.
 func reportErrors(name string, errs []RefError, stderr io.Writer) int {
 	for _, e := range errs {
 		if e.Line > 0 {

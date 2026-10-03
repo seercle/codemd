@@ -456,9 +456,8 @@ See [Configuration](configuration.md) for the config format.
 
 ## FAQ
 
-### Why did codemd insert a second code block and print a warning?
-
-An `import` reference found a fenced block directly below it that codemd did
+**Why did codemd insert a second code block and print a warning?** An `import`
+reference found a fenced block directly below it that codemd did
 not generate. codemd marks every `import` region it generates with a hidden
 `<!-- codemd:generated -->` comment and only rewrites marked regions, so it
 left the unmarked block untouched and inserted its own marked snippet above it.
