@@ -174,9 +174,11 @@ The content directly below the reference is the managed region. codemd skips
 blank lines to find the first non-blank line, then applies the rules for the
 mode:
 
-- `import`: if that line opens a fenced block, the whole block (opening fence,
-  body, closing fence) is replaced. Otherwise the generated fence is inserted
-  directly below the comment, leaving the existing lines untouched.
+- `import`: if that line opens a marked fenced block, the whole region (opening
+  fence, body, closing fence, and marker) is replaced in place. If it opens an
+  unmarked fenced block, that block is preserved or adopted as described below.
+  Otherwise the generated fence is inserted directly below the comment, leaving
+  the existing lines untouched.
 - `link`: if that line is a generated link (`[label](target#L<n>)`), it is
   replaced. Otherwise the generated link is inserted directly below the
   comment.

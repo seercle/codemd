@@ -56,8 +56,11 @@ below.
 The managed region is the content directly below a reference comment. `splice`
 skips blank lines to find the first non-blank line, then:
 
-- `import`: if that line opens a fenced block, the whole block is replaced;
-  otherwise the generated fence is inserted directly below the comment.
+- `import`: if that line opens a marked fenced block, the whole region is
+  replaced in place. If it opens an unmarked fenced block, that block is
+  preserved (with the marked snippet inserted above it and a warning) or adopted
+  by appending the marker, as described below. Otherwise the generated fence is
+  inserted directly below the comment.
 - `link`: if that line is a generated link, it is replaced; otherwise the
   generated link is inserted directly below the comment.
 
