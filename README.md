@@ -44,8 +44,9 @@ directories are skipped when a directory argument is recursed.
 ```
 
 - **MODE**: `import` or `link`.
-- **RANGE**: `import` takes two tokens joined by `..`; `link` takes one token.
-  A token is a named point (`handler-start`) or a line regex (`/^func/`).
+- **RANGE**: `import` takes two tokens joined by `..`. `link` takes either one
+  token (a single-line link) or two tokens joined by `..` (a range link). A
+  token is a named point (`handler-start`) or a line regex (`/^func/`).
   Open ranges are allowed: `a..` and `..b`. Named points and regexes may be
   mixed (`func1../end/`). Regex boundaries are included; named-point marker
   lines are excluded.
