@@ -456,6 +456,14 @@ See [Configuration](configuration.md) for the config format.
 
 ## FAQ
 
+### Why did codemd insert a second code block and print a warning?
+
+An `import` reference found a fenced block directly below it that codemd did
+not generate. codemd marks every region it generates with a hidden
+`<!-- codemd:generated -->` comment and only rewrites marked regions, so it
+left the unmarked block untouched and inserted its own marked snippet above it.
+Move the hand-written block below a line of prose (or remove it) and re-run.
+
 **Why does re-running codemd produce no changes?** Resolution is idempotent:
 each run re-derives the managed region from the reference comment, so once a
 document is up to date, further runs leave it byte-for-byte unchanged. A clean

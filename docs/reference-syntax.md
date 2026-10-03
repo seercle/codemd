@@ -181,14 +181,23 @@ mode:
   replaced. Otherwise the generated link is inserted directly below the
   comment.
 
-For `import`, the managed region is the first non-blank fenced block below the
-reference; codemd replaces that whole block in place. If the first non-blank
-line below the reference is not a fence, the generated snippet is inserted
-directly below the reference instead. A generated block carries no identity, so
-a hand-written fenced block placed directly below an `import` reference is
-indistinguishable from a stale generated one and will be replaced. Keep
-hand-written blocks separated from a reference by intervening text, or use a
-`link` reference (which only replaces a line matching the generated link shape).
+For `import`, codemd writes the fenced snippet followed by a hidden marker:
+
+````markdown
+<!-- codemd: (import a..b server.go go) -->
+```go
+func main() {}
+```
+<!-- codemd:generated -->
+````
+
+The marker identifies the block as managed, so codemd rewrites the marked
+region in place on each run. An unmarked fenced block directly below the
+reference is treated as hand-written: codemd leaves it untouched, inserts its
+own marked snippet directly above it, and prints a warning. If the unmarked
+block already matches the generated snippet, codemd marks it in place instead
+of duplicating it. The marker is an HTML comment, so Markdown renderers hide
+it.
 
 The reference line's leading whitespace is copied onto every non-blank
 generated line, so a reference inside a list item keeps its snippet inside that

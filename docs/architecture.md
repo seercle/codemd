@@ -61,10 +61,12 @@ skips blank lines to find the first non-blank line, then:
 - `link`: if that line is a generated link, it is replaced; otherwise the
   generated link is inserted directly below the comment.
 
-Because a generated block carries no identity, a hand-written fenced block
-placed directly below an `import` reference is indistinguishable from a stale
-generated one and is replaced, whereas `link` replaces only a line matching its
-generated shape.
+A generated `import` region is a fenced block followed by the marker
+`<!-- codemd:generated -->`. A marked region is replaced in place. An unmarked
+fenced block directly below an import reference is treated as hand-written:
+`splice` leaves it in place, inserts the marked region above it, and returns a
+warning. An unmarked block whose bytes equal the generated snippet is adopted
+by appending the marker.
 
 The reference line's leading whitespace is copied onto every non-blank
 generated line, so a reference inside a list item keeps its snippet inside that
