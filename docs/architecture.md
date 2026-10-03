@@ -134,8 +134,8 @@ regression check on the tool.
 These are deliberate design boundaries, not gaps:
 
 - SSH sources. The loader supports local paths and `http(s)://` only.
-- GitHub commit-SHA permalinks. Link targets are `PATH#L<line>`, with no
-  pinned revision.
+- GitHub commit-SHA permalinks. Link targets are `PATH#L<line>` (or
+  `PATH#L<start>-L<end>` for a range), with no pinned revision.
 - Multi-line markers in block-comment languages. Block comment markers must
   open and close on the same line.
 - Inline references. A reference comment must be the whole line; references

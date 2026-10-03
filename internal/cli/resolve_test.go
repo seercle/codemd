@@ -224,6 +224,19 @@ func TestResolveDocumentLinkRangeEmptyIsError(t *testing.T) {
 	}
 }
 
+func TestResolveDocumentReplacesUserAuthoredRangeLink(t *testing.T) {
+	dir := writeSource(t, "s.go", "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n")
+	md := "<!-- codemd: (link a..b s.go go) -->\n\n[s.go:97-98](s.go#L97-L98)\n"
+	out, errs, _ := resolver().ResolveDocument(md, dir)
+	if len(errs) != 0 {
+		t.Fatalf("errs %+v", errs)
+	}
+	want := "<!-- codemd: (link a..b s.go go) -->\n\n[s.go:3-4](s.go#L3-L4)\n"
+	if out != want {
+		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
+	}
+}
+
 func TestIsGeneratedLink(t *testing.T) {
 	cases := []struct {
 		name string

@@ -43,6 +43,38 @@ func TestIntegrationHTTP(t *testing.T) {
 	}
 }
 
+func TestIntegrationHTTPRangeLink(t *testing.T) {
+	const src = "package x\n//codemd:a\nfunc A() {}\nfunc B() {}\n//codemd:b\n"
+	hits := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		io.WriteString(w, src)
+	}))
+	defer srv.Close()
+
+	dir := t.TempDir()
+	url := srv.URL + "/s.go"
+	doc := "<!-- codemd: (link a..b " + url + " go) -->\n"
+	writeTree(t, dir, map[string]string{"doc.md": doc})
+
+	var out, errb bytes.Buffer
+	code := Run([]string{"-w", filepath.Join(dir, "doc.md")}, strings.NewReader(""), &out, &errb)
+	if code != 0 {
+		t.Fatalf("code %d stderr %s", code, errb.String())
+	}
+	got, err := os.ReadFile(filepath.Join(dir, "doc.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "<!-- codemd: (link a..b " + url + " go) -->\n[" + url + ":3-4](" + url + "#L3-L4)\n"
+	if string(got) != want {
+		t.Fatalf("got:\n%s\nwant:\n%s", got, want)
+	}
+	if hits != 1 {
+		t.Fatalf("expected the URL to be fetched once, got %d hits", hits)
+	}
+}
+
 func TestIntegrationHTTPError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "nope", http.StatusNotFound)
